@@ -1,0 +1,83 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Create a change log</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_REPO_ROOT</name>
+          <description>/localdisk/designer/$USER/$PROJECT</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_WORKSPACE</name>
+          <description>localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
+echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
+
+[ -n &quot;$MY_REPO_ROOT&quot; ]
+[ -n &quot;$MY_WORKSPACE&quot; ]
+
+[ -d &quot;$MY_REPO_ROOT&quot; ]
+[ -d &quot;$MY_WORKSPACE&quot; ]
+
+cd $MY_REPO_ROOT
+
+for e in $(find . -type d -name .git)
+do
+ pushd $e/..
+ f=$(/usr/bin/dirname $e)
+ echo &quot;$f&quot;
+ g=$(printf &quot;%-48s&quot; $f)
+ c=$(grep $(echo $f | sed &apos;s:/:[/]:g&apos; | sed &apos;s:$:[^a-zA-Z0-9/_-]:&apos; | sed &apos;s:^[.][.]:^[.][.]:&apos; | sed &apos;s:^[.]:^[.]:&apos;) $MY_WORKSPACE/../LAST_COMMITS | awk &apos; { print $2 } &apos;)
+ git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; --date=iso --after $(date --date=&apos;yesterday&apos; +%Y-%m-%d) &gt; $MY_WORKSPACE/CHANGELOG.PART
+ cat $MY_WORKSPACE/CHANGELOG.PART &gt;&gt; $MY_WORKSPACE/CHANGELOG.OLD
+ if [ &quot;x$c&quot; != &quot;x&quot; ] ; then
+   git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; $c.. &gt;&gt; $MY_WORKSPACE/CHANGELOG || true
+ else
+   cat $MY_WORKSPACE/CHANGELOG.PART &gt;&gt; $MY_WORKSPACE/CHANGELOG
+ fi
+ popd
+done
+\rm $MY_WORKSPACE/CHANGELOG.PART
+
+for e in $(find . -type d -name .git)
+do
+ pushd $e/..
+ f=$(/usr/bin/dirname $e)
+ echo &quot;$f&quot;
+ g=`printf &quot;%-48s&quot; $f`
+ git log --pretty=tformat:&quot;$g %H&quot; -n 1 &gt;&gt; $MY_WORKSPACE/LAST_COMMITS
+ popd
+done
+
+\cp $MY_WORKSPACE/LAST_COMMITS $MY_WORKSPACE/../LAST_COMMITS</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+  </buildWrappers>
+</project>

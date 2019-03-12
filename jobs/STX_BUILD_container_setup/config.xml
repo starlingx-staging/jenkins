@@ -1,0 +1,210 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>DOCKER_BUILD_TAG</name>
+          <description>$PROJECT-$TIMESTAMP-builder-image</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DOCKER_BUILD_ID</name>
+          <description>$USER-$PROJECT-$TIMESTAMP-builder</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_REPO_ROOT</name>
+          <description>/localdisk/designer/$USER/$PROJECT</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_WORKSPACE</name>
+          <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PROJECT</name>
+          <description></description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_LOGS_BASE</name>
+          <description></description>
+          <defaultValue>/tmp/logs</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_LOGS_URL</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>echo &quot;DOCKER_BUILD_ID=$DOCKER_BUILD_ID&quot;
+echo &quot;DOCKER_BUILD_TAG=$DOCKER_BUILD_TAG&quot;
+echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
+echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
+echo &quot;PROJECT=$PROJECT&quot;
+echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
+echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
+
+[ -n &quot;$DOCKER_BUILD_ID&quot; ]
+[ -n &quot;$DOCKER_BUILD_TAG&quot; ]
+[ -n &quot;$MY_REPO_ROOT&quot; ]
+[ -n &quot;$MY_WORKSPACE&quot; ]
+[ -n &quot;$PROJECT&quot; ]
+[ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
+[ -n &quot;$PUBLISH_LOGS_URL&quot; ]
+
+export DOCKER_BUILD_IMAGE=$USER:$DOCKER_BUILD_TAG
+export DOCKER_BUILD_WORKDIR=$MY_REPO_ROOT/stx-tools
+export STX_INSTALLER_DIR=&quot;$DOCKER_BUILD_WORKDIR/centos-mirror-tools/output/stx-installer&quot;
+MYUID=$(id -u)
+MYUNAME=$(id -un)
+
+cd $DOCKER_BUILD_WORKDIR
+
+cp ~/.gitconfig toCOPY
+
+cat &lt;&lt;- EOF &gt; localrc
+PROJECT=$PROJECT
+HOST_PREFIX=&quot;&quot;
+EOF
+
+if [ ! -d centos-mirror-tools/output/stx-installer ]; then
+    mkdir -p centos-mirror-tools/output/stx-installer
+    cp centos-mirror-tools/output/stx-r1/CentOS/pike/Binary/images/pxeboot/initrd.img $STX_INSTALLER_DIR/initrd.img
+    cp centos-mirror-tools/output/stx-r1/CentOS/pike/Binary/images/pxeboot/vmlinuz $STX_INSTALLER_DIR/vmlinuz
+    cp centos-mirror-tools/output/stx-r1/CentOS/pike/Binary/LiveOS/squashfs.img $STX_INSTALLER_DIR/squashfs.img
+fi
+
+# docker build --build-arg MYUID=${MYUID} \
+#                  --build-arg MYUNAME=${MYUNAME} \
+#                  --ulimit core=0 \
+#                  --network host \
+#                  --tag $DOCKER_BUILD_IMAGE \
+#                  --file Dockerfile \
+#                  .
+
+DOCKERFILE_ORIG=Dockerfile
+DOCKERFILE=../Dockerfile
+cat ${DOCKERFILE_ORIG} | sed &apos;/ENV container=docker/aRUN echo retries=20 &gt;&gt; /etc/yum.conf\nRUN echo timeout=60 &gt;&gt; /etc/yum.conf&apos; &gt; ${DOCKERFILE}
+docker build --build-arg MYUID=${MYUID} \
+                  --build-arg MYUNAME=${MYUNAME} \
+                  --ulimit core=0 \
+                  --network host \
+                  --tag $DOCKER_BUILD_IMAGE \
+                  --file ${DOCKERFILE} \
+                  .
+
+docker run -it --rm \
+        --name ${DOCKER_BUILD_ID} \
+        --detach \
+        --volume $(readlink -f /localdisk):/localdisk \
+        --volume ${DOCKER_BUILD_WORKDIR}/centos-mirror-tools/output:/import/mirrors/CentOS:ro \
+        --volume /sys/fs/cgroup:/sys/fs/cgroup:ro \
+        --volume ~/.ssh:/mySSH:ro \
+        -e &quot;container=docker&quot; \
+        -e MYUNAME=${MYUNAME} \
+        --privileged=true \
+        --security-opt seccomp=unconfined \
+        ${DOCKER_BUILD_IMAGE}
+
+
+MY_BUILDRC=$(mktemp /tmp/buildrc_XXXXXX)
+cp ${DOCKER_BUILD_WORKDIR}/buildrc ${MY_BUILDRC}
+sed -i &apos;s#export MY_BUILD_DIR=.*#export MY_BUILD_DIR=&apos;&quot;${MY_WORKSPACE}&quot;&apos;#&apos; ${MY_BUILDRC}
+docker cp ${MY_BUILDRC} ${DOCKER_BUILD_ID}:/home/${MYUNAME}/buildrc
+docker cp ${DOCKER_BUILD_WORKDIR}/localrc ${DOCKER_BUILD_ID}:/home/${MYUNAME}
+\rm -f ${MY_BUILDRC}
+
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.22">
+      <recipients>scott.little@windriver.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.63">
+      <recipientList>$DEFAULT_RECIPIENTS</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders>
+              <hudson.plugins.emailext.plugins.recipients.ListRecipientProvider/>
+            </recipientProviders>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+      </configuredTriggers>
+      <contentType>default</contentType>
+      <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+      <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
+      <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
+      <attachBuildLog>false</attachBuildLog>
+      <compressBuildLog>false</compressBuildLog>
+      <replyTo>$DEFAULT_REPLYTO</replyTo>
+      <from></from>
+      <saveOutput>false</saveOutput>
+      <disabled>false</disabled>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+              <properties>BUILD_NM=$JOB_NAME
+BUILD_NUM=$BUILD_NUMBER
+PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+            </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+          </configs>
+          <projects>copy_logs</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+        </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.BuildTrigger>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <org.jenkinsci.plugins.preSCMbuildstep.PreSCMBuildStepsWrapper plugin="preSCMbuildstep@0.3">
+      <failOnError>false</failOnError>
+    </org.jenkinsci.plugins.preSCMbuildstep.PreSCMBuildStepsWrapper>
+  </buildWrappers>
+</project>

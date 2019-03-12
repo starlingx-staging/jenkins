@@ -1,0 +1,132 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>0 1 * * *</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>DATE_FORMAT=&quot;+%Y-%B&quot;
+
+TMPDIR=$(mktemp -d /tmp/sanity_XXXXXX)
+if [ &quot;$TMPDIR&quot; == &quot;&quot; ]; then exit 1; fi
+
+ARCHIVE=&quot;$TMPDIR/archive.txt&quot;
+LOG=&quot;$TMPDIR/log.txt&quot;
+RECORD=&quot;$TMPDIR/record.txt&quot;
+HEADERS=&quot;$TMPDIR/headers.txt&quot;
+
+echo ARCHIVE=$ARCHIVE
+
+update_sanity () {
+    path=&quot;$1&quot;
+    status=&quot;$2&quot;
+
+    link_path=&quot;$(dirname &quot;$path&quot;)/latest_green_build&quot;
+    sanity_path=&quot;$path/outputs&quot;
+
+    if [ ! -d $path ]; then
+        echo &quot;Invalid directory: $path&quot;
+        return 1
+    fi
+
+    if [ ! -d $sanity_path ]; then
+        echo &quot;Invalid directory: $sanity_path&quot;
+        return 1
+    fi
+
+    if [ &quot;$status&quot; != &quot;GREEN&quot; ] &amp;&amp; [ &quot;$status&quot; != &quot;YELLOW&quot; ] &amp;&amp; [ &quot;$status&quot; != &quot;RED&quot; ]; then
+        echo &quot;Invalid status: $status&quot;
+        return 1
+    fi
+
+    if [ -f &quot;$sanity_path/$status&quot; ]; then
+        # already set
+        return 0
+    fi
+
+    if [ -f &quot;$sanity_path/GREEN&quot; ] || [ -f &quot;$sanity_path/GREEN&quot; ] || [ -f &quot;$sanity_path/GREEN&quot; ]; then
+        echo &quot;Status mismatch when setting $status at $path&quot;
+        return 1
+    fi
+
+    echo &quot;touch $sanity_path/$status&quot;
+    touch &quot;$sanity_path/$status&quot;
+
+    if [ $status == &quot;GREEN&quot; ]; then
+        if [ -L &quot;$link_path&quot; ]; then
+            rm &quot;$link_path&quot;
+        fi
+        echo &quot;ln -s $(basename $path) $link_path&quot;
+        ln -s &quot;$(basename $path)&quot; &quot;$link_path&quot;
+    fi
+}
+
+for ym in $((date $DATE_FORMAT; date -d &apos;yesterday&apos; $DATE_FORMAT) | sort --unique); do
+    # Obtain archive of starlingx-discuss for the month
+    wget &quot;http://lists.starlingx.io/pipermail/starlingx-discuss/${ym}.txt&quot; -O $ARCHIVE -o $LOG
+    if [ $? -ne 0 ]; then
+        continue
+    fi
+
+    # Look for messages with a subject suggesting a sanity test result
+    grep &quot;^Subject: \[Starlingx-discuss\] FW: Sanity Test&quot; $ARCHIVE &gt; $HEADERS || true
+    grep &quot;^Subject: \[Starlingx-discuss\] Sanity Test&quot; $ARCHIVE &gt;&gt; $HEADERS || true
+    cat $HEADERS | sort --unique | \
+    while read -r line; do
+        # restore the &apos;\&apos; prior to &apos;[&apos; and &apos;]&apos; for the upcomming sed search pattern
+        pattern=$(echo &quot;$line&quot; | sed &apos;s/\[/\\[/&apos; | sed &apos;s/\]/\\]/&apos;)
+
+        # Extract the message body (more or less) and save to file
+        sed -n -e  &quot;/^$pattern$/,/^Subject:/{ /^$pattern$/d; /^Subject:/d; p}&quot; $ARCHIVE &gt; $RECORD
+
+        # expect to find two pieces of info from the message, load url and test status
+        url=$(grep &apos;http://mirror.starlingx.cengn.ca/mirror/starlingx&apos; $RECORD | grep -v latest_build | grep -v &apos;^[&gt;[]&apos; | sed &apos;s/^.*&lt;//&apos; | sed &apos;s/&gt;.*$//&apos; | head -n 1 | sed &apos;s#iso/$##&apos; | sed &apos;s#outputs/$##&apos;)
+        status=$(grep &apos;^Status:&apos; $RECORD | grep -v &apos;^[&gt;]&apos; | sed &apos;s/^Status: //&apos; | head -n 1)
+
+        if [ &quot;$status&quot; == &quot;&quot; ] || [ &quot;$url&quot; == &quot;&quot; ]; then
+           continue
+        fi
+
+        # Convert url to file system path
+        path=$(echo $url | sed &apos;s#http://mirror.starlingx.cengn.ca#/export#&apos; | sed &apos;s#/$##&apos;)
+
+        # process this entry
+        echo &quot;$status: $path&quot;
+        if [ ! -d $path ]; then
+            echo &quot;Invalid directory: $path&quot;
+            continue
+        fi
+        update_sanity &quot;$path&quot; &quot;$status&quot;
+    done
+    
+    \rm -f $LOG
+done
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.22">
+      <recipients>scott.little@windriver.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
+  <buildWrappers/>
+</project>

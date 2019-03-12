@@ -1,0 +1,98 @@
+This is a sample set of jenkins jobs to build StarlingX.
+
+Details of the StarlingX project can be found here:
+
+   https://wiki.openstack.org/wiki/StarlingX
+
+The lead build jobs are listed under the 'Master Build jobs'.
+The naming convention is 'STX_build_<StarlingX-Branch>_<Openstack_Branch>'.
+These jobs define most of the variables that are passed to the sub-jobs.:wq
+
+The standard build job is 'STX_build_master_master'.
+The old based against openstack pike is illustrated by 'STX_build_master_pike'.
+A sample feature branch build would look like 'STX_build_centos76_pike'
+
+Required software:
+
+   git
+   docker
+   jenkins
+   anything else listed at https://docs.starlingx.io/developer_guide/index.html
+
+
+Jenkins Plugins:
+
+   Ant Plugin
+   Authentication Tokens API Plugin
+   bouncycastle API Plugin
+   Branch API Plugin
+   Build Timeout
+   Build Timestamp Plugin
+   Code Coverage API Plugin
+   Command Agent Launcher Plugin
+   Conditional BuildStep
+   Coverage/Complexity Scatter Plot PlugIn
+   Credentials Binding Plugin
+   Credentials Plugin
+   Display URL API
+   Docker Commons Plugin
+   Docker Pipeline
+   Durable Task Plugin
+   Email Extension Plugin
+   EnvInject API Plugin
+   Environment Injector Plugin
+   External Monitor Job Type Plugin
+   Folders Plugin
+   GitHub API Plugin
+   GitHub Branch Source Plugin
+   GitHub Organization Folder Plugin
+   GitHub plugin
+   Git Parameter Plug-In
+   Gradle Plugin
+   Groovy
+   Jackson 2 API Plugin
+   Javadoc Plugin
+   JavaScript GUI Lib
+   JDK Tool Plugin
+   Jenkins Apache HttpComponents Client 4.x API Plugin
+   Jenkins Cobertura Plugin
+   Jenkins Git client plugin
+   Jenkins Git plugin
+   Jenkins GIT server Plugin
+   Jenkins JSch dependency plugin
+   Jenkins Mailer Plugin
+   Jenkins Parameterized Trigger plugin
+   Jenkins SSH Slaves plugin
+   Jenkins Subversion Plug-in
+   Jenkins TextFinder plugin
+   Jenkins Workspace Cleanup Plugin
+   jQuery plugin
+   JUnit Plugin
+   LDAP Plugin
+   Lockable Resources plugin
+   MapDB API Plugin
+   Mask Passwords Plugin
+   Matrix Authorization Strategy Plugin
+   Matrix Project Plugin
+   Maven Integration plugin
+   next-executions
+   OWASP Markup Formatter Plugin
+   PAM Authentication plugin
+   Parameterized Remote Trigger Plugin
+   Pipeline
+   Pipeline
+   Pipeline Graph Analysis Plugin
+   Plain Credentials Plugin
+   Pre SCM BuildStep Plugin
+   Rebuilder
+   Resource Disposer Plugin
+   Run Condition Plugin
+   SCM API Plugin
+   Script Security Plugin
+   SSH Agent Plugin
+   SSH Credentials Plugin
+   Structs Plugin
+   Timestamper
+   Token Macro Plugin
+   Windows Slaves Plugin
+   xUnit plugin

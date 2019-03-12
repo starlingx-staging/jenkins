@@ -1,0 +1,71 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Logout from docker</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>LOCK_FILE=&quot;$HOME/.docker-login-lock&quot;
+COUNT_FILE=&quot;$HOME/.docker-login-count&quot;
+
+function down {
+    local COUNT
+
+    lockfile -1 -l 60 $LOCK_FILE
+    if [ $? -ne 0 ]
+    then
+        &gt;&amp;2 echo &quot;down: failed to lock&quot;
+        return 1
+    fi
+    # &gt;&amp;2 echo &quot;down: locked&quot;
+
+    if [ -f &quot;$COUNT_FILE&quot; ]
+    then
+        source &quot;$COUNT_FILE&quot;
+        COUNT=$(($COUNT-1))
+        if [ $COUNT -lt 0 ]
+        then
+            &gt;&amp;2 echo &quot;down: count &lt; 0&quot;
+            COUNT=0
+        fi
+    else
+        COUNT=0
+    fi
+
+    &gt;&amp;2 echo &quot;COUNT=$COUNT&quot; &gt; &quot;$COUNT_FILE&quot;
+    # &gt;&amp;2 echo &quot;down: count=$COUNT&quot;
+
+    \rm -f $LOCK_FILE
+    if [ $? -ne 0 ]
+    then
+        &gt;&amp;2 echo &quot;down: failed to unlock&quot;
+        return 2
+    fi
+    # &gt;&amp;2 echo &quot;down: unlocked&quot;
+    echo $COUNT
+    return 0
+}
+
+RC=$(down)
+
+if [ $RC -eq 0 ]; then
+    docker logout
+fi</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

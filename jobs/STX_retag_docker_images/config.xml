@@ -23,9 +23,9 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>OPENSTACK_RELEASE</name>
-          <description></description>
-          <defaultValue>pike</defaultValue>
+          <name>BUILD_STREAM</name>
+          <description>dev or stable</description>
+          <defaultValue>dev</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -96,7 +96,7 @@
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>FLOCK_VERSION</name>
-          <description>${PREFIX}-${OS}-${OPENSTACK_RELEASE}-${TIMESTAMP}
+          <description>${PREFIX}-${OS}-${BUILD_STREAM}-${TIMESTAMP}
 dev-centos-pike-${TIMESTAMP}</description>
           <defaultValue></defaultValue>
           <trim>false</trim>
@@ -120,9 +120,9 @@ dev-centos-pike-${TIMESTAMP}</description>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>OLD_OPENSTACK_RELEASE</name>
-          <description></description>
-          <defaultValue>pike</defaultValue>
+          <name>OLD_BUILD_STREAM</name>
+          <description>dev or stable</description>
+          <defaultValue>stable</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -180,7 +180,7 @@ dev-centos-pike-${TIMESTAMP}</description>
       <command>
 echo &quot;TIMESTAMP=$TIMESTAMP&quot;
 echo &quot;OS=$OS&quot;
-echo &quot;OPENSTACK_RELEASE=$OPENSTACK_RELEASE&quot;
+echo &quot;BUILD_STREAM=$BUILD_STREAM&quot;
 echo &quot;REGISTRY=$REGISTRY&quot;
 echo &quot;REGISTRY_ORG=$REGISTRY_ORG&quot;
 echo &quot;REGISTRY_USERID=$REGISTRY_USERID&quot;
@@ -196,12 +196,12 @@ echo &quot;FLOCK_VERSION=$FLOCK_VERSION&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 echo &quot;OLD_LATEST_PREFIX=$OLD_LATEST_PREFIX&quot;
-echo &quot;OLD_OPENSTACK_RELEASE=$OLD_OPENSTACK_RELEASE&quot;
+echo &quot;OLD_BUILD_STREAM=$OLD_BUILD_STREAM&quot;
 echo &quot;RETAG_IMAGE_LIST=$RETAG_IMAGE_LIST&quot;
 
 [ -n &quot;$TIMESTAMP&quot; ]
 [ -n &quot;$OS&quot; ]
-[ -n &quot;$OPENSTACK_RELEASE&quot; ]
+[ -n &quot;$BUILD_STREAM&quot; ]
 [ -n &quot;$REGISTRY&quot; ]
 [ -n &quot;$REGISTRY_ORG&quot; ]
 [ -n &quot;$REGISTRY_USERID&quot; ]
@@ -217,27 +217,14 @@ echo &quot;RETAG_IMAGE_LIST=$RETAG_IMAGE_LIST&quot;
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 [ -n &quot;$OLD_LATEST_PREFIX&quot; ]
-[ -n &quot;$OLD_OPENSTACK_RELEASE&quot; ]
+[ -n &quot;$OLD_BUILD_STREAM&quot; ]
 [ -n &quot;$RETAG_IMAGE_LIST&quot; ]
 
-# WEB_OUTPUTS_BASE=${PUBLISH_OUTPUTS_BASE#/export}
-# 
-# $MY_REPO/build-tools/build-docker-images/build-stx-images.sh \
-#     --prefix ${PREFIX} \
-#     --latest-prefix ${LATEST_PREFIX} \
-#     --os ${OS} \
-#     --release ${OPENSTACK_RELEASE} \
-#     --version ${TIMESTAMP} \
-#     --base ${REGISTRY}/${REGISTRY_ORG}/stx-${OS}:${BASE_VERSION} \
-#     --wheels http://${HOST}:${HOST_PORT}/${WEB_OUTPUTS_BASE}/wheels/stx-${OS}-${OPENSTACK_RELEASE}-wheels.tar \
-#     --user ${REGISTRY_ORG} --registry ${REGISTRY} \
-#     --push --latest \
-#     --clean
 
 NEW_LATEST_PREFIX=${LATEST_PREFIX}
-NEW_OPENSTACK_RELEASE=${OPENSTACK_RELEASE}
-OLD_TAG=${OLD_LATEST_PREFIX}-${OS}-${OLD_OPENSTACK_RELEASE}-latest
-NEW_TAG=${NEW_LATEST_PREFIX}-${OS}-${NEW_OPENSTACK_RELEASE}-latest
+NEW_BUILD_STREAM=${BUILD_STREAM}
+OLD_TAG=${OLD_LATEST_PREFIX}-${OS}-${OLD_BUILD_STREAM}-latest
+NEW_TAG=${NEW_LATEST_PREFIX}-${OS}-${NEW_BUILD_STREAM}-latest
 
 if [ &quot;$OLD_TAG&quot; != &quot;$NEW_TAG&quot; ]; then
     for IMAGE in $RETAG_IMAGE_LIST; do
@@ -254,7 +241,7 @@ fi</command>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.63">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>

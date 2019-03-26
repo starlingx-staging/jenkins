@@ -35,9 +35,9 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>OPENSTACK_RELEASE</name>
-          <description></description>
-          <defaultValue>pike</defaultValue>
+          <name>BUILD_STREAM</name>
+          <description>dev or stable</description>
+          <defaultValue>dev</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -106,6 +106,18 @@
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MASTER_JOB_NAME</name>
+          <description>Top of tree build job name</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MASTER_BUILD_NUMBER</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -126,7 +138,7 @@ echo &quot;MUNGED_BRANCH=$MUNGED_BRANCH&quot;
 # echo &quot;REGISTRY=$REGISTRY&quot;
 echo &quot;OS=$OS&quot;
 echo &quot;OS_VERSION=$OS_VERSION&quot;
-echo &quot;OPENSTACK_RELEASE=$OPENSTACK_RELEASE&quot;
+echo &quot;BUILD_STREAM=$BUILD_STREAM&quot;
 echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
 echo &quot;MY_REPO=$MY_REPO&quot;
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
@@ -152,7 +164,7 @@ echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
 # [ -n &quot;$REGISTRY&quot; ]
 [ -n &quot;$OS&quot; ]
 [ -n &quot;$OS_VERSION&quot; ]
-[ -n &quot;$OPENSTACK_RELEASE&quot; ]
+[ -n &quot;$BUILD_STREAM&quot; ]
 [ -n &quot;$MY_REPO_ROOT&quot; ]
 [ -n &quot;$MY_REPO&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
@@ -372,8 +384,8 @@ echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
     <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
       <condition class="org.jenkins_ci.plugins.run_condition.core.StringsMatchCondition" plugin="run-condition@1.2">
-        <arg1>$MUNGED_BRANCH</arg1>
-        <arg2>f-stein</arg2>
+        <arg1>$BUILD_STREAM</arg1>
+        <arg2>stable</arg2>
         <ignoreCase>false</ignoreCase>
       </condition>
       <buildStep class="hudson.plugins.parameterizedtrigger.TriggerBuilder" plugin="parameterized-trigger@2.35.2">
@@ -388,9 +400,10 @@ echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
                 <onlyExactRuns>false</onlyExactRuns>
               </hudson.plugins.parameterizedtrigger.FileBuildParameters>
               <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
-                <properties>OLD_LATEST_PREFIX=dev
-OLD_OPENSTACK_RELEASE=pike
-RETAG_IMAGE_LIST=&quot;stx-libvirt stx-ceph-config-helper&quot;</properties>
+                <properties>OLD_LATEST_PREFIX=master
+OLD_BUILD_STREAM=stable
+BUILD_STREAM=dev
+RETAG_IMAGE_LIST=&quot;stx-fm-rest-api stx-libvirt stx-mariadb&quot;</properties>
                 <textParamValueOnNewLine>false</textParamValueOnNewLine>
               </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
             </configs>
@@ -411,7 +424,7 @@ RETAG_IMAGE_LIST=&quot;stx-libvirt stx-ceph-config-helper&quot;</properties>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.63">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -446,14 +459,20 @@ RETAG_IMAGE_LIST=&quot;stx-libvirt stx-ceph-config-helper&quot;</properties>
       <configs>
         <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
           <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
             <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
               <properties>BUILD_NM=$JOB_NAME
-BUILD_NUM=$BUILD_NUMBER
-PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
+BUILD_NUM=$BUILD_NUMBER</properties>
               <textParamValueOnNewLine>false</textParamValueOnNewLine>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>copy_logs,docker_prune</projects>
+          <projects>copy_logs,copy_failed_image_logs,docker_prune</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -471,24 +490,33 @@ export REGISTRY_USERID=slittlewrs
 export REGISTRY_ORG=starlingx
 export REGISTRY=docker.io
 
+if [ &quot;${MASTER_JOB_NAME}&quot; == &quot;&quot; ]; then
+    export MASTER_JOB_NAME=$JOB_NAME
+    export MASTER_BUILD_NUMBER=$BUILD_NUMBER
+fi
+
+if [ &quot;${MASTER_BUILD_NUMBER}&quot; == &quot;&quot; ]; then
+    export MASTER_BUILD_NUMBER=0
+fi
+
 if [ $MUNGED_BRANCH == &quot;master&quot; ]; then
-   PREFIX=&quot;dev&quot;
+   PREFIX=&quot;$MUNGED_BRANCH&quot;
    LATEST_PREFIX=&quot;${PREFIX}&quot;
-   BASE_VERSION=&quot;${PREFIX}-${PUBLISH_TIMESTAMP}&quot;
-   BASE_LATEST_TAG=&quot;${PREFIX}-latest&quot;
-   FLOCK_VERSION=&quot;${PREFIX}-${OS}-${OPENSTACK_RELEASE}-${PUBLISH_TIMESTAMP}&quot;
+   BASE_VERSION=&quot;${PREFIX}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
+   BASE_LATEST_TAG=&quot;${PREFIX}-${BUILD_STREAM}-latest&quot;
+   FLOCK_VERSION=&quot;${PREFIX}-${OS}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
 elif [[ ${MUNGED_BRANCH} == f-* ]]; then
    PREFIX=&quot;${MUNGED_BRANCH}&quot;
    LATEST_PREFIX=&quot;${PREFIX}&quot;
-   BASE_VERSION=&quot;${PREFIX}-${PUBLISH_TIMESTAMP}&quot;
-   BASE_LATEST_TAG=&quot;${PREFIX}-latest&quot;
-   FLOCK_VERSION=&quot;${PREFIX}-${OS}-${OPENSTACK_RELEASE}-${PUBLISH_TIMESTAMP}&quot;
+   BASE_VERSION=&quot;${PREFIX}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
+   BASE_LATEST_TAG=&quot;${PREFIX}-${BUILD_STREAM}-latest&quot;
+   FLOCK_VERSION=&quot;${PREFIX}-${OS}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
 else
    PREFIX=&quot;${MUNGED_BRANCH}&quot;
    LATEST_PREFIX=&quot;$( echo ${PREFIX} | cut -d &apos;.&apos; -f 1,2 )&quot;
-   BASE_VERSION=&quot;${PREFIX}&quot;
-   BASE_LATEST_TAG=&quot;${LATEST_PREFIX}-latest&quot;
-   FLOCK_VERSION=&quot;${PREFIX}-${OS}-${OPENSTACK_RELEASE}${PUBLISH_TIMESTAMP}&quot;
+   BASE_VERSION=&quot;${PREFIX}-${BUILD_STREAM}&quot;
+   BASE_LATEST_TAG=&quot;${LATEST_PREFIX}-${BUILD_STREAM}-latest&quot;
+   FLOCK_VERSION=&quot;${PREFIX}-${OS}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
 fi
 
 echo TIMESTAMP=$TIMESTAMP &gt; env.properties
@@ -500,7 +528,7 @@ echo REGISTRY_ORG=$REGISTRY_ORG &gt;&gt; env.properties
 echo REGISTRY=$REGISTRY &gt;&gt; env.properties
 echo OS=$OS &gt;&gt; env.properties
 echo OS_VERSION=$OS_VERSION &gt;&gt; env.properties
-echo OPENSTACK_RELEASE=$OPENSTACK_RELEASE &gt;&gt; env.properties
+echo BUILD_STREAM=$BUILD_STREAM &gt;&gt; env.properties
 echo MY_REPO_ROOT=$MY_REPO_ROOT &gt;&gt; env.properties
 echo MY_REPO=$MY_REPO &gt;&gt; env.properties
 echo MY_WORKSPACE=$MY_WORKSPACE &gt;&gt; env.properties
@@ -516,8 +544,10 @@ echo PREFIX=$PREFIX &gt;&gt; env.properties
 echo LATEST_PREFIX=$LATEST_PREFIX &gt;&gt; env.properties
 echo BASE_VERSION=$BASE_VERSION &gt;&gt; env.properties
 echo BASE_LATEST_TAG=$BASE_LATEST_TAG &gt;&gt; env.properties
-echo FLOCK_VERSION=$FLOCK_VERSION &gt;&gt; env.properties</scriptContent>
-        <secureGroovyScript plugin="script-security@1.48">
+echo FLOCK_VERSION=$FLOCK_VERSION &gt;&gt; env.properties
+echo MASTER_BUILD_NUMBER=$MASTER_BUILD_NUMBER &gt;&gt; env.properties
+echo MASTER_JOB_NAME=$MASTER_JOB_NAME &gt;&gt; env.properties</scriptContent>
+        <secureGroovyScript plugin="script-security@1.55">
           <script></script>
           <sandbox>false</sandbox>
         </secureGroovyScript>

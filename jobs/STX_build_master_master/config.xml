@@ -11,13 +11,13 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.BooleanParameterDefinition>
-          <name>BUILD_CONTAINERS</name>
-          <description>Force build of containers.  Otherwise it&apos;s automatic based on day of week.</description>
+          <name>BUILD_CONTAINERS_DEV</name>
+          <description>Force build of dev stream containers.  Otherwise it&apos;s automatic based on day of week.</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
-          <name>BUILD_CONTAINERS_ZZZ</name>
-          <description></description>
+          <name>BUILD_CONTAINERS_STABLE</name>
+          <description>Force build of stable stream containers.  Otherwise it&apos;s automatic based on day of week.</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
@@ -30,8 +30,8 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <hudson.triggers.TimerTrigger>
-      <spec>30 21 * * 0,2,3,4,5,6
-30 19 * * 1</spec>
+      <spec>30 21 * * 2,3,4,5,6
+30 19 * * 0,1</spec>
     </hudson.triggers.TimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
@@ -518,7 +518,7 @@
         <conditions>
           <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
             <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition">
-              <token>$BUILD_CONTAINERS</token>
+              <token>$BUILD_CONTAINERS_DEV</token>
             </condition>
           </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
           <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
@@ -571,6 +571,10 @@
                 <useMatrixChild>false</useMatrixChild>
                 <onlyExactRuns>false</onlyExactRuns>
               </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+                <properties>BUILD_STREAM=dev</properties>
+                <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
             </configs>
             <projects>STX_build_docker_images</projects>
             <condition>ALWAYS</condition>
@@ -607,7 +611,7 @@
         <conditions>
           <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
             <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition">
-              <token>$BUILD_CONTAINERS_ZZZ</token>
+              <token>$BUILD_CONTAINERS_STABLE</token>
             </condition>
           </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
           <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
@@ -661,7 +665,8 @@
                 <onlyExactRuns>false</onlyExactRuns>
               </hudson.plugins.parameterizedtrigger.FileBuildParameters>
               <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
-                <properties>OPENSTACK_RELEASE=$STABLE_OPENSTACK_RELEASE</properties>
+                <properties>BUILD_STREAM=stable
+OS_VERSION=7.5.1804</properties>
                 <textParamValueOnNewLine>false</textParamValueOnNewLine>
               </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
             </configs>
@@ -759,7 +764,6 @@
       <info>
         <scriptContent>export BRANCH=master
 export OPENSTACK_RELEASE=master
-export STABLE_OPENSTACK_RELEASE=pike
 export OS=centos
 export OS_VERSION=7.5.1804
 export PUBLISH_URL=http://mirror.starlingx.cengn.ca
@@ -846,7 +850,6 @@ echo BRANCH=$BRANCH &gt;&gt; env.properties
 echo PROJECT=$PROJECT &gt;&gt; env.properties
 echo MUNGED_BRANCH=$MUNGED_BRANCH &gt;&gt; env.properties
 echo OPENSTACK_RELEASE=$OPENSTACK_RELEASE &gt;&gt; env.properties
-echo STABLE_OPENSTACK_RELEASE=$STABLE_OPENSTACK_RELEASE &gt;&gt; env.properties
 echo DISTRO=$DISTRO &gt;&gt; env.properties
 echo OS=$OS &gt;&gt; env.properties
 echo OS_VERSION=$OS_VERSION &gt;&gt; env.properties

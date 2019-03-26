@@ -17,9 +17,9 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>OPENSTACK_RELEASE</name>
-          <description></description>
-          <defaultValue>pike</defaultValue>
+          <name>BUILD_STREAM</name>
+          <description>dev or stable</description>
+          <defaultValue>dev</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -80,7 +80,7 @@
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
 echo &quot;OS=$OS&quot;
 echo &quot;PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE&quot;
-echo &quot;OPENSTACK_RELEASE=$OPENSTACK_RELEASE&quot;
+echo &quot;BUILD_STREAM=$BUILD_STREAM&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
@@ -90,7 +90,7 @@ echo &quot;TIMESTAMP=$TIMESTAMP&quot;
 [ -n &quot;$MY_WORKSPACE&quot; ]
 [ -n &quot;$OS&quot; ]
 [ -n &quot;$PUBLISH_OUTPUTS_BASE&quot; ]
-[ -n &quot;$OPENSTACK_RELEASE&quot; ]
+[ -n &quot;$BUILD_STREAM&quot; ]
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 [ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
@@ -99,11 +99,11 @@ echo &quot;TIMESTAMP=$TIMESTAMP&quot;
 
 PUBLISH_WHEELS_BASE=$PUBLISH_OUTPUTS_BASE/wheels
 
-SRC_WHEELS_DIR=$MY_WORKSPACE/std/build-wheels-${OS}-${OPENSTACK_RELEASE}
+SRC_WHEELS_DIR=$MY_WORKSPACE/std/build-wheels-${OS}-${BUILD_STREAM}
 
 mkdir -p $PUBLISH_WHEELS_BASE
 
-cp -L -v ${SRC_WHEELS_DIR}/stx-${OS}-${OPENSTACK_RELEASE}-wheels.tar ${PUBLISH_WHEELS_BASE}/
+cp -L -v ${SRC_WHEELS_DIR}/stx-${OS}-${BUILD_STREAM}-wheels.tar ${PUBLISH_WHEELS_BASE}/
 
 </command>
     </hudson.tasks.Shell>
@@ -114,7 +114,7 @@ cp -L -v ${SRC_WHEELS_DIR}/stx-${OS}-${OPENSTACK_RELEASE}-wheels.tar ${PUBLISH_W
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.63">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>

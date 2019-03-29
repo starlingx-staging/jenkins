@@ -43,7 +43,7 @@
         <hudson.model.StringParameterDefinition>
           <name>HOST</name>
           <description></description>
-          <defaultValue>build.starlingx.cengn.ca</defaultValue>
+          <defaultValue>mirror.starlingx.cengn.ca</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -89,9 +89,9 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>OPENSTACK_RELEASE</name>
-          <description></description>
-          <defaultValue>pike</defaultValue>
+          <name>BUILD_STREAM</name>
+          <description>dev or stable</description>
+          <defaultValue>dev</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -155,7 +155,7 @@
       <command>
 echo &quot;OS=$OS&quot;
 echo &quot;OS_VERSION=$OS_VERSION&quot;
-echo &quot;OPENSTACK_RELEASE=$OPENSTACK_RELEASE&quot;
+echo &quot;BUILD_STREAM=$BUILD_STREAM&quot;
 echo &quot;REGISTRY=$REGISTRY&quot;
 echo &quot;REGISTRY_ORG=$REGISTRY_ORG&quot;
 echo &quot;REGISTRY_USERID=$REGISTRY_USERID&quot;
@@ -172,7 +172,7 @@ echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 
 [ -n &quot;$OS&quot; ]
 [ -n &quot;$OS_VERSION&quot; ]
-[ -n &quot;$OPENSTACK_RELEASE&quot; ]
+[ -n &quot;$BUILD_STREAM&quot; ]
 [ -n &quot;$REGISTRY&quot; ]
 [ -n &quot;$REGISTRY_ORG&quot; ]
 [ -n &quot;$REGISTRY_USERID&quot; ]
@@ -192,7 +192,7 @@ WEB_OUTPUTS_BASE=${PUBLISH_OUTPUTS_BASE#/export}
 WEB_INPUTS_BASE=${PUBLISH_INPUTS_BASE#/export}
 
 EXTRA_ARGS=&quot;&quot;
-if [ &quot;$OPENSTACK_RELEASE&quot; != &quot;master&quot; ]; then
+if [ &quot;$BUILD_STREAM&quot; != &quot;dev&quot; ]; then
     EXTRA_ARGS=&quot; 
         --repo stx-local-build,http://${HOST}:${HOST_PORT}/${WEB_OUTPUTS_BASE}/RPMS/std \
         --repo stx-mirror-distro,http://${HOST}:${HOST_PORT}/${WEB_INPUTS_BASE}/RPMS \
@@ -202,7 +202,7 @@ fi
 $MY_REPO/build-tools/build-docker-images/build-stx-base.sh \
     --os ${OS} \
     --os-version ${OS_VERSION} \
-    --release ${OPENSTACK_RELEASE} \
+    --stream ${BUILD_STREAM} \
     --version ${BASE_VERSION} \
     --user ${REGISTRY_ORG} --registry ${REGISTRY} \
     --push \
@@ -222,7 +222,7 @@ $MY_REPO/build-tools/build-docker-images/build-stx-base.sh \
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.63">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>

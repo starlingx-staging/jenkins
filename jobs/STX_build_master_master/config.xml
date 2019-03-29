@@ -11,13 +11,13 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.BooleanParameterDefinition>
-          <name>BUILD_CONTAINERS</name>
-          <description>Force build of containers.  Otherwise it&apos;s automatic based on day of week.</description>
+          <name>BUILD_CONTAINERS_DEV</name>
+          <description>Force build of dev stream containers.  Otherwise it&apos;s automatic based on day of week.</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
-          <name>BUILD_CONTAINERS_ZZZ</name>
-          <description></description>
+          <name>BUILD_CONTAINERS_STABLE</name>
+          <description>Force build of stable stream containers.  Otherwise it&apos;s automatic based on day of week.</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
@@ -30,8 +30,8 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <hudson.triggers.TimerTrigger>
-      <spec>30 20 * * 0,1,3,4,5,6
-30 18 * * 2</spec>
+      <spec>30 21 * * 2,3,4,5,6
+30 19 * * 0,1</spec>
     </hudson.triggers.TimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
@@ -41,6 +41,38 @@
         <propertiesFilePath>env.properties</propertiesFilePath>
       </info>
     </EnvInjectBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs class="empty-list"/>
+          <projects>mirror_download_sync</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
     <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
@@ -486,7 +518,7 @@
         <conditions>
           <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
             <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition">
-              <token>$BUILD_CONTAINERS</token>
+              <token>$BUILD_CONTAINERS_DEV</token>
             </condition>
           </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
           <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
@@ -496,11 +528,11 @@
                 <days>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>2</day>
-                    <selected>false</selected>
+                    <selected>true</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>3</day>
-                    <selected>true</selected>
+                    <selected>false</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>4</day>
@@ -539,6 +571,10 @@
                 <useMatrixChild>false</useMatrixChild>
                 <onlyExactRuns>false</onlyExactRuns>
               </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+                <properties>BUILD_STREAM=dev</properties>
+                <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
             </configs>
             <projects>STX_build_docker_images</projects>
             <condition>ALWAYS</condition>
@@ -575,7 +611,7 @@
         <conditions>
           <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
             <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition">
-              <token>$BUILD_CONTAINERS_ZZZ</token>
+              <token>$BUILD_CONTAINERS_STABLE</token>
             </condition>
           </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
           <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
@@ -629,7 +665,8 @@
                 <onlyExactRuns>false</onlyExactRuns>
               </hudson.plugins.parameterizedtrigger.FileBuildParameters>
               <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
-                <properties>OPENSTACK_RELEASE=$STABLE_OPENSTACK_RELEASE</properties>
+                <properties>BUILD_STREAM=stable
+OS_VERSION=7.5.1804</properties>
                 <textParamValueOnNewLine>false</textParamValueOnNewLine>
               </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
             </configs>
@@ -670,7 +707,7 @@
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.63">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -727,7 +764,6 @@
       <info>
         <scriptContent>export BRANCH=master
 export OPENSTACK_RELEASE=master
-export STABLE_OPENSTACK_RELEASE=pike
 export OS=centos
 export OS_VERSION=7.5.1804
 export PUBLISH_URL=http://mirror.starlingx.cengn.ca
@@ -788,6 +824,13 @@ export MY_REPO_ROOT=/localdisk/designer/$USER/$PROJECT
 export MY_REPO=$MY_REPO_ROOT/cgcs-root
 export MY_WORKSPACE=/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP
 
+if [ &quot;$OS&quot; == &quot;centos&quot; ] &amp;&amp; [ -f $MY_REPO_ROOT/stx-tools/centos-mirror-tools/yum.conf.sample ] ; then
+    export OS_VERSION=$( cd $MY_REPO_ROOT/stx-tools/centos-mirror-tools/; 
+                        yum --config=./yum.conf.sample --showduplicates list centos-release | \
+                          grep &apos;^centos-release&apos; | awk &apos;{print $2}&apos; | sort --unique | \
+                          tail -n 1 | tr &apos;-&apos; &apos;.&apos; | cut -d &apos;.&apos; -f -3 )
+fi
+
 export DOCKER_BUILD_ID=$USER-$PROJECT-$TIMESTAMP-builder
 export DOCKER_DL_ID=$USER-$PROJECT-$TIMESTAMP-downloader
 export DOCKER_BUILD_TAG=$PROJECT-$TIMESTAMP-builder-image
@@ -807,7 +850,6 @@ echo BRANCH=$BRANCH &gt;&gt; env.properties
 echo PROJECT=$PROJECT &gt;&gt; env.properties
 echo MUNGED_BRANCH=$MUNGED_BRANCH &gt;&gt; env.properties
 echo OPENSTACK_RELEASE=$OPENSTACK_RELEASE &gt;&gt; env.properties
-echo STABLE_OPENSTACK_RELEASE=$STABLE_OPENSTACK_RELEASE &gt;&gt; env.properties
 echo DISTRO=$DISTRO &gt;&gt; env.properties
 echo OS=$OS &gt;&gt; env.properties
 echo OS_VERSION=$OS_VERSION &gt;&gt; env.properties
@@ -828,7 +870,7 @@ echo PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE &gt;&gt; env.properties
 echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt;&gt; env.properties
 echo BUILD_NM=$JOB_NAME &gt;&gt; env.properties
 echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties</scriptContent>
-        <secureGroovyScript plugin="script-security@1.48">
+        <secureGroovyScript plugin="script-security@1.55">
           <script></script>
           <sandbox>false</sandbox>
         </secureGroovyScript>

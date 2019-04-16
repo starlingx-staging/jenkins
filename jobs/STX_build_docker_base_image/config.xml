@@ -205,6 +205,7 @@ $MY_REPO/build-tools/build-docker-images/build-stx-base.sh \
     --stream ${BUILD_STREAM} \
     --version ${BASE_VERSION} \
     --user ${REGISTRY_ORG} --registry ${REGISTRY} \
+    --attempts 5 \
     --push \
     --latest \
     --latest-tag=${BASE_LATEST_TAG} \

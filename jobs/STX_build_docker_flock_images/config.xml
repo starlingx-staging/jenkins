@@ -215,6 +215,7 @@ $MY_REPO/build-tools/build-docker-images/build-stx-images.sh \
     --base ${REGISTRY}/${REGISTRY_ORG}/stx-${OS}:${BASE_VERSION} \
     --wheels http://${HOST}:${HOST_PORT}/${WEB_OUTPUTS_BASE}/wheels/stx-${OS}-${BUILD_STREAM}-wheels.tar \
     --user ${REGISTRY_ORG} --registry ${REGISTRY} \
+    --attempts 5 \
     --push --latest \
     --clean
 </command>

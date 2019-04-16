@@ -1,7 +1,7 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Build the helm charts</description>
+  <description>Publish build products to http://mirror.starlingx.cengn.ca</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
@@ -11,26 +11,44 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>OS</name>
+          <name>PUBLISH_DISTRO_BASE</name>
           <description></description>
-          <defaultValue>centos</defaultValue>
+          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>DOCKER_BUILD_ID</name>
+          <name>PUBLISH_OUTPUTS_BASE</name>
           <description></description>
-          <defaultValue>builder</defaultValue>
+          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>MY_REPO</name>
-          <description>/localdisk/designer/$USER/$PROJECT/cgcs-root</description>
+          <name>PUBLISH_INPUTS_BASE</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_REPO_ROOT</name>
+          <description>/localdisk/designer/$USER/$PROJECT</description>
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>MY_WORKSPACE</name>
           <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OS</name>
+          <description></description>
+          <defaultValue>centos</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TIMESTAMP</name>
+          <description></description>
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -47,8 +65,8 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>PUBLISH_DISTRO_BASE</name>
-          <description>/export/mirror/starlingx/$BRANCH/$OS</description>
+          <name>MASTER_JOB_NAME</name>
+          <description>Top of tree build job name</description>
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -64,73 +82,48 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>echo &quot;DOCKER_BUILD_ID=$DOCKER_BUILD_ID&quot;
-echo &quot;MY_REPO=$MY_REPO&quot;
+      <command>
+echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
 echo &quot;OS=$OS&quot;
 echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
+echo &quot;PUBLISH_INPUTS_BASE=$PUBLISH_INPUTS_BASE&quot;
+echo &quot;PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE&quot;
+echo &quot;TIMESTAMP=$TIMESTAMP&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
+echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
 
-[ -n &quot;$DOCKER_BUILD_ID&quot; ]
-[ -n &quot;$MY_REPO&quot; ]
+[ -n &quot;$MY_REPO_ROOT&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
 [ -n &quot;$OS&quot; ]
+[ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
+[ -n &quot;$PUBLISH_INPUTS_BASE&quot; ]
+[ -n &quot;$PUBLISH_OUTPUTS_BASE&quot; ]
+[ -n &quot;$TIMESTAMP&quot; ]
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
-[ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
+[ -n &quot;$MASTER_JOB_NAME&quot; ]
 
-MYUNAME=$(id -un)
+export DISTRO=&quot;$OS&quot;
 
-DOCKER_CMD=&quot;docker exec --interactive --user=${MYUNAME} -e MYUNAME=${MYUNAME} ${DOCKER_BUILD_ID} /bin/bash -i -&quot;
 
-echo &apos;echo MY_REPO=$MY_REPO&apos; | $DOCKER_CMD
+mkdir -p $PUBLISH_OUTPUTS_BASE/helm-charts
+mkdir -p $PUBLISH_LOGS_BASE
 
-# echo &quot;build-helm-charts.sh --os ${OS} --image-file ${IMAGE_FILE} --label ${LABEL} --verbose&quot; | $DOCKER_CMD
 
-IMAGE_DIR=$(find $MY_WORKSPACE -maxdepth 2 -type d -name build-images)
-ALT_IMAGE_SRC_DIR=$PUBLISH_DISTRO_BASE
-HELM_SAVE_DIR=$MY_WORKSPACE/helm-charts
-mkdir -p $HELM_SAVE_DIR
-ALT_IMAGE_DIR=$MY_WORKSPACE/alt_image_lists
-mkdir -p ${ALT_IMAGE_DIR}
-cp -v $ALT_IMAGE_SRC_DIR/images-${OS}*.lst $ALT_IMAGE_DIR/
-if [ &quot;${IMAGE_DIR}&quot; == &quot;&quot; ]; then
-    IMAGE_DIR=$ALT_IMAGE_DIR
-fi
+for d in $(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm); do
+    \cp -v $d/stx/helm-charts-manifest*.tgz $PUBLISH_OUTPUTS_BASE/helm-charts
+done
 
-BUILD_STREAMS=&quot;stable dev&quot;
-BUILD_TAGS=&quot;latest versioned&quot;
 
-if [ -d &quot;${IMAGE_DIR}&quot; ]; then
-  for BUILD_STREAM in $BUILD_STREAMS; do
-    for BUILD_TAG in $BUILD_TAGS; do
-      IMAGE_ARG=&quot;&quot;
-      LABEL=&quot;${OS}-${BUILD_STREAM}-${BUILD_TAG}&quot;
 
-      for IMAGE_FILE in $(find ${IMAGE_DIR} -maxdepth 1 -name &quot;images-${LABEL}.lst&quot;); do
-        IMAGE_ARG+=&quot;,$IMAGE_FILE&quot;
-      done
-      
-      if [  &quot;$IMAGE_ARG&quot; == &quot;&quot; ]; then
-        for IMAGE_FILE in $(find ${ALT_IMAGE_DIR} -maxdepth 1 -name &quot;images-${LABEL}.lst&quot;); do
-          IMAGE_ARG+=&quot;,$IMAGE_FILE&quot;
-        done
-      fi
-      
-      if [ &quot;$IMAGE_ARG&quot; != &quot;&quot; ]; then
-        IMAGE_ARG=&quot;$(echo $IMAGE_ARG | sed &apos;s/^,//&apos;)&quot;
 
-        echo &quot;Building chart for image file: ${IMAGE_ARG}&quot;
-        echo &quot;build-helm-charts.sh --os ${OS} --image-file ${IMAGE_ARG} --label ${LABEL} --verbose&quot; | $DOCKER_CMD
-        HELM_OUT_DIR=$(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm)
-        cp -v $HELM_OUT_DIR/stx/helm-charts*.tgz $HELM_SAVE_DIR
-      fi
-    done
-  done
-fi
 
-cp -v $HELM_SAVE_DIR/helm-charts*.tgz $HELM_OUT_DIR/stx/</command>
+
+
+
+</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>

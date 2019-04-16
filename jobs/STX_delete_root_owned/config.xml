@@ -11,12 +11,6 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>OPENSTACK_RELEASE</name>
-          <description></description>
-          <defaultValue>pike</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
           <name>MY_REPO_ROOT</name>
           <description>/localdisk/designer/$USER/$PROJECT</description>
           <defaultValue></defaultValue>
@@ -49,12 +43,10 @@
       <command>
 echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
-echo &quot;OPENSTACK_RELEASE=$OPENSTACK_RELEASE&quot;
 echo &quot;OS=$OS&quot;
 
 [ -n &quot;$MY_REPO_ROOT&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
-[ -n &quot;$OPENSTACK_RELEASE&quot; ]
 [ -n &quot;$OS&quot; ]
 
 # export MY_REPO_ROOT=/localdisk/designer/$USER/$PROJECT
@@ -92,14 +84,14 @@ if [ -d &quot;$MY_WORKSPACE/mock-cache&quot; ]; then
     sudo /bin/rm -rf $MY_WORKSPACE/mock-cache
 fi
 
-if [ -d &quot;$MY_WORKSPACE/std/build-wheels-${OS}-${OPENSTACK_RELEASE}/base&quot; ]; then
-    sudo /bin/rm -rf $MY_WORKSPACE/std/build-wheels-${OS}-${OPENSTACK_RELEASE}/base
-fi
-
 PXE_INSTALLER_OUT_DIR=&quot;$MY_WORKSPACE/pxe-network-installer/output&quot;
 if [ -d $PXE_INSTALLER_OUT_DIR ]; then
    sudo chown -R $USER $PXE_INSTALLER_OUT_DIR
 fi
+
+for WHEEL_DIR in $(find $MY_WORKSPACE -maxdepth 2 -type d -name &apos;build-wheels-*&apos;); do
+    sudo chown -R $USER $WHEEL_DIR
+done
 
 REMAINDER=$(if [ -d $MY_WORKSPACE ]; then find $MY_WORKSPACE  -user root; fi)
 if [ ! -z &quot;${REMAINDER}&quot; ]; then
@@ -113,7 +105,7 @@ fi
   </builders>
   <publishers>
     <hudson.tasks.Mailer plugin="mailer@1.22">
-      <recipients>scott.little@windriver.com, jason.mckenna@windriver.com</recipients>
+      <recipients>scott.little@windriver.com, don.penney@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>

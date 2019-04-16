@@ -518,99 +518,6 @@
         <conditions>
           <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
             <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition">
-              <token>$BUILD_CONTAINERS_DEV</token>
-            </condition>
-          </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
-          <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
-            <condition class="org.jenkins_ci.plugins.run_condition.core.DayCondition">
-              <useBuildTime>false</useBuildTime>
-              <daySelector class="org.jenkins_ci.plugins.run_condition.core.DayCondition$SelectDays">
-                <days>
-                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                    <day>2</day>
-                    <selected>true</selected>
-                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                    <day>3</day>
-                    <selected>false</selected>
-                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                    <day>4</day>
-                    <selected>false</selected>
-                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                    <day>5</day>
-                    <selected>false</selected>
-                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                    <day>6</day>
-                    <selected>false</selected>
-                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                    <day>7</day>
-                    <selected>false</selected>
-                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                    <day>1</day>
-                    <selected>false</selected>
-                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                </days>
-              </daySelector>
-            </condition>
-          </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
-        </conditions>
-      </condition>
-      <buildStep class="hudson.plugins.parameterizedtrigger.TriggerBuilder" plugin="parameterized-trigger@2.35.2">
-        <configs>
-          <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
-            <configs>
-              <hudson.plugins.parameterizedtrigger.FileBuildParameters>
-                <propertiesFile>env.properties</propertiesFile>
-                <failTriggerOnMissing>false</failTriggerOnMissing>
-                <textParamValueOnNewLine>false</textParamValueOnNewLine>
-                <useMatrixChild>false</useMatrixChild>
-                <onlyExactRuns>false</onlyExactRuns>
-              </hudson.plugins.parameterizedtrigger.FileBuildParameters>
-              <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
-                <properties>BUILD_STREAM=dev</properties>
-                <textParamValueOnNewLine>false</textParamValueOnNewLine>
-              </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
-            </configs>
-            <projects>STX_build_docker_images</projects>
-            <condition>ALWAYS</condition>
-            <triggerWithNoParameters>false</triggerWithNoParameters>
-            <triggerFromChildProjects>false</triggerFromChildProjects>
-            <block>
-              <buildStepFailureThreshold>
-                <name>FAILURE</name>
-                <ordinal>2</ordinal>
-                <color>RED</color>
-                <completeBuild>true</completeBuild>
-              </buildStepFailureThreshold>
-              <unstableThreshold>
-                <name>UNSTABLE</name>
-                <ordinal>1</ordinal>
-                <color>YELLOW</color>
-                <completeBuild>true</completeBuild>
-              </unstableThreshold>
-              <failureThreshold>
-                <name>FAILURE</name>
-                <ordinal>2</ordinal>
-                <color>RED</color>
-                <completeBuild>true</completeBuild>
-              </failureThreshold>
-            </block>
-            <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
-          </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
-        </configs>
-      </buildStep>
-      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.2"/>
-    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
-    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
-      <condition class="org.jenkins_ci.plugins.run_condition.logic.Or" plugin="run-condition@1.2">
-        <conditions>
-          <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
-            <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition">
               <token>$BUILD_CONTAINERS_STABLE</token>
             </condition>
           </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
@@ -621,7 +528,7 @@
                 <days>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>2</day>
-                    <selected>false</selected>
+                    <selected>true</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>3</day>
@@ -694,6 +601,79 @@ OS_VERSION=7.5.1804</properties>
                 <completeBuild>true</completeBuild>
               </failureThreshold>
             </block>
+            <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+          </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+        </configs>
+      </buildStep>
+      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.2"/>
+    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
+    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
+      <condition class="org.jenkins_ci.plugins.run_condition.logic.Or" plugin="run-condition@1.2">
+        <conditions>
+          <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+            <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition">
+              <token>$BUILD_CONTAINERS_DEV</token>
+            </condition>
+          </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+          <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+            <condition class="org.jenkins_ci.plugins.run_condition.core.DayCondition">
+              <useBuildTime>false</useBuildTime>
+              <daySelector class="org.jenkins_ci.plugins.run_condition.core.DayCondition$SelectDays">
+                <days>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>2</day>
+                    <selected>true</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>3</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>4</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>5</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>6</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>7</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>1</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                </days>
+              </daySelector>
+            </condition>
+          </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+        </conditions>
+      </condition>
+      <buildStep class="hudson.plugins.parameterizedtrigger.TriggerBuilder" plugin="parameterized-trigger@2.35.2">
+        <configs>
+          <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+            <configs>
+              <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+                <propertiesFile>env.properties</propertiesFile>
+                <failTriggerOnMissing>false</failTriggerOnMissing>
+                <textParamValueOnNewLine>false</textParamValueOnNewLine>
+                <useMatrixChild>false</useMatrixChild>
+                <onlyExactRuns>false</onlyExactRuns>
+              </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+                <properties>BUILD_STREAM=dev</properties>
+                <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+            </configs>
+            <projects>STX_build_docker_images</projects>
+            <condition>ALWAYS</condition>
+            <triggerWithNoParameters>false</triggerWithNoParameters>
+            <triggerFromChildProjects>false</triggerFromChildProjects>
             <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
           </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
         </configs>
@@ -843,6 +823,8 @@ export PUBLISH_OUTPUTS_BASE=$PUBLISH_BUILD_BASE/outputs
 export PUBLISH_LOGS_BASE=$PUBLISH_BUILD_BASE/logs
 export PUBLISH_LOGS_URL=$PUBLISH_URL/$(echo $PUBLISH_LOGS_BASE | sed &apos;s#^/export/##&apos;)
 
+echo BUILD_CONTAINERS_DEV=$BUILD_CONTAINERS_DEV
+echo BUILD_CONTAINERS_STABLE=$BUILD_CONTAINERS_STABLE
 
 echo TIMESTAMP=$TIMESTAMP &gt; env.properties
 echo PUBLISH_TIMESTAMP=$PUBLISH_TIMESTAMP &gt;&gt; env.properties

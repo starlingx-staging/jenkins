@@ -4,6 +4,14 @@
   <description>copy logs to website</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>14</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
@@ -108,6 +116,8 @@ FROM=&quot;/var/lib/jenkins/jobs/${BUILD_NM}/builds/${BUILD_NUM}/log&quot;
 
 mkdir -p $PUBLISH_LOGS_BASE
 \cp $FROM $PUBLISH_LOGS_BASE/jenkins-${BUILD_NM}-${BUILD_NUM}.log
+~/bin/log2html  $PUBLISH_LOGS_BASE/jenkins-${BUILD_NM}-${BUILD_NUM}.log
+
     
 
 

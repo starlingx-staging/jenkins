@@ -24,7 +24,7 @@ docker image prune -f</command>
   </builders>
   <publishers>
     <hudson.tasks.Mailer plugin="mailer@1.22">
-      <recipients>scott.little@windriver.com, jason mckenna@windriver.com</recipients>
+      <recipients>scott.little@windriver.com, don.penney@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>

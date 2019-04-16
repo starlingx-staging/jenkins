@@ -90,7 +90,7 @@ fi</command>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
     <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.63">
-      <recipientList>scott.little@windriver.com, jason.mckenna@windriver.com</recipientList>
+      <recipientList>scott.little@windriver.com, don.penney@windriver.com</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
           <email>

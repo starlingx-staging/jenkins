@@ -81,6 +81,7 @@ echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 
 time $MY_REPO/build-tools/build-wheels/build-wheel-tarball.sh \
+    --attempts 5 \
     --os ${OS} \
     --os-version ${OS_VERSION} \
     --stream ${BUILD_STREAM}

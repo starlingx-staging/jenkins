@@ -46,6 +46,12 @@
           <defaultValue>https://127.0.0.1/</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_DISTRO_BASE</name>
+          <description>/export/mirror/starlingx/$BRANCH/$OS</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -62,6 +68,7 @@
 echo &quot;MY_REPO=$MY_REPO&quot;
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
 echo &quot;OS=$OS&quot;
+echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 
@@ -71,6 +78,7 @@ echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 [ -n &quot;$OS&quot; ]
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
+[ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
 
 MYUNAME=$(id -un)
 
@@ -78,7 +86,51 @@ DOCKER_CMD=&quot;docker exec --interactive --user=${MYUNAME} -e MYUNAME=${MYUNAM
 
 echo &apos;echo MY_REPO=$MY_REPO&apos; | $DOCKER_CMD
 
-echo &quot;build-helm-charts.sh --os ${OS} --verbose&quot; | $DOCKER_CMD</command>
+# echo &quot;build-helm-charts.sh --os ${OS} --image-file ${IMAGE_FILE} --label ${LABEL} --verbose&quot; | $DOCKER_CMD
+
+IMAGE_DIR=$(find $MY_WORKSPACE -maxdepth 2 -type d -name build-images)
+ALT_IMAGE_SRC_DIR=$PUBLISH_DISTRO_BASE
+HELM_SAVE_DIR=$MY_WORKSPACE/helm-charts
+mkdir -p $HELM_SAVE_DIR
+ALT_IMAGE_DIR=$MY_WORKSPACE/alt_image_lists
+mkdir -p ${ALT_IMAGE_DIR}
+cp -v $ALT_IMAGE_SRC_DIR/images-${OS}*.lst $ALT_IMAGE_DIR/
+if [ &quot;${IMAGE_DIR}&quot; == &quot;&quot; ]; then
+    IMAGE_DIR=$ALT_IMAGE_DIR
+fi
+
+BUILD_STREAMS=&quot;stable dev&quot;
+BUILD_TAGS=&quot;latest versioned&quot;
+
+if [ -d &quot;${IMAGE_DIR}&quot; ]; then
+  for BUILD_STREAM in $BUILD_STREAMS; do
+    for BUILD_TAG in $BUILD_TAGS; do
+      IMAGE_ARG=&quot;&quot;
+      LABEL=&quot;${OS}-${BUILD_STREAM}-${BUILD_TAG}&quot;
+
+      for IMAGE_FILE in $(find ${IMAGE_DIR} -maxdepth 1 -name &quot;images-${LABEL}.lst&quot;); do
+        IMAGE_ARG+=&quot;,$IMAGE_FILE&quot;
+      done
+      
+      if [  &quot;$IMAGE_ARG&quot; == &quot;&quot; ]; then
+        for IMAGE_FILE in $(find ${ALT_IMAGE_DIR} -maxdepth 1 -name &quot;images-${LABEL}.lst&quot;); do
+          IMAGE_ARG+=&quot;,$IMAGE_FILE&quot;
+        done
+      fi
+      
+      if [ &quot;$IMAGE_ARG&quot; != &quot;&quot; ]; then
+        IMAGE_ARG=&quot;$(echo $IMAGE_ARG | sed &apos;s/^,//&apos;)&quot;
+
+        echo &quot;Building chart for image file: ${IMAGE_ARG}&quot;
+        echo &quot;build-helm-charts.sh --os ${OS} --image-file ${IMAGE_ARG} --label ${LABEL} --verbose&quot; | $DOCKER_CMD
+        HELM_OUT_DIR=$(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm)
+        cp -v $HELM_OUT_DIR/stx/helm-charts*.tgz $HELM_SAVE_DIR
+      fi
+    done
+  done
+fi
+
+cp -v $HELM_SAVE_DIR/helm-charts*.tgz $HELM_OUT_DIR/stx/</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
@@ -87,7 +139,7 @@ echo &quot;build-helm-charts.sh --os ${OS} --verbose&quot; | $DOCKER_CMD</comman
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.63">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>

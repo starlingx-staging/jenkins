@@ -99,7 +99,7 @@ for ym in $((date $DATE_FORMAT; date -d &apos;yesterday&apos; $DATE_FORMAT) | so
 
         # expect to find two pieces of info from the message, load url and test status
         url=$(grep &apos;http://mirror.starlingx.cengn.ca/mirror/starlingx&apos; $RECORD | grep -v latest_build | grep -v &apos;^[&gt;[]&apos; | sed &apos;s/^.*&lt;//&apos; | sed &apos;s/&gt;.*$//&apos; | head -n 1 | sed &apos;s#iso/$##&apos; | sed &apos;s#outputs/$##&apos;)
-        status=$(grep &apos;^Status:&apos; $RECORD | grep -v &apos;^[&gt;]&apos; | sed &apos;s/^Status: //&apos; | head -n 1)
+        status=$(grep &apos;^Status: [YRG]&apos; $RECORD | grep -v &apos;^[&gt;]&apos; | sed &apos;s/^Status: //&apos; | head -n 1)
 
         if [ &quot;$status&quot; == &quot;&quot; ] || [ &quot;$url&quot; == &quot;&quot; ]; then
            continue

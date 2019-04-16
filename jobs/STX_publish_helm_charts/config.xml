@@ -1,7 +1,7 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Build the installer&apos;s kernel and ramdisk</description>
+  <description>Publish build products to http://mirror.starlingx.cengn.ca</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
@@ -11,9 +11,21 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>DOCKER_BUILD_ID</name>
+          <name>PUBLISH_DISTRO_BASE</name>
           <description></description>
-          <defaultValue>builder</defaultValue>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_OUTPUTS_BASE</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_INPUTS_BASE</name>
+          <description></description>
+          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -25,6 +37,18 @@
         <hudson.model.StringParameterDefinition>
           <name>MY_WORKSPACE</name>
           <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OS</name>
+          <description></description>
+          <defaultValue>centos</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TIMESTAMP</name>
+          <description></description>
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -41,14 +65,8 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>OS</name>
-          <description></description>
-          <defaultValue>centos</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
           <name>MASTER_JOB_NAME</name>
-          <description></description>
+          <description>Top of tree build job name</description>
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -64,50 +82,47 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>echo &quot;DOCKER_BUILD_ID=$DOCKER_BUILD_ID&quot;
+      <command>
 echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
 echo &quot;OS=$OS&quot;
-echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
+echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
+echo &quot;PUBLISH_INPUTS_BASE=$PUBLISH_INPUTS_BASE&quot;
+echo &quot;PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE&quot;
+echo &quot;TIMESTAMP=$TIMESTAMP&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
+echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
 
-[ -n &quot;$DOCKER_BUILD_ID&quot; ]
 [ -n &quot;$MY_REPO_ROOT&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
 [ -n &quot;$OS&quot; ]
-[ -n &quot;$MASTER_JOB_NAME&quot; ]
+[ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
+[ -n &quot;$PUBLISH_INPUTS_BASE&quot; ]
+[ -n &quot;$PUBLISH_OUTPUTS_BASE&quot; ]
+[ -n &quot;$TIMESTAMP&quot; ]
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
+[ -n &quot;$MASTER_JOB_NAME&quot; ]
 
-export DOCKER_BUILD_WORKDIR=$MY_REPO_ROOT/stx-tools
-MYUNAME=$(id -un)
-PXE_INSTALLER_OUT_DIR=&quot;$MY_WORKSPACE/pxe-network-installer/output&quot;
-STX_INSTALLER_DIR=&quot;$DOCKER_BUILD_WORKDIR/centos-mirror-tools/output/stx-installer&quot;
+export DISTRO=&quot;$OS&quot;
 
 
-DOCKER_CMD=&quot;docker exec --interactive --user=${MYUNAME} -e MYUNAME=${MYUNAME} ${DOCKER_BUILD_ID} /bin/bash -i -&quot;
+mkdir -p $PUBLISH_OUTPUTS_BASE/helm-charts
+mkdir -p $PUBLISH_LOGS_BASE
 
-echo &apos;$MY_REPO_ROOT_DIR/stx-tools/toCOPY/generate-cgcs-centos-repo.sh /import/mirrors/CentOS/stx-r1/CentOS/pike/&apos; | $DOCKER_CMD
-    
-echo &apos;$MY_REPO_ROOT_DIR/stx-tools/toCOPY/populate_downloads.sh /import/mirrors/CentOS/stx-r1/CentOS/pike/&apos; | $DOCKER_CMD
 
-echo &apos;build-pkgs --installer&apos; | $DOCKER_CMD
+for d in $(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm); do
+    \cp -v $d/stx/helm-charts-manifest*.tgz $PUBLISH_OUTPUTS_BASE/helm-charts
+done
 
-echo &apos;update-pxe-network-installer&apos; | $DOCKER_CMD
 
-cd $DOCKER_BUILD_WORKDIR
-if [ ! -d $TIS_INSTALLER_DIR ]; then
-    mkdir -p $TIS_INSTALLER_DIR
-fi
 
-PXE_INSTALLER_OUT_DIR=&quot;$MY_WORKSPACE/pxe-network-installer/output&quot;
 
-sudo chown -R $USER $PXE_INSTALLER_OUT_DIR
-    
-cp $PXE_INSTALLER_OUT_DIR/new-initrd.img $STX_INSTALLER_DIR/initrd.img
-cp $PXE_INSTALLER_OUT_DIR/new-vmlinuz $STX_INSTALLER_DIR/vmlinuz
-cp $PXE_INSTALLER_OUT_DIR/new-squashfs.img $STX_INSTALLER_DIR/squashfs.img
+
+
+
+
 </command>
     </hudson.tasks.Shell>
   </builders>
@@ -155,15 +170,11 @@ cp $PXE_INSTALLER_OUT_DIR/new-squashfs.img $STX_INSTALLER_DIR/squashfs.img
             <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
               <properties>BUILD_NM=$JOB_NAME
 BUILD_NUM=$BUILD_NUMBER
-PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE
-MY_REPO_ROOT=$MY_REPO_ROOT
-MY_WORKSPACE=$MY_WORKSPACE
-OS=$OS
-MASTER_JOB_NAME=$MASTER_JOB_NAME</properties>
+PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
               <textParamValueOnNewLine>false</textParamValueOnNewLine>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>copy_logs,copy_failed_package_logs</projects>
+          <projects>copy_logs</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>

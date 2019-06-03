@@ -4,7 +4,7 @@
   <description>Publish build products to http://mirror.starlingx.cengn.ca</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -133,45 +133,61 @@ if [ -f &quot;$ENV_FILE&quot; ]; then
     \cp -v $ENV_FILE $PUBLISH_LOGS_BASE/
 fi
 
+# Publish iso
 cp -L -v $MY_WORKSPACE/export/bootimage.iso $PUBLISH_OUTPUTS_BASE/iso/
 cp -L -v $MY_WORKSPACE/export/bootimage.sig $PUBLISH_OUTPUTS_BASE/iso/
 
+# Publish output rpms and src.rpms
 for LAYER in $(find $MY_WORKSPACE -maxdepth 2 -type d -name rpmbuild -exec dirname {} \; | xargs --max-lines=1 --no-run-if-empty basename); do
     \cp -r -L -v $MY_WORKSPACE/$LAYER/rpmbuild/RPMS/./ $PUBLISH_OUTPUTS_BASE/RPMS/$LAYER/
-    \cp -r -L -v $MY_WORKSPACE/$LAYER/rpmbuild/SRPMS/./ $PUBLISH_OUTPUTS_BASE/SRPMS/$LAYER/
     (
     cd $PUBLISH_OUTPUTS_BASE/RPMS/$LAYER
     \rm -f *.src.rpm
     createrepo_c --update .
     )
+    
+    \cp -r -L -v $MY_WORKSPACE/$LAYER/rpmbuild/SRPMS/./ $PUBLISH_OUTPUTS_BASE/SRPMS/$LAYER/
+    (
+    cd $PUBLISH_OUTPUTS_BASE/SRPMS/$LAYER
+    createrepo_c --update .
+    )
 done
 
+# Publish installer
 \cp -L -v $MY_REPO_ROOT/stx-tools/centos-mirror-tools/output/stx-installer/* $PUBLISH_OUTPUTS_BASE/installer/
 
+# Publish helm charts
 for d in $(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm); do
-    \cp -v $d/stx/helm-charts-manifest*.tgz $PUBLISH_OUTPUTS_BASE/helm-charts
+    \cp -v $d/stx/*.tgz $PUBLISH_OUTPUTS_BASE/helm-charts
 done
 
+# Publish context
 if [ -f $MY_WORKSPACE/CONTEXT ]; then
    \cp -v $MY_WORKSPACE/CONTEXT $PUBLISH_OUTPUTS_BASE/CONTEXT.sh
 fi
 
+# Publish change log
 if [ -f $MY_WORKSPACE/CHANGELOG ]; then
    \cp -v $MY_WORKSPACE/CHANGELOG $PUBLISH_OUTPUTS_BASE/CHANGELOG.txt
 fi
 
+# Publish build info
 if [ -f $MY_WORKSPACE/BUILD ]; then
    \cp -v $MY_WORKSPACE/BUILD $PUBLISH_OUTPUTS_BASE/BUILD_INFO.txt
 fi
 
+# Copy build-pkg logs
 for LAYER in $(find $MY_WORKSPACE -maxdepth 2 -type d -name rpmbuild -exec dirname {} \; | xargs --max-lines=1 --no-run-if-empty basename); do
-    for f in $(find $MY_WORKSPACE/$LAYER -maxdepth 1 -type rf -name &apos;*.log&apos;); do
+    for f in $(find $MY_WORKSPACE/$LAYER -maxdepth 1 -type f -name &apos;*.log&apos;); do
         mkdir -p $PUBLISH_LOGS_BASE/std/
         \cp -v $f $PUBLISH_LOGS_BASE/std/
     done
+    
     if [ -f $MY_WORKSPACE/build-$LAYER.log ]; then
         \cp -v $MY_WORKSPACE/build-$LAYER.log $PUBLISH_LOGS_BASE/
     fi
+    
+    # Add failure logs of individual packages
     for d in $(find $MY_WORKSPACE/$LAYER/results/ -type f -name &apos;fail&apos; -exec dirname {} \; ); do
         b=$(basename $d)
        mkdir -p $PUBLISH_LOGS_BASE/std/failed-packages/$b
@@ -179,36 +195,50 @@ for LAYER in $(find $MY_WORKSPACE -maxdepth 2 -type d -name rpmbuild -exec dirna
     done
 done
 
+# Copy downloads directory
 cd $MY_REPO_ROOT/cgcs-root/stx/downloads
 find . -type d -exec mkdir -p $PUBLISH_INPUTS_BASE/downloads/{} \;
 find . -type f -exec cp -v {} $PUBLISH_INPUTS_BASE/downloads/{} \;
 for l in $(find . -type l); do
     d=$(dirname $l)
     f=$(readlink $l | sed &quot;s#^/import/mirrors/CentOS/#${MY_REPO_ROOT}/stx-tools/centos-mirror-tools/output/#&quot;)
-    \cp -v $f $PUBLISH_INPUTS_BASE/downloads/$d
+
+    if [ -f &quot;${f}&quot; ]; then
+        \cp -v $f $PUBLISH_INPUTS_BASE/downloads/$d
+    fi
 done
 
+# Publish input rpms
 cd $MY_REPO_ROOT/cgcs-root/cgcs-centos-repo/Binary
 find . -type d -exec mkdir -p $PUBLISH_INPUTS_BASE/RPMS/{} \;
 find . -type f -exec cp -v {} $PUBLISH_INPUTS_BASE/RPMS/{} \;
 for l in $(find . -type l); do
     d=$(dirname $l)
     f=$(readlink $l | sed &quot;s#^/import/mirrors/CentOS/#${MY_REPO_ROOT}/stx-tools/centos-mirror-tools/output/#&quot;)
-    \cp -v $f $PUBLISH_INPUTS_BASE/RPMS/$d
+
+    if [ -f &quot;${f}&quot; ]; then
+        \cp -v $f $PUBLISH_INPUTS_BASE/RPMS/$d
+    fi
 done
 
+# Publish input src.rpms
 cd $MY_REPO_ROOT/cgcs-root/cgcs-centos-repo/Source
 find . -type d -exec mkdir -p $PUBLISH_INPUTS_BASE/SRPMS/{} \;
 find . -type f -exec cp -v {} $PUBLISH_INPUTS_BASE/SRPMS/{} \;
 for l in $(find . -type l); do
     d=$(dirname $l)
     f=$(readlink $l | sed &quot;s#^/import/mirrors/CentOS/#${MY_REPO_ROOT}/stx-tools/centos-mirror-tools/output/#&quot;)
-    \cp -v $f $PUBLISH_INPUTS_BASE/SRPMS/$d
+
+    if [ -f &quot;${f}&quot; ]; then
+        \cp -v $f $PUBLISH_INPUTS_BASE/SRPMS/$d
+    fi
 done
 
+# set latest_build&apos; symlink
 if [ -L $PUBLISH_DISTRO_BASE/latest_build ]; then
     \rm -f $PUBLISH_DISTRO_BASE/latest_build 
 fi
+
 ln -s $TIMESTAMP $PUBLISH_DISTRO_BASE/latest_build
 
 
@@ -216,12 +246,12 @@ ln -s $TIMESTAMP $PUBLISH_DISTRO_BASE/latest_build
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.63">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -272,6 +302,6 @@ PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
   </buildWrappers>
 </project>

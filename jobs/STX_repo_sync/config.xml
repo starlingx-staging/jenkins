@@ -4,7 +4,7 @@
   <description>Download StarlingX software</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -58,21 +58,32 @@ echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 
 
-export BUILD_REPO_URL=https://git.starlingx.io/stx-manifest.git
+export BUILD_REPO_URL=https://opendev.org/starlingx/manifest
 
 mkdir -p $MY_REPO_ROOT
 cd $MY_REPO_ROOT
+
+if [ -d $MY_REPO_ROOT/stx/downloads ]; then
+    \rm -rf $MY_REPO_ROOT/stx/downloads 
+fi
+
+if [ -d $MY_REPO_ROOT/cgcs-root/cgcs-centos-repo ]; then
+    \rm -rf $MY_REPO_ROOT/cgcs-root/cgcs-centos-repo 
+fi
+
 repo init -u ${BUILD_REPO_URL} -b ${BRANCH}
-repo sync --force-sync --optimized-fetch -j$(nproc)</command>
+repo sync --force-sync --optimized-fetch -j$(nproc)
+
+</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.63">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -123,6 +134,6 @@ PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
   </buildWrappers>
 </project>

@@ -4,7 +4,7 @@
   <description>Build the helm charts</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -122,24 +122,25 @@ if [ -d &quot;${IMAGE_DIR}&quot; ]; then
         IMAGE_ARG=&quot;$(echo $IMAGE_ARG | sed &apos;s/^,//&apos;)&quot;
 
         echo &quot;Building chart for image file: ${IMAGE_ARG}&quot;
-        echo &quot;build-helm-charts.sh --os ${OS} --image-file ${IMAGE_ARG} --label ${LABEL} --verbose&quot; | $DOCKER_CMD
+        echo &quot;build-helm-charts.sh --os ${OS} --image-record ${IMAGE_ARG} --label ${LABEL} --verbose&quot; | $DOCKER_CMD
         HELM_OUT_DIR=$(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm)
-        cp -v $HELM_OUT_DIR/stx/helm-charts*.tgz $HELM_SAVE_DIR
+        cp -v $HELM_OUT_DIR/stx/*.tgz $HELM_SAVE_DIR
+        rm -f $HELM_OUT_DIR/stx/*.tgz
       fi
     done
   done
 fi
 
-cp -v $HELM_SAVE_DIR/helm-charts*.tgz $HELM_OUT_DIR/stx/</command>
+cp -v $HELM_SAVE_DIR/*.tgz $HELM_OUT_DIR/stx/</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -190,6 +191,6 @@ PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
   </buildWrappers>
 </project>

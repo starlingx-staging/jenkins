@@ -4,7 +4,7 @@
   <description>Publish build products to http://mirror.starlingx.cengn.ca</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -113,7 +113,7 @@ mkdir -p $PUBLISH_LOGS_BASE
 
 
 for d in $(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm); do
-    \cp -v $d/stx/helm-charts-manifest*.tgz $PUBLISH_OUTPUTS_BASE/helm-charts
+    \cp -v $d/stx/*.tgz $PUBLISH_OUTPUTS_BASE/helm-charts
 done
 
 
@@ -127,12 +127,12 @@ done
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -183,6 +183,6 @@ PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
   </buildWrappers>
 </project>

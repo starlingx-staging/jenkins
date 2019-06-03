@@ -4,7 +4,7 @@
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -98,8 +98,11 @@ for ym in $((date $DATE_FORMAT; date -d &apos;yesterday&apos; $DATE_FORMAT) | so
         sed -n -e  &quot;/^$pattern$/,/^Subject:/{ /^$pattern$/d; /^Subject:/d; p}&quot; $ARCHIVE &gt; $RECORD
 
         # expect to find two pieces of info from the message, load url and test status
-        url=$(grep &apos;http://mirror.starlingx.cengn.ca/mirror/starlingx&apos; $RECORD | grep -v latest_build | grep -v &apos;^[&gt;[]&apos; | sed &apos;s/^.*&lt;//&apos; | sed &apos;s/&gt;.*$//&apos; | head -n 1 | sed &apos;s#iso/$##&apos; | sed &apos;s#outputs/$##&apos;)
-        status=$(grep &apos;^Status: [YRG]&apos; $RECORD | grep -v &apos;^[&gt;]&apos; | sed &apos;s/^Status: //&apos; | head -n 1)
+        url=$(grep &apos;http://mirror.starlingx.cengn.ca/mirror/starlingx&apos; $RECORD | grep -v latest_build | grep -v helm-charts | grep -v &apos;^[&gt;[]&apos; | sed &apos;s/^.*&lt;//&apos; | sed &apos;s/&gt;.*$//&apos; | head -n 1 | sed &apos;s#iso/$##&apos; | sed &apos;s#outputs/$##&apos;)
+        status=$(grep &apos;^Status: [YRGyrg]&apos;  $RECORD | grep -v &apos;^[&gt;]&apos; | sed &apos;s/^Status: //&apos; | head -n 1)
+        
+        # convert to uppercase
+        status=${status^^}
 
         if [ &quot;$status&quot; == &quot;&quot; ] || [ &quot;$url&quot; == &quot;&quot; ]; then
            continue
@@ -123,7 +126,7 @@ done
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>

@@ -39,7 +39,7 @@
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>true</disabled>
+  <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers/>
@@ -70,7 +70,7 @@ false</command>
         </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
       </configuredTriggers>
       <contentType>default</contentType>
-      <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
+      <defaultSubject>[$P1] $DEFAULT_SUBJECT</defaultSubject>
       <defaultContent>$DEFAULT_CONTENT</defaultContent>
       <attachmentsPattern></attachmentsPattern>
       <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>

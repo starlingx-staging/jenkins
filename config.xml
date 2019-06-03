@@ -1,7 +1,7 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <hudson>
   <disabledAdministrativeMonitors/>
-  <version>2.168</version>
+  <version>2.175</version>
   <installStateName>RUNNING</installStateName>
   <numExecutors>6</numExecutors>
   <mode>NORMAL</mode>
@@ -67,6 +67,30 @@
         <comparator class="hudson.util.CaseInsensitiveComparator"/>
         <string>mirror_download_sync</string>
         <string>mirror_repo_sync</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>Maintenance_Jobs</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <string>delete_old_loads_master_feature</string>
+        <string>docker_prune</string>
+        <string>STX_sanity_result_from_discuss_mailing_list</string>
       </jobNames>
       <jobFilters/>
       <columns>

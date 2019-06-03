@@ -36,11 +36,11 @@ users/
 workspace/
 com*xml
 env*xml
+org.jenkinsci.plugins*xml
 github-plugin-configuration.xml
 hudson*xml
 jenkins*xml
 nodeMonitors.xml
-org*xml
 queue.xml
 scriptApproval.xml
 jobs/delay-test-bounce/

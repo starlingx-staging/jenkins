@@ -122,7 +122,7 @@ if [ -d &quot;${IMAGE_DIR}&quot; ]; then
         IMAGE_ARG=&quot;$(echo $IMAGE_ARG | sed &apos;s/^,//&apos;)&quot;
 
         echo &quot;Building chart for image file: ${IMAGE_ARG}&quot;
-        echo &quot;build-helm-charts.sh --os ${OS} --image-record ${IMAGE_ARG} --label ${LABEL} --verbose&quot; | $DOCKER_CMD
+        echo &quot;build-helm-charts.sh --os ${OS} --image-record ${IMAGE_ARG} --label ${LABEL} --app stx-openstack --rpm stx-openstack-helm --verbose&quot; | $DOCKER_CMD
         HELM_OUT_DIR=$(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm)
         cp -v $HELM_OUT_DIR/stx/*.tgz $HELM_SAVE_DIR
         rm -f $HELM_OUT_DIR/stx/*.tgz

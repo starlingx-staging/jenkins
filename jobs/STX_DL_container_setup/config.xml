@@ -61,12 +61,15 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>echo &quot;DOCKER_DL_ID=$DOCKER_DL_ID&quot;
+      <command>DOCKER_BUILD_RETRIES=3
+
+echo &quot;DOCKER_DL_ID=$DOCKER_DL_ID&quot;
 echo &quot;DOCKER_DL_TAG=$DOCKER_DL_TAG&quot;
 echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
+echo &quot;DOCKER_BUILD_RETRIES=$DOCKER_BUILD_RETRIES&quot;
 
 [ -n &quot;$DOCKER_DL_ID&quot; ]
 [ -n &quot;$DOCKER_DL_TAG&quot; ]
@@ -74,9 +77,47 @@ echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 [ -n &quot;$MY_WORKSPACE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
+[ -n &quot;$DOCKER_BUILD_RETRIES&quot; ]
 
 export DOCKER_DL_IMAGE=$USER:$DOCKER_DL_TAG
 export DOCKER_DL_WORKDIR=$MY_REPO_ROOT/stx-tools/
+
+#
+# Function to call a command, with support for retries
+#
+function with_retries {
+    local max_attempts=$1
+    local cmd=$2
+
+    # Pop the first two arguments off the list,
+    # so we can pass additional args to the command safely
+    shift 2
+
+    local -i attempt=0
+
+    while :; do
+        # let -i attempt++
+        attempt=$((attempt+1))
+
+        echo &quot;Running: ${cmd} $@&quot;
+        local rc=0
+        ${cmd} &quot;$@&quot; || rc=1
+        if [ $rc -eq 0 ]; then
+            return 0
+        fi
+
+        echo &quot;Command (${cmd}) failed, attempt ${attempt} of ${max_attempts}.&quot;
+        if [ ${attempt} -lt ${max_attempts} ]; then
+            local delay=5
+            echo &quot;Waiting ${delay} seconds before retrying...&quot;
+            sleep ${delay}
+            continue
+        else
+            echo &quot;Max command attempts reached. Aborting...&quot;
+            return 1
+        fi
+    done
+}
 
 cd $DOCKER_DL_WORKDIR
 
@@ -84,7 +125,7 @@ cd $DOCKER_DL_WORKDIR
 DOCKERFILE_ORIG=Dockerfile
 DOCKERFILE=../Dockerfile
 cat ${DOCKERFILE_ORIG} | sed &apos;/ENV container=docker/aRUN echo retries=20 &gt;&gt; /etc/yum.conf\nRUN echo timeout=60 &gt;&gt; /etc/yum.conf\nRUN echo http_caching=packages &gt;&gt; /etc/yum.conf&apos; &gt; ${DOCKERFILE}
-docker build --tag $DOCKER_DL_IMAGE --file ${DOCKERFILE} .
+with_retries $DOCKER_BUILD_RETRIES docker build --tag $DOCKER_DL_IMAGE --file ${DOCKERFILE} .
 
 docker run -itd --rm --name $DOCKER_DL_ID --volume $(readlink -f /localdisk):/localdisk $DOCKER_DL_IMAGE</command>
     </hudson.tasks.Shell>

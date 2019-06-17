@@ -4,7 +4,7 @@
   <description>Build &apos;master&apos; branch nightly</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -125,7 +125,7 @@
               <onlyExactRuns>false</onlyExactRuns>
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
           </configs>
-          <projects>STX_DL_container_setup</projects>
+          <projects>STX_BUILD_container_setup</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -166,46 +166,6 @@
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
           </configs>
           <projects>STX_download_mirror</projects>
-          <condition>ALWAYS</condition>
-          <triggerWithNoParameters>false</triggerWithNoParameters>
-          <triggerFromChildProjects>false</triggerFromChildProjects>
-          <block>
-            <buildStepFailureThreshold>
-              <name>FAILURE</name>
-              <ordinal>2</ordinal>
-              <color>RED</color>
-              <completeBuild>true</completeBuild>
-            </buildStepFailureThreshold>
-            <unstableThreshold>
-              <name>UNSTABLE</name>
-              <ordinal>1</ordinal>
-              <color>YELLOW</color>
-              <completeBuild>true</completeBuild>
-            </unstableThreshold>
-            <failureThreshold>
-              <name>FAILURE</name>
-              <ordinal>2</ordinal>
-              <color>RED</color>
-              <completeBuild>true</completeBuild>
-            </failureThreshold>
-          </block>
-          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
-        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
-      </configs>
-    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
-      <configs>
-        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
-          <configs>
-            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
-              <propertiesFile>env.properties</propertiesFile>
-              <failTriggerOnMissing>false</failTriggerOnMissing>
-              <textParamValueOnNewLine>false</textParamValueOnNewLine>
-              <useMatrixChild>false</useMatrixChild>
-              <onlyExactRuns>false</onlyExactRuns>
-            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
-          </configs>
-          <projects>STX_BUILD_container_setup</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -682,12 +642,12 @@ OS_VERSION=7.5.1804</properties>
     </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -730,7 +690,7 @@ OS_VERSION=7.5.1804</properties>
               <onlyExactRuns>false</onlyExactRuns>
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
           </configs>
-          <projects>STX_delete_root_owned,STX_DL_container_teardown,STX_BUILD_container_teardown,copy_logs</projects>
+          <projects>STX_delete_root_owned,STX_BUILD_container_teardown,copy_logs</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -739,7 +699,7 @@ OS_VERSION=7.5.1804</properties>
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
     <EnvInjectBuildWrapper plugin="envinject@2.1.6">
       <info>
         <scriptContent>export BRANCH=master
@@ -812,9 +772,7 @@ if [ &quot;$OS&quot; == &quot;centos&quot; ] &amp;&amp; [ -f $MY_REPO_ROOT/stx-t
 fi
 
 export DOCKER_BUILD_ID=$USER-$PROJECT-$TIMESTAMP-builder
-export DOCKER_DL_ID=$USER-$PROJECT-$TIMESTAMP-downloader
 export DOCKER_BUILD_TAG=$PROJECT-$TIMESTAMP-builder-image
-export DOCKER_DL_TAG=$PROJECT-$TIMESTAMP-downloader-image
 
 export PUBLISH_DISTRO_BASE=/export/mirror/starlingx/$PUBLISH_BRANCH/$DISTRO
 export PUBLISH_BUILD_BASE=$PUBLISH_DISTRO_BASE/$PUBLISH_TIMESTAMP
@@ -841,9 +799,7 @@ echo MY_REPO_ROOT=$MY_REPO_ROOT &gt;&gt; env.properties
 echo MY_REPO=$MY_REPO &gt;&gt; env.properties
 echo MY_WORKSPACE=$MY_WORKSPACE &gt;&gt; env.properties
 echo DOCKER_BUILD_ID=$DOCKER_BUILD_ID &gt;&gt; env.properties
-echo DOCKER_DL_ID=$DOCKER_DL_ID &gt;&gt; env.properties
 echo DOCKER_BUILD_TAG=$DOCKER_BUILD_TAG &gt;&gt; env.properties
-echo DOCKER_DL_TAG=$DOCKER_DL_TAG &gt;&gt; env.properties
 echo PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE &gt;&gt; env.properties
 echo PUBLISH_BUILD_BASE=$PUBLISH_BUILD_BASE &gt;&gt; env.properties
 echo PUBLISH_INPUTS_BASE=$PUBLISH_INPUTS_BASE &gt;&gt; env.properties
@@ -852,7 +808,7 @@ echo PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE &gt;&gt; env.properties
 echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt;&gt; env.properties
 echo BUILD_NM=$JOB_NAME &gt;&gt; env.properties
 echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties</scriptContent>
-        <secureGroovyScript plugin="script-security@1.55">
+        <secureGroovyScript plugin="script-security@1.58">
           <script></script>
           <sandbox>false</sandbox>
         </secureGroovyScript>

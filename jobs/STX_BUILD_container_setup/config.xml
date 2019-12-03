@@ -89,6 +89,7 @@ echo &quot;DOCKER_BUILD_RETRIES=$DOCKER_BUILD_RETRIES&quot;
 
 export DOCKER_BUILD_IMAGE=$USER:$DOCKER_BUILD_TAG
 export DOCKER_BUILD_WORKDIR=$MY_REPO_ROOT/stx-tools
+export OS_BINARY_DIR=$DOCKER_BUILD_WORKDIR/centos-mirror-tools/output/stx-r1/CentOS/pike/Binary
 export STX_INSTALLER_DIR=&quot;$DOCKER_BUILD_WORKDIR/centos-mirror-tools/output/stx-installer&quot;
 MYUID=$(id -u)
 MYUNAME=$(id -un)
@@ -140,11 +141,11 @@ PROJECT=$PROJECT
 HOST_PREFIX=&quot;&quot;
 EOF
 
-if [ ! -d centos-mirror-tools/output/stx-installer ]; then
+if [ ! -d centos-mirror-tools/output/stx-installer ] &amp;&amp; [ -f $OS_BINARY_DIR/images/pxeboot/initrd.img ]; then
     mkdir -p centos-mirror-tools/output/stx-installer
-    cp centos-mirror-tools/output/stx-r1/CentOS/pike/Binary/images/pxeboot/initrd.img $STX_INSTALLER_DIR/initrd.img
-    cp centos-mirror-tools/output/stx-r1/CentOS/pike/Binary/images/pxeboot/vmlinuz $STX_INSTALLER_DIR/vmlinuz
-    cp centos-mirror-tools/output/stx-r1/CentOS/pike/Binary/LiveOS/squashfs.img $STX_INSTALLER_DIR/squashfs.img
+    cp $OS_BINARY_DIR/images/pxeboot/initrd.img $STX_INSTALLER_DIR/initrd.img
+    cp $OS_BINARY_DIR/images/pxeboot/vmlinuz $STX_INSTALLER_DIR/vmlinuz
+    cp $OS_BINARY_DIR/LiveOS/squashfs.img $STX_INSTALLER_DIR/squashfs.img
 fi
 
 # docker build --build-arg MYUID=${MYUID} \

@@ -59,6 +59,8 @@ echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 [ -d &quot;$MY_REPO_ROOT&quot; ]
 
 export MIRROR_TOOLS_DIR=$MY_REPO_ROOT/stx-tools/centos-mirror-tools
+export DOCKER_BUILD_WORKDIR=$MY_REPO_ROOT/stx-tools
+export STX_INSTALLER_DIR=&quot;$DOCKER_BUILD_WORKDIR/centos-mirror-tools/output/stx-installer&quot;
 
 docker exec -i $DOCKER_BUILD_ID /bin/bash -c &quot;cd $MIRROR_TOOLS_DIR; ./download_mirror.sh&quot;
 docker exec -i $DOCKER_BUILD_ID /bin/bash -c &quot;cd $MIRROR_TOOLS_DIR; chown -R $(id -u) output logs&quot;
@@ -69,7 +71,15 @@ ERRORS=$(
    cat $MIRROR_TOOLS_DIR/logs/*missing*.log
    grep -v &apos;already_there_srpm:&apos;  $MIRROR_TOOLS_DIR/logs/*failmoved*.log
    ) | wc -l )
-[ $ERRORS -eq 0 ]</command>
+[ $ERRORS -eq 0 ]
+
+cd $DOCKER_BUILD_WORKDIR
+if [ ! -d centos-mirror-tools/output/stx-installer ]; then
+     mkdir -p centos-mirror-tools/output/stx-installer
+     cp centos-mirror-tools/output/stx-r1/CentOS/pike/Binary/images/pxeboot/initrd.img $STX_INSTALLER_DIR/initrd.img
+     cp centos-mirror-tools/output/stx-r1/CentOS/pike/Binary/images/pxeboot/vmlinuz $STX_INSTALLER_DIR/vmlinuz
+     cp centos-mirror-tools/output/stx-r1/CentOS/pike/Binary/LiveOS/squashfs.img $STX_INSTALLER_DIR/squashfs.img
+fi</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>

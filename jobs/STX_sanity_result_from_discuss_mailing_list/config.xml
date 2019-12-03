@@ -16,7 +16,10 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <hudson.triggers.TimerTrigger>
-      <spec>0 1 * * *</spec>
+      <spec>0 1 * * *
+0 7 * * *
+0 13 * * *
+0 19 * * *</spec>
     </hudson.triggers.TimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
@@ -88,6 +91,7 @@ for ym in $((date $DATE_FORMAT; date -d &apos;yesterday&apos; $DATE_FORMAT) | so
     # Look for messages with a subject suggesting a sanity test result
     grep &quot;^Subject: \[Starlingx-discuss\] FW: Sanity Test&quot; $ARCHIVE &gt; $HEADERS || true
     grep &quot;^Subject: \[Starlingx-discuss\] Sanity Test&quot; $ARCHIVE &gt;&gt; $HEADERS || true
+    grep &quot;^Subject: \[Starlingx-discuss\]  Sanity Test&quot; $ARCHIVE &gt;&gt; $HEADERS || true
     grep &quot;^Subject: \[Starlingx-discuss\][ ]*\[Containers\][ ]*Sanity Test&quot; $ARCHIVE &gt;&gt; $HEADERS || true
     cat $HEADERS | sort --unique | \
     while read -r line; do

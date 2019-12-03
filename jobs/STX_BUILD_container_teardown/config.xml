@@ -68,9 +68,7 @@ echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 
 export DOCKER_BUILD_IMAGE=$USER:$DOCKER_BUILD_TAG
-export DOCKER_BUILD_WORKDIR=$MY_REPO_ROOT/stx-tools
 
-cd $DOCKER_BUILD_WORKDIR
 if docker ps -a | grep -q $DOCKER_BUILD_ID; then
    docker stop $DOCKER_BUILD_ID
    sleep 60

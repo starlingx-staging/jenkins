@@ -4,7 +4,7 @@
   <description>Publish build products associated with STX docker images</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -127,19 +127,47 @@ if [ -f &quot;${LATEST_LIST}&quot; ]; then
     cp -v &quot;${LATEST_LIST}&quot; ${PUBLISH_DISTRO_BASE}/
 fi
 
+if [ &quot;${OS}&quot; == &quot;centos&quot; ]; then
+    DISTROLESS_OS=&quot;distroless&quot;
+    for f in $(find ${SRC_IMAGES_DIR}/ -name &quot;*${DISTROLESS_OS}-${BUILD_STREAM}.rpmlst&quot;); do
+        cp -v $f ${PUBLISH_IMAGES_BASE}/
+    done
+    for f in $(find ${SRC_IMAGES_DIR}/ -name &quot;*${DISTROLESS_OS}-${BUILD_STREAM}.piplst&quot;); do
+        cp -v $f ${PUBLISH_IMAGES_BASE}/
+    done
+    for f in $(find ${SRC_IMAGES_DIR}/ -name &quot;*${DISTROLESS_OS}-${BUILD_STREAM}.log&quot;); do
+        cp -v $f ${PUBLISH_IMAGE_LOGS_BASE}/
+    done
+    
+    
+    VER_LIST=&quot;${SRC_IMAGES_DIR}/images-${DISTROLESS_OS}-${BUILD_STREAM}-versioned.lst&quot;
+    LATEST_LIST=&quot;${SRC_IMAGES_DIR}/images-${DISTROLESS_OS}-${BUILD_STREAM}-latest.lst&quot;
+
+    if [ -f &quot;${VER_LIST}&quot; ]; then
+        cp -v &quot;${VER_LIST}&quot; ${PUBLISH_IMAGES_BASE}/
+        cp -v &quot;${VER_LIST}&quot; ${PUBLISH_DISTRO_BASE}/
+    fi
+
+    if [ -f &quot;${LATEST_LIST}&quot; ]; then
+        cp -v &quot;${LATEST_LIST}&quot; ${PUBLISH_DISTRO_BASE}/
+    fi
+fi
+
 if [ -L $PUBLISH_DISTRO_BASE/latest_docker_image_build ]; then
     \rm -f $PUBLISH_DISTRO_BASE/latest_docker_image_build 
 fi
-ln -s $TIMESTAMP $PUBLISH_DISTRO_BASE/latest_docker_image_build</command>
+ln -s $TIMESTAMP $PUBLISH_DISTRO_BASE/latest_docker_image_build
+
+</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -190,6 +218,6 @@ PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
   </buildWrappers>
 </project>

@@ -4,7 +4,7 @@
   <description>Build docker images, and wheel tarball</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -497,14 +497,94 @@ RETAG_IMAGE_LIST=stx-fm-rest-api stx-libvirt stx-mariadb</properties>
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_build_remote_cli</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_publish_remote_cli</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -561,7 +641,7 @@ BUILD_NUM=$BUILD_NUMBER</properties>
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
     <EnvInjectBuildWrapper plugin="envinject@2.1.6">
       <info>
         <scriptContent>export HOST=build.starlingx.cengn.ca
@@ -586,6 +666,12 @@ if [ $MUNGED_BRANCH == &quot;master&quot; ]; then
    BASE_LATEST_TAG=&quot;${PREFIX}-${BUILD_STREAM}-latest&quot;
    FLOCK_VERSION=&quot;${PREFIX}-${OS}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
 elif [[ ${MUNGED_BRANCH} == f-* ]]; then
+   PREFIX=&quot;${MUNGED_BRANCH}&quot;
+   LATEST_PREFIX=&quot;${PREFIX}&quot;
+   BASE_VERSION=&quot;${PREFIX}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
+   BASE_LATEST_TAG=&quot;${PREFIX}-${BUILD_STREAM}-latest&quot;
+   FLOCK_VERSION=&quot;${PREFIX}-${OS}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
+elif [[ ${MUNGED_BRANCH} == rc-* ]]; then
    PREFIX=&quot;${MUNGED_BRANCH}&quot;
    LATEST_PREFIX=&quot;${PREFIX}&quot;
    BASE_VERSION=&quot;${PREFIX}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
@@ -627,7 +713,7 @@ echo BASE_LATEST_TAG=$BASE_LATEST_TAG &gt;&gt; env.properties
 echo FLOCK_VERSION=$FLOCK_VERSION &gt;&gt; env.properties
 echo MASTER_BUILD_NUMBER=$MASTER_BUILD_NUMBER &gt;&gt; env.properties
 echo MASTER_JOB_NAME=$MASTER_JOB_NAME &gt;&gt; env.properties</scriptContent>
-        <secureGroovyScript plugin="script-security@1.55">
+        <secureGroovyScript plugin="script-security@1.58">
           <script></script>
           <sandbox>false</sandbox>
         </secureGroovyScript>

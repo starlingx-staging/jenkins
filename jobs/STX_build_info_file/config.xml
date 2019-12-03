@@ -4,7 +4,7 @@
   <description>Update build info</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -101,7 +101,12 @@ echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 export INFO_DIR=$MY_WORKSPACE
 export INFO_FILE=$INFO_DIR/BUILD
 export VER=99.99
-export RELEASE_INFO_PATH=$MY_REPO/stx/stx-integ/utilities/build-info/release-info.inc
+export RELEASE_INFO_PATH=$MY_REPO/stx/utilities/utilities/build-info/release-info.inc
+export OLD_RELEASE_INFO_PATH=$MY_REPO/stx/stx-integ/utilities/build-info/release-info.inc
+
+if [ ! -f $RELEASE_INFO_PATH ] ; then
+    RELEASE_INFO_PATH=$OLD_RELEASE_INFO_PATH
+fi
 
 if [ -f $RELEASE_INFO_PATH ] ; then
    export VER=$(grep &quot;PLATFORM_RELEASE=&quot; $RELEASE_INFO_PATH | cut -d = -f 2 | tr -d &apos;&quot;&apos;)
@@ -139,12 +144,12 @@ date -u -d &quot;$(echo $TIMESTAMP | sed &apos;s/\([0-9][0-9][0-9][0-9]\)\([0-9]
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.63">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -195,6 +200,6 @@ PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
   </buildWrappers>
 </project>

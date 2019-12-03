@@ -159,6 +159,8 @@ fi
 DOCKERFILE_ORIG=Dockerfile
 DOCKERFILE=../Dockerfile
 cat ${DOCKERFILE_ORIG} | sed &apos;/ENV container=docker/aRUN echo retries=20 &gt;&gt; /etc/yum.conf\nRUN echo timeout=60 &gt;&gt; /etc/yum.conf&apos; &gt; ${DOCKERFILE}
+# DPENNEY: Lock mock down to 1.4.19
+sed -i &apos;s#^        mock#        https://kojipkgs.fedoraproject.org//packages/mock/1.4.19/1.el7/noarch/mock-1.4.19-1.el7.noarch.rpm#&apos; ${DOCKERFILE}
 with_retries $DOCKER_BUILD_RETRIES  docker build --build-arg MYUID=${MYUID} \
                   --build-arg MYUNAME=${MYUNAME} \
                   --ulimit core=0 \

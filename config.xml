@@ -41,6 +41,7 @@
       <jobNames>
         <comparator class="hudson.util.CaseInsensitiveComparator"/>
         <string>STX_BUILD_2.0</string>
+        <string>STX_BUILD_3.0</string>
         <string>STX_build_centos76_pike</string>
         <string>STX_build_master_master</string>
         <string>STX_build_master_pike</string>

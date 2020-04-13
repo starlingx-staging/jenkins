@@ -96,6 +96,11 @@ echo &quot;TIMESTAMP=$TIMESTAMP&quot;
 [ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
 [ -n &quot;$TIMESTAMP&quot; ]
 
+if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
+    echo &quot;No new content.  Build not required&quot;
+    exit 0
+fi
+
 
 PUBLISH_WHEELS_BASE=$PUBLISH_OUTPUTS_BASE/wheels
 

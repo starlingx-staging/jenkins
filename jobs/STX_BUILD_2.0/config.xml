@@ -1,7 +1,7 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Build docker images, and wheel tarball</description>
+  <description>Build &apos;master&apos; branch nightly</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
@@ -10,120 +10,16 @@
     </com.sonyericsson.rebuild.RebuildSettings>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        <hudson.model.StringParameterDefinition>
-          <name>BRANCH</name>
-          <description></description>
-          <defaultValue>master</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>TIMESTAMP</name>
-          <description></description>
-          <defaultValue>19000101T010101Z</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>OS</name>
-          <description></description>
-          <defaultValue>centos</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>OS_VERSION</name>
-          <description></description>
-          <defaultValue>7.5.1804</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>BUILD_STREAM</name>
-          <description>dev or stable</description>
-          <defaultValue>dev</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>MUNGED_BRANCH</name>
-          <description></description>
-          <defaultValue>master</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>DOCKER_BUILD_ID</name>
-          <description></description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>PUBLISH_INPUTS_BASE</name>
-          <description>/export/mirror/starlingx/$BRANCH/$OS/$TIMESTAMP/inputs</description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>PUBLISH_OUTPUTS_BASE</name>
-          <description>/export/mirror/starlingx/$BRANCH/$OS/$TIMESTAMP/outputs</description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>PUBLISH_LOGS_BASE</name>
-          <description>/export/mirror/starlingx/$BRANCH/$OS/$TIMESTAMP/logs</description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>MY_REPO_ROOT</name>
-          <description>/localdisk/designer/$USER/$PROJECT</description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>MY_WORKSPACE</name>
-          <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>MY_REPO</name>
-          <description>$MY_REPO_ROOT/cgcs-root</description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>PUBLISH_LOGS_URL</name>
-          <description></description>
-          <defaultValue>https://127.0.0.1/</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>PUBLISH_DISTRO_BASE</name>
-          <description>/export/mirror/starlingx/$BRANCH/$OS</description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>PUBLISH_TIMESTAMP</name>
-          <description></description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>MASTER_JOB_NAME</name>
-          <description>Top of tree build job name</description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>MASTER_BUILD_NUMBER</name>
-          <description></description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>LAYER</name>
-          <description></description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>BUILD_CONTAINERS_DEV</name>
+          <description>Force build of dev stream containers.  Otherwise it&apos;s automatic based on day of week.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>BUILD_CONTAINERS_STABLE</name>
+          <description>Force build of stable stream containers.  Otherwise it&apos;s automatic based on day of week.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -135,78 +31,16 @@
   <triggers/>
   <concurrentBuild>false</concurrentBuild>
   <builders>
-    <hudson.tasks.Shell>
-      <command>echo &quot;TIMESTAMP=$TIMESTAMP&quot;
-echo &quot;BRANCH=$BRANCH&quot;
-echo &quot;MUNGED_BRANCH=$MUNGED_BRANCH&quot;
-# echo &quot;REGISTRY_USERID=$REGISTRY_USERID&quot;
-# echo &quot;REGISTRY_ORG=$REGISTRY_ORG&quot;
-# echo &quot;REGISTRY=$REGISTRY&quot;
-echo &quot;OS=$OS&quot;
-echo &quot;OS_VERSION=$OS_VERSION&quot;
-echo &quot;BUILD_STREAM=$BUILD_STREAM&quot;
-echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
-echo &quot;MY_REPO=$MY_REPO&quot;
-echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
-# echo &quot;HOST=$HOST&quot;
-# echo &quot;HOST_PORT=$HOST_PORT&quot;
-echo &quot;DOCKER_BUILD_ID=$DOCKER_BUILD_ID&quot;
-echo &quot;PUBLISH_INPUTS_BASE=$PUBLISH_INPUTS_BASE&quot;
-echo &quot;PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE&quot;
-echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
-echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
-echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
-# echo &quot;PREFIX=$PREFIX&quot;
-# echo &quot;LATEST_PREFIX=$LATEST_PREFIX&quot;
-# echo &quot;BASE_VERSION=$BASE_VERSION&quot;
-# echo &quot;BASE_LATEST_TAG=$BASE_LATEST_TAG&quot;
-# echo &quot;FLOCK_VERSION=$FLOCK_VERSION&quot;
-
-[ -n &quot;$TIMESTAMP&quot; ]
-[ -n &quot;$BRANCH&quot; ]
-[ -n &quot;$MUNGED_BRANCH&quot; ]
-# [ -n &quot;$REGISTRY_USERID&quot; ]
-# [ -n &quot;$REGISTRY_ORG&quot; ]
-# [ -n &quot;$REGISTRY&quot; ]
-[ -n &quot;$OS&quot; ]
-[ -n &quot;$OS_VERSION&quot; ]
-[ -n &quot;$BUILD_STREAM&quot; ]
-[ -n &quot;$MY_REPO_ROOT&quot; ]
-[ -n &quot;$MY_REPO&quot; ]
-[ -n &quot;$MY_WORKSPACE&quot; ]
-# [ -n &quot;$HOST&quot; ]
-# [ -n &quot;$HOST_PORT&quot; ]
-[ -n &quot;$DOCKER_BUILD_ID&quot; ]
-[ -n &quot;$PUBLISH_INPUTS_BASE&quot; ]
-[ -n &quot;$PUBLISH_OUTPUTS_BASE&quot; ]
-[ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
-[ -n &quot;$PUBLISH_LOGS_URL&quot; ]
-[ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
-# [ -n &quot;$PREFIX&quot; ]
-# [ -n &quot;$LATEST_PREFIX&quot; ]
-# [ -n &quot;$BASE_VERSION&quot; ]
-# [ -n &quot;$BASE_LATEST_TAG&quot; ]
-# [ -n &quot;$FLOCK_VERSION&quot; ]
-
-if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
-    echo &quot;No new content.  Build not required&quot;
-    exit 0
-fi
-</command>
-    </hudson.tasks.Shell>
+    <EnvInjectBuilder plugin="envinject@2.1.6">
+      <info>
+        <propertiesFilePath>env.properties</propertiesFilePath>
+      </info>
+    </EnvInjectBuilder>
     <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
-          <configs>
-            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
-              <propertiesFile>env.properties</propertiesFile>
-              <failTriggerOnMissing>false</failTriggerOnMissing>
-              <textParamValueOnNewLine>false</textParamValueOnNewLine>
-              <useMatrixChild>false</useMatrixChild>
-              <onlyExactRuns>false</onlyExactRuns>
-            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
-          </configs>
-          <projects>STX_build_docker_base_image</projects>
+          <configs class="empty-list"/>
+          <projects>mirror_download_sync</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -246,7 +80,7 @@ fi
               <onlyExactRuns>false</onlyExactRuns>
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
           </configs>
-          <projects>STX_build_wheels</projects>
+          <projects>STX_repo_sync</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -286,7 +120,7 @@ fi
               <onlyExactRuns>false</onlyExactRuns>
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
           </configs>
-          <projects>STX_publish_wheels</projects>
+          <projects>STX_BUILD_container_setup</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -326,7 +160,7 @@ fi
               <onlyExactRuns>false</onlyExactRuns>
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
           </configs>
-          <projects>STX_build_docker_flock_images</projects>
+          <projects>STX_download_mirror</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -366,7 +200,7 @@ fi
               <onlyExactRuns>false</onlyExactRuns>
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
           </configs>
-          <projects>STX_publish_docker_images</projects>
+          <projects>STX_build_info_file</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -394,41 +228,146 @@ fi
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
-      <condition class="org.jenkins_ci.plugins.run_condition.core.StringsMatchCondition" plugin="run-condition@1.2">
-        <arg1>$BUILD_STREAM</arg1>
-        <arg2>stable</arg2>
-        <ignoreCase>false</ignoreCase>
-      </condition>
-      <buildStep class="hudson.plugins.parameterizedtrigger.TriggerBuilder" plugin="parameterized-trigger@2.35.2">
-        <configs>
-          <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
-            <configs>
-              <hudson.plugins.parameterizedtrigger.FileBuildParameters>
-                <propertiesFile>env.properties</propertiesFile>
-                <failTriggerOnMissing>false</failTriggerOnMissing>
-                <textParamValueOnNewLine>false</textParamValueOnNewLine>
-                <useMatrixChild>false</useMatrixChild>
-                <onlyExactRuns>false</onlyExactRuns>
-              </hudson.plugins.parameterizedtrigger.FileBuildParameters>
-              <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
-                <properties>OLD_LATEST_PREFIX=master
-OLD_BUILD_STREAM=stable
-BUILD_STREAM=dev
-RETAG_IMAGE_LIST=stx-fm-rest-api stx-libvirt stx-mariadb</properties>
-                <textParamValueOnNewLine>false</textParamValueOnNewLine>
-              </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
-            </configs>
-            <projects>STX_retag_docker_images</projects>
-            <condition>ALWAYS</condition>
-            <triggerWithNoParameters>false</triggerWithNoParameters>
-            <triggerFromChildProjects>false</triggerFromChildProjects>
-            <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
-          </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
-        </configs>
-      </buildStep>
-      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.2"/>
-    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_build_lst_audit</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_build_pre_installer</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_build_installer</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_build_post_installer</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
     <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
@@ -481,7 +420,7 @@ RETAG_IMAGE_LIST=stx-fm-rest-api stx-libvirt stx-mariadb</properties>
               <onlyExactRuns>false</onlyExactRuns>
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
           </configs>
-          <projects>STX_publish_helm_charts</projects>
+          <projects>STX_change_log</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -521,7 +460,7 @@ RETAG_IMAGE_LIST=stx-fm-rest-api stx-libvirt stx-mariadb</properties>
               <onlyExactRuns>false</onlyExactRuns>
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
           </configs>
-          <projects>STX_build_remote_cli</projects>
+          <projects>STX_publish</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -549,46 +488,173 @@ RETAG_IMAGE_LIST=stx-fm-rest-api stx-libvirt stx-mariadb</properties>
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
-      <configs>
-        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
-          <configs>
-            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
-              <propertiesFile>env.properties</propertiesFile>
-              <failTriggerOnMissing>false</failTriggerOnMissing>
-              <textParamValueOnNewLine>false</textParamValueOnNewLine>
-              <useMatrixChild>false</useMatrixChild>
-              <onlyExactRuns>false</onlyExactRuns>
-            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
-          </configs>
-          <projects>STX_publish_remote_cli</projects>
-          <condition>ALWAYS</condition>
-          <triggerWithNoParameters>false</triggerWithNoParameters>
-          <triggerFromChildProjects>false</triggerFromChildProjects>
-          <block>
-            <buildStepFailureThreshold>
-              <name>FAILURE</name>
-              <ordinal>2</ordinal>
-              <color>RED</color>
-              <completeBuild>true</completeBuild>
-            </buildStepFailureThreshold>
-            <unstableThreshold>
-              <name>UNSTABLE</name>
-              <ordinal>1</ordinal>
-              <color>YELLOW</color>
-              <completeBuild>true</completeBuild>
-            </unstableThreshold>
-            <failureThreshold>
-              <name>FAILURE</name>
-              <ordinal>2</ordinal>
-              <color>RED</color>
-              <completeBuild>true</completeBuild>
-            </failureThreshold>
-          </block>
-          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
-        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
-      </configs>
-    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
+      <condition class="org.jenkins_ci.plugins.run_condition.logic.Or" plugin="run-condition@1.2">
+        <conditions>
+          <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+            <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition">
+              <token>$BUILD_CONTAINERS_STABLE</token>
+            </condition>
+          </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+          <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+            <condition class="org.jenkins_ci.plugins.run_condition.core.DayCondition">
+              <useBuildTime>false</useBuildTime>
+              <daySelector class="org.jenkins_ci.plugins.run_condition.core.DayCondition$SelectDays">
+                <days>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>2</day>
+                    <selected>true</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>3</day>
+                    <selected>true</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>4</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>5</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>6</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>7</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>1</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                </days>
+              </daySelector>
+            </condition>
+          </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+        </conditions>
+      </condition>
+      <buildStep class="hudson.plugins.parameterizedtrigger.TriggerBuilder" plugin="parameterized-trigger@2.35.2">
+        <configs>
+          <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+            <configs>
+              <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+                <propertiesFile>env.properties</propertiesFile>
+                <failTriggerOnMissing>false</failTriggerOnMissing>
+                <textParamValueOnNewLine>false</textParamValueOnNewLine>
+                <useMatrixChild>false</useMatrixChild>
+                <onlyExactRuns>false</onlyExactRuns>
+              </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+                <properties>BUILD_STREAM=stable
+OS_VERSION=7.5.1804</properties>
+                <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+            </configs>
+            <projects>STX_build_docker_images</projects>
+            <condition>ALWAYS</condition>
+            <triggerWithNoParameters>false</triggerWithNoParameters>
+            <triggerFromChildProjects>false</triggerFromChildProjects>
+            <block>
+              <buildStepFailureThreshold>
+                <name>FAILURE</name>
+                <ordinal>2</ordinal>
+                <color>RED</color>
+                <completeBuild>true</completeBuild>
+              </buildStepFailureThreshold>
+              <unstableThreshold>
+                <name>UNSTABLE</name>
+                <ordinal>1</ordinal>
+                <color>YELLOW</color>
+                <completeBuild>true</completeBuild>
+              </unstableThreshold>
+              <failureThreshold>
+                <name>FAILURE</name>
+                <ordinal>2</ordinal>
+                <color>RED</color>
+                <completeBuild>true</completeBuild>
+              </failureThreshold>
+            </block>
+            <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+          </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+        </configs>
+      </buildStep>
+      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.2"/>
+    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
+    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
+      <condition class="org.jenkins_ci.plugins.run_condition.logic.Or" plugin="run-condition@1.2">
+        <conditions>
+          <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+            <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition">
+              <token>$BUILD_CONTAINERS_DEV</token>
+            </condition>
+          </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+          <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+            <condition class="org.jenkins_ci.plugins.run_condition.core.DayCondition">
+              <useBuildTime>false</useBuildTime>
+              <daySelector class="org.jenkins_ci.plugins.run_condition.core.DayCondition$SelectDays">
+                <days>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>2</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>3</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>4</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>5</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>6</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>7</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>1</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                </days>
+              </daySelector>
+            </condition>
+          </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+        </conditions>
+      </condition>
+      <buildStep class="hudson.plugins.parameterizedtrigger.TriggerBuilder" plugin="parameterized-trigger@2.35.2">
+        <configs>
+          <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+            <configs>
+              <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+                <propertiesFile>env.properties</propertiesFile>
+                <failTriggerOnMissing>false</failTriggerOnMissing>
+                <textParamValueOnNewLine>false</textParamValueOnNewLine>
+                <useMatrixChild>false</useMatrixChild>
+                <onlyExactRuns>false</onlyExactRuns>
+              </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+                <properties>BUILD_STREAM=dev</properties>
+                <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+            </configs>
+            <projects>STX_build_docker_images</projects>
+            <condition>ALWAYS</condition>
+            <triggerWithNoParameters>false</triggerWithNoParameters>
+            <triggerFromChildProjects>false</triggerFromChildProjects>
+            <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+          </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+        </configs>
+      </buildStep>
+      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.2"/>
+    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
   </builders>
   <publishers>
     <hudson.tasks.Mailer plugin="mailer@1.23">
@@ -615,7 +681,7 @@ RETAG_IMAGE_LIST=stx-fm-rest-api stx-libvirt stx-mariadb</properties>
         </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
       </configuredTriggers>
       <contentType>default</contentType>
-      <defaultSubject>[$BUILD_STREAM]  $DEFAULT_SUBJECT</defaultSubject>
+      <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
       <defaultContent>$DEFAULT_CONTENT</defaultContent>
       <attachmentsPattern></attachmentsPattern>
       <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
@@ -638,13 +704,8 @@ RETAG_IMAGE_LIST=stx-fm-rest-api stx-libvirt stx-mariadb</properties>
               <useMatrixChild>false</useMatrixChild>
               <onlyExactRuns>false</onlyExactRuns>
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
-            <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
-              <properties>BUILD_NM=$JOB_NAME
-BUILD_NUM=$BUILD_NUMBER</properties>
-              <textParamValueOnNewLine>false</textParamValueOnNewLine>
-            </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>copy_logs,copy_failed_image_logs,docker_prune</projects>
+          <projects>STX_delete_root_owned,STX_BUILD_container_teardown,copy_logs</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -656,79 +717,117 @@ BUILD_NUM=$BUILD_NUMBER</properties>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
     <EnvInjectBuildWrapper plugin="envinject@2.1.6">
       <info>
-        <scriptContent>export HOST=build.starlingx.cengn.ca
-export HOST_PORT=80
-if [ &quot;$LAYER&quot; == &quot;containers&quot; ]; then
-    export REGISTRY_ORG=slittlewrs
-else
-    export REGISTRY_ORG=starlingx
-fi
-export REGISTRY_USERID=slittlewrs
-export REGISTRY=docker.io
+        <scriptContent>export BRANCH=r/stx.2.0
+export OPENSTACK_RELEASE=master
+export OS=centos
+export OS_VERSION=7.5.1804
+export PUBLISH_URL=http://mirror.starlingx.cengn.ca
 
-if [ &quot;${MASTER_JOB_NAME}&quot; == &quot;&quot; ]; then
-    export MASTER_JOB_NAME=$JOB_NAME
-    export MASTER_BUILD_NUMBER=$BUILD_NUMBER
+export TIMESTAMP=$BUILD_TIMESTAMP
+export MASTER_BUILD_NUMBER=$BUILD_NUMBER
+export MASTER_JOB_NAME=$JOB_NAME
+export DISTRO=$OS
+
+export PUBLISH_BRANCH=&quot;&quot;
+export PUBLISH_TIMESTAMP=&quot;&quot;
+export MUNGED_BRANCH=$(echo $BRANCH | tr &apos;/&apos; &apos;-&apos;)
+
+if [ &quot;$BRANCH&quot; == &quot;master&quot; ]; then
+    PUBLISH_BRANCH=$BRANCH
+    PUBLISH_TIMESTAMP=$TIMESTAMP
+elif [[ $BRANCH == f/* ]]; then
+    # feature branch
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^f/#feature/#&apos;)
+    PUBLISH_TIMESTAMP=$TIMESTAMP
+elif [[ $BRANCH == m/[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
+    # milestone tag   m/2018.10.b3
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
+elif [[ $BRANCH == m[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
+    # milestone tag m2018.10.b3
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
+    MUNGED_BRANCH=$(echo $BRANCH | sed &apos;s#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#m-\1\2#&apos;)
+elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9][.][Bb][0-9]* ]]; then
+    # milestone tag 2018.10.b3
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
+    MUNGED_BRANCH=&quot;m-$BRANCH&quot;
+elif [[ $BRANCH == r/stx[.]@([0-9])[.]@([0-9]) ]]; then
+    # release candidate branch r/stx.2.0
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/stx[.]\([0-9]*[.][0-9]*\).*$#rc/\1#&apos;)
+    PUBLISH_TIMESTAMP=$TIMESTAMP
+    MUNGED_BRANCH=$(echo $BRANCH | sed &apos;s#^r/stx[.]#rc-#&apos;)
+elif [[ $BRANCH == r/[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
+    # release branch r/2018.10.5
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#&apos;)
+elif [[ $BRANCH == r[0-9][0-9][0-9][0-9][.]* ]]; then
+    # release branch r2018.10.5
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#&apos;)
+    MUNGED_BRANCH=$(echo $BRANCH | sed &apos;s#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#r-\1\2#&apos;)
+elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9] ]] || [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9].[0-9]* ]] ; then
+    # Release branch 2018.10.1 
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
+    PUBLISH_TIMESTAMP=$BRANCH
+    MUNGED_BRANCH=&quot;r-$BRANCH&quot;
 fi
 
-if [ &quot;${MASTER_BUILD_NUMBER}&quot; == &quot;&quot; ]; then
-    export MASTER_BUILD_NUMBER=0
-fi
+# Assertions, did we get a BRANCH we understand how to parse
+[ -n &quot;$PUBLISH_BRANCH&quot; ]
+[ -n &quot;$PUBLISH_TIMESTAMP&quot; ]
 
-if [ $MUNGED_BRANCH == &quot;master&quot; ]; then
-   PREFIX=&quot;$MUNGED_BRANCH&quot;
-   LATEST_PREFIX=&quot;${PREFIX}&quot;
-   BASE_VERSION=&quot;${PREFIX}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
-   BASE_LATEST_TAG=&quot;${PREFIX}-${BUILD_STREAM}-latest&quot;
-   FLOCK_VERSION=&quot;${PREFIX}-${OS}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
-elif [[ ${MUNGED_BRANCH} == f-* ]]; then
-   PREFIX=&quot;${MUNGED_BRANCH}&quot;
-   LATEST_PREFIX=&quot;${PREFIX}&quot;
-   BASE_VERSION=&quot;${PREFIX}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
-   BASE_LATEST_TAG=&quot;${PREFIX}-${BUILD_STREAM}-latest&quot;
-   FLOCK_VERSION=&quot;${PREFIX}-${OS}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
-elif [[ ${MUNGED_BRANCH} == rc-* ]]; then
-   PREFIX=&quot;${MUNGED_BRANCH}&quot;
-   LATEST_PREFIX=&quot;${PREFIX}&quot;
-   BASE_VERSION=&quot;${PREFIX}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
-   BASE_LATEST_TAG=&quot;${PREFIX}-${BUILD_STREAM}-latest&quot;
-   FLOCK_VERSION=&quot;${PREFIX}-${OS}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
-else
-   PREFIX=&quot;${MUNGED_BRANCH}&quot;
-   LATEST_PREFIX=&quot;$( echo ${PREFIX} | cut -d &apos;.&apos; -f 1,2 )&quot;
-   BASE_VERSION=&quot;${PREFIX}-${BUILD_STREAM}&quot;
-   BASE_LATEST_TAG=&quot;${LATEST_PREFIX}-${BUILD_STREAM}-latest&quot;
-   FLOCK_VERSION=&quot;${PREFIX}-${OS}-${BUILD_STREAM}-${PUBLISH_TIMESTAMP}&quot;
-fi
+export PROJECT=$MUNGED_BRANCH
+
+export MY_REPO_ROOT=/localdisk/designer/$USER/$PROJECT
+export MY_REPO=$MY_REPO_ROOT/cgcs-root
+export MY_WORKSPACE=/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP
+
+# if [ &quot;$OS&quot; == &quot;centos&quot; ] &amp;&amp; [ -f $MY_REPO_ROOT/stx-tools/centos-mirror-tools/yum.conf.sample ] ; then
+#    export OS_VERSION=$( cd $MY_REPO_ROOT/stx-tools/centos-mirror-tools/; 
+#                        yum --config=./yum.conf.sample --showduplicates list centos-release | \
+#                          grep &apos;^centos-release&apos; | awk &apos;{print $2}&apos; | sort --unique | \
+#                          tail -n 1 | tr &apos;-&apos; &apos;.&apos; | cut -d &apos;.&apos; -f -3 )
+# fi
+
+export DOCKER_BUILD_ID=$USER-$PROJECT-$TIMESTAMP-builder
+export DOCKER_BUILD_TAG=$PROJECT-$TIMESTAMP-builder-image
+
+export PUBLISH_DISTRO_BASE=/export/mirror/starlingx/$PUBLISH_BRANCH/$DISTRO
+export PUBLISH_BUILD_BASE=$PUBLISH_DISTRO_BASE/$PUBLISH_TIMESTAMP
+export PUBLISH_INPUTS_BASE=$PUBLISH_BUILD_BASE/inputs
+export PUBLISH_OUTPUTS_BASE=$PUBLISH_BUILD_BASE/outputs
+export PUBLISH_LOGS_BASE=$PUBLISH_BUILD_BASE/logs
+export PUBLISH_LOGS_URL=$PUBLISH_URL/$(echo $PUBLISH_LOGS_BASE | sed &apos;s#^/export/##&apos;)
+
+echo BUILD_CONTAINERS_DEV=$BUILD_CONTAINERS_DEV
+echo BUILD_CONTAINERS_STABLE=$BUILD_CONTAINERS_STABLE
 
 echo TIMESTAMP=$TIMESTAMP &gt; env.properties
 echo PUBLISH_TIMESTAMP=$PUBLISH_TIMESTAMP &gt;&gt; env.properties
 echo BRANCH=$BRANCH &gt;&gt; env.properties
+echo PROJECT=$PROJECT &gt;&gt; env.properties
 echo MUNGED_BRANCH=$MUNGED_BRANCH &gt;&gt; env.properties
-echo REGISTRY_USERID=$REGISTRY_USERID &gt;&gt; env.properties
-echo REGISTRY_ORG=$REGISTRY_ORG &gt;&gt; env.properties
-echo REGISTRY=$REGISTRY &gt;&gt; env.properties
+echo OPENSTACK_RELEASE=$OPENSTACK_RELEASE &gt;&gt; env.properties
+echo DISTRO=$DISTRO &gt;&gt; env.properties
 echo OS=$OS &gt;&gt; env.properties
 echo OS_VERSION=$OS_VERSION &gt;&gt; env.properties
-echo BUILD_STREAM=$BUILD_STREAM &gt;&gt; env.properties
+echo MASTER_BUILD_NUMBER=$MASTER_BUILD_NUMBER &gt;&gt; env.properties
+echo MASTER_JOB_NAME=$MASTER_JOB_NAME &gt;&gt; env.properties
 echo MY_REPO_ROOT=$MY_REPO_ROOT &gt;&gt; env.properties
 echo MY_REPO=$MY_REPO &gt;&gt; env.properties
 echo MY_WORKSPACE=$MY_WORKSPACE &gt;&gt; env.properties
-echo HOST=$HOST &gt;&gt; env.properties
-echo HOST_PORT=$HOST_PORT &gt;&gt; env.properties
 echo DOCKER_BUILD_ID=$DOCKER_BUILD_ID &gt;&gt; env.properties
+echo DOCKER_BUILD_TAG=$DOCKER_BUILD_TAG &gt;&gt; env.properties
 echo PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE &gt;&gt; env.properties
+echo PUBLISH_BUILD_BASE=$PUBLISH_BUILD_BASE &gt;&gt; env.properties
 echo PUBLISH_INPUTS_BASE=$PUBLISH_INPUTS_BASE &gt;&gt; env.properties
 echo PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE &gt;&gt; env.properties
 echo PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE &gt;&gt; env.properties
 echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt;&gt; env.properties
-echo PREFIX=$PREFIX &gt;&gt; env.properties
-echo LATEST_PREFIX=$LATEST_PREFIX &gt;&gt; env.properties
-echo BASE_VERSION=$BASE_VERSION &gt;&gt; env.properties
-echo BASE_LATEST_TAG=$BASE_LATEST_TAG &gt;&gt; env.properties
-echo FLOCK_VERSION=$FLOCK_VERSION &gt;&gt; env.properties
-echo MASTER_BUILD_NUMBER=$MASTER_BUILD_NUMBER &gt;&gt; env.properties
-echo MASTER_JOB_NAME=$MASTER_JOB_NAME &gt;&gt; env.properties</scriptContent>
+echo BUILD_NM=$JOB_NAME &gt;&gt; env.properties
+echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties</scriptContent>
         <secureGroovyScript plugin="script-security@1.58">
           <script></script>
           <sandbox>false</sandbox>

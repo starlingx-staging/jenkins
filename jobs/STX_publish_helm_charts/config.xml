@@ -75,7 +75,7 @@
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>false</disabled>
+  <disabled>true</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers/>
@@ -104,6 +104,11 @@ echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 [ -n &quot;$MASTER_JOB_NAME&quot; ]
+
+if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
+    echo &quot;No new content.  Build not required&quot;
+    exit 0
+fi
 
 export DISTRO=&quot;$OS&quot;
 

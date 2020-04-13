@@ -1,39 +1,15 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Publish build products to http://mirror.starlingx.cengn.ca</description>
+  <description>publish remote cli</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        <hudson.model.StringParameterDefinition>
-          <name>PUBLISH_DISTRO_BASE</name>
-          <description></description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>PUBLISH_OUTPUTS_BASE</name>
-          <description></description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>PUBLISH_INPUTS_BASE</name>
-          <description></description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>MY_REPO</name>
-          <description>/localdisk/designer/$USER/$PROJECT/cgcs-root</description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>MY_WORKSPACE</name>
           <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
@@ -41,13 +17,7 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>OS</name>
-          <description></description>
-          <defaultValue>centos</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>TIMESTAMP</name>
+          <name>PUBLISH_OUTPUTS_BASE</name>
           <description></description>
           <defaultValue></defaultValue>
           <trim>false</trim>
@@ -59,14 +29,20 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>PUBLISH_LOGS_URL</name>
+          <name>BRANCH</name>
           <description></description>
-          <defaultValue>https://127.0.0.1/</defaultValue>
+          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>MASTER_JOB_NAME</name>
-          <description>Top of tree build job name</description>
+          <name>TIMESTAMP</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_REPO</name>
+          <description></description>
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -85,60 +61,40 @@
       <command>
 echo &quot;MY_REPO=$MY_REPO&quot;
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
-echo &quot;OS=$OS&quot;
-echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
-echo &quot;PUBLISH_INPUTS_BASE=$PUBLISH_INPUTS_BASE&quot;
 echo &quot;PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE&quot;
-echo &quot;TIMESTAMP=$TIMESTAMP&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
-echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
-echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
 
 [ -n &quot;$MY_REPO&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
-[ -n &quot;$OS&quot; ]
-[ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
-[ -n &quot;$PUBLISH_INPUTS_BASE&quot; ]
 [ -n &quot;$PUBLISH_OUTPUTS_BASE&quot; ]
-[ -n &quot;$TIMESTAMP&quot; ]
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
-[ -n &quot;$PUBLISH_LOGS_URL&quot; ]
-[ -n &quot;$MASTER_JOB_NAME&quot; ]
 
-export DISTRO=&quot;$OS&quot;
+if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
+    echo &quot;No new content.  Build not required&quot;
+    exit 0
+fi
 
+if [ -f ${MY_REPO}/build-tools/build-remote-cli.sh ]; then
+    mkdir -p $PUBLISH_OUTPUTS_BASE/remote-cli
 
-gits=(
-&quot;stx-clients&quot;
-&quot;stx-config&quot;
-&quot;stx-distcloud&quot;
-&quot;stx-distcloud-client&quot;
-&quot;stx-fault&quot;
-&quot;stx-gui&quot;
-&quot;stx-ha&quot;
-&quot;stx-nfv&quot;
-&quot;stx-update&quot;
-)
+    for f in $(find $MY_WORKSPACE/std/build-remote-cli/ -name &apos;*.tgz&apos;); do
+        \cp -v $f $PUBLISH_OUTPUTS_BASE/remote-cli
+    done
 
-mkdir -p $PUBLISH_OUTPUTS_BASE/source-tarballs
+    if [ -f ${MY_REPO}/stx/oidc-auth-armada-app/oidc-auth-tools/oidcauthtools/oidcauthtools/oidc_auth.py ]; then
+        \cp -v ${MY_REPO}/stx/oidc-auth-armada-app/oidc-auth-tools/oidcauthtools/oidcauthtools/oidc_auth.py $PUBLISH_OUTPUTS_BASE/remote-cli/oidc-auth
+    fi
 
-
-
-
-
-
-
-
-</command>
+fi</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.63">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -146,7 +102,7 @@ mkdir -p $PUBLISH_OUTPUTS_BASE/source-tarballs
             <subject>$PROJECT_DEFAULT_SUBJECT</subject>
             <body>$PROJECT_DEFAULT_CONTENT</body>
             <recipientProviders>
-              <hudson.plugins.emailext.plugins.recipients.ListRecipientProvider/>
+              <hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider/>
             </recipientProviders>
             <attachmentsPattern></attachmentsPattern>
             <attachBuildLog>false</attachBuildLog>
@@ -189,6 +145,6 @@ PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
   </buildWrappers>
 </project>

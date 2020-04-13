@@ -12,7 +12,7 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -54,6 +54,24 @@
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_WORKSPACE</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_OUTPUTS_BASE</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LAYER</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -66,13 +84,17 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>[ -n &quot;$BUILD_NM&quot; ]
+      <command>echo &quot;BUILD_NM=$BUILD_NM&quot;
+echo &quot;BUILD_NUM=$BUILD_NUM&quot;
+echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
+echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
+echo &quot;PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE&quot;
+
+[ -n &quot;$BUILD_NM&quot; ]
 [ -n &quot;$BUILD_NUM&quot; ]
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 
-echo &quot;BUILD_NM=$BUILD_NM&quot;
-echo &quot;BUILD_NUM=$BUILD_NUM&quot;
-echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
+
 
 # [ -n &quot;$BRANCH&quot; ]
 # [ -n &quot;$TIMESTAMP&quot; ]
@@ -114,11 +136,52 @@ FROM=&quot;/var/lib/jenkins/jobs/${BUILD_NM}/builds/${BUILD_NUM}/log&quot;
 # 
 # PUBLISH_LOGS_BASE=$PUBLISH_BUILD_BASE/logs
 
+if [ -f &quot;${MY_WORKSPACE}/NO_BUILD_REQUIRED&quot; ]; then
+    echo &quot;NO_BUILD_REQUIRED&quot;
+    exit 0
+fi
+
 mkdir -p $PUBLISH_LOGS_BASE
 \cp $FROM $PUBLISH_LOGS_BASE/jenkins-${BUILD_NM}-${BUILD_NUM}.log
 ~/bin/log2html  $PUBLISH_LOGS_BASE/jenkins-${BUILD_NM}-${BUILD_NUM}.log
 
-    
+
+if [ -n &quot;$MY_WORKSPACE&quot; ] &amp;&amp; [ -n &quot;$PUBLISH_OUTPUTS_BASE&quot; ]; then
+    # Publish change log
+    if [ -f $MY_WORKSPACE/CHANGELOG ]; then
+        mkdir -p $PUBLISH_OUTPUTS_BASE
+       \cp -v $MY_WORKSPACE/CHANGELOG $PUBLISH_OUTPUTS_BASE/CHANGELOG.txt
+    fi
+
+
+    # Publish build info
+    if [ &quot;x$LAYER&quot; == &quot;x&quot; ] || [ &quot;$LAYER&quot; == &quot;flock&quot; ]; then
+        if [ -f $MY_WORKSPACE/BUILD ]; then
+           mkdir -p $PUBLISH_OUTPUTS_BASE
+           \cp -v $MY_WORKSPACE/BUILD $PUBLISH_OUTPUTS_BASE/ISO_BUILD_INFO.txt
+       fi
+    fi
+
+    if [ &quot;x$LAYER&quot; == &quot;x&quot; ] ; then
+        if [ -f &quot;$MY_WORKSPACE/BUILD&quot;  ]; then
+            mkdir -p $PUBLISH_OUTPUTS_BASE
+            cp -v &quot;$MY_WORKSPACE/BUILD&quot; $PUBLISH_OUTPUTS_BASE/BUILD_INFO
+            cp -v $PUBLISH_OUTPUTS_BASE/BUILD_INFO $PUBLISH_OUTPUTS_BASE/BUILD_INFO.txt
+        fi
+    else
+        if [ -f &quot;$MY_WORKSPACE/BUILD&quot;  ]; then
+            mkdir -p $PUBLISH_OUTPUTS_BASE
+            grep &quot;^${LAYER_PREFIX}_&quot; &quot;$MY_WORKSPACE/BUILD&quot; &gt; $PUBLISH_OUTPUTS_BASE/BUILD_INFO
+            cp -v $PUBLISH_OUTPUTS_BASE/BUILD_INFO $PUBLISH_OUTPUTS_BASE/BUILD_INFO.txt
+        fi
+    fi
+
+    # Publish context
+    if [ -f $MY_WORKSPACE/CONTEXT ]; then
+       mkdir -p $PUBLISH_OUTPUTS_BASE
+       \cp -v $MY_WORKSPACE/CONTEXT $PUBLISH_OUTPUTS_BASE/CONTEXT.sh
+    fi
+fi
 
 
     

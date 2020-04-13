@@ -4,7 +4,7 @@
   <description>Build the installer&apos;s kernel and ramdisk</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -52,6 +52,12 @@
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_REPO</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -66,6 +72,7 @@
     <hudson.tasks.Shell>
       <command>echo &quot;DOCKER_BUILD_ID=$DOCKER_BUILD_ID&quot;
 echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
+echo &quot;MY_REPO=$MY_REPO&quot;
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
 echo &quot;OS=$OS&quot;
 echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
@@ -74,6 +81,7 @@ echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 
 [ -n &quot;$DOCKER_BUILD_ID&quot; ]
 [ -n &quot;$MY_REPO_ROOT&quot; ]
+[ -n &quot;$MY_REPO&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
 [ -n &quot;$OS&quot; ]
 [ -n &quot;$MASTER_JOB_NAME&quot; ]
@@ -87,10 +95,6 @@ STX_INSTALLER_DIR=&quot;$DOCKER_BUILD_WORKDIR/centos-mirror-tools/output/stx-ins
 
 
 DOCKER_CMD=&quot;docker exec --interactive --user=${MYUNAME} -e MYUNAME=${MYUNAME} ${DOCKER_BUILD_ID} /bin/bash -i -&quot;
-
-echo &apos;$MY_REPO_ROOT_DIR/stx-tools/toCOPY/generate-cgcs-centos-repo.sh /import/mirrors/CentOS/stx-r1/CentOS/pike/&apos; | $DOCKER_CMD
-    
-echo &apos;$MY_REPO_ROOT_DIR/stx-tools/toCOPY/populate_downloads.sh /import/mirrors/CentOS/stx-r1/CentOS/pike/&apos; | $DOCKER_CMD
 
 echo &apos;build-pkgs --installer&apos; | $DOCKER_CMD
 
@@ -112,12 +116,12 @@ cp $PXE_INSTALLER_OUT_DIR/new-squashfs.img $STX_INSTALLER_DIR/squashfs.img
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -172,6 +176,6 @@ MASTER_JOB_NAME=$MASTER_JOB_NAME</properties>
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
   </buildWrappers>
 </project>

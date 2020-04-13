@@ -1,7 +1,7 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Update build info</description>
+  <description>Audit package lst files vs yum repos</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
@@ -11,15 +11,27 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>BRANCH</name>
+          <name>DOCKER_BUILD_ID</name>
           <description></description>
-          <defaultValue>master</defaultValue>
+          <defaultValue>builder</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>TIMESTAMP</name>
-          <description></description>
-          <defaultValue>19000101T010101Z</defaultValue>
+          <name>MY_REPO_ROOT</name>
+          <description>/localdisk/designer/$USER/$PROJECT</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_WORKSPACE</name>
+          <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_REPO</name>
+          <description>$MY_REPO_ROOT/cgcs-root</description>
+          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -29,26 +41,8 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>MASTER_BUILD_NUMBER</name>
-          <description></description>
-          <defaultValue>0</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
           <name>MASTER_JOB_NAME</name>
           <description></description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>MY_REPO</name>
-          <description>/localdisk/designer/$USER/$PROJECT/cgcs-root</description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>MY_WORKSPACE</name>
-          <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -65,9 +59,9 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>LAYER</name>
+          <name>PUBLISH_DISTRO_BASE</name>
           <description></description>
-          <defaultValue></defaultValue>
+          <defaultValue>/tmp/reports</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
@@ -82,111 +76,40 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>echo &quot;BRANCH=$BRANCH&quot;
-echo &quot;TIMESTAMP=$TIMESTAMP&quot;
+      <command>echo &quot;DOCKER_BUILD_ID=$DOCKER_BUILD_ID&quot;
 echo &quot;MY_REPO=$MY_REPO&quot;
+echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
 echo &quot;OS=$OS&quot;
-echo &quot;MASTER_BUILD_NUMBER=$MASTER_BUILD_NUMBER&quot;
 echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
-echo &quot;LAYER=$LAYER&quot;
+echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
 
-[ -n &quot;$BRANCH&quot; ]
-[ -n &quot;$TIMESTAMP&quot; ]
+[ -n &quot;$DOCKER_BUILD_ID&quot; ]
 [ -n &quot;$MY_REPO&quot; ]
+[ -n &quot;$MY_REPO_ROOT&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
 [ -n &quot;$OS&quot; ]
-[ -n &quot;$MASTER_BUILD_NUMBER&quot; ]
 [ -n &quot;$MASTER_JOB_NAME&quot; ]
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
+[ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
 
 if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
     echo &quot;No new content.  Build not required&quot;
     exit 0
 fi
 
-# export MY_REPO=/localdisk/designer/$USER/$PROJECT/cgcs-root
-# export MY_WORKSPACE=/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP
-export INFO_DIR=$MY_WORKSPACE
-export INFO_FILE=$INFO_DIR/BUILD
-export VER=99.99
-export RELEASE_INFO_PATH=$MY_REPO/stx/utilities/utilities/build-info/release-info.inc
-export OLD_RELEASE_INFO_PATH=$MY_REPO/stx/stx-integ/utilities/build-info/release-info.inc
+MYUNAME=$(id -un)
 
-HOSTNAME=$(hostname)
+DOCKER_CMD=&quot;docker exec --interactive --user=${MYUNAME} -e MYUNAME=${MYUNAME} ${DOCKER_BUILD_ID} /bin/bash -i -&quot;
 
-if [ ! -f $RELEASE_INFO_PATH ] ; then
-    RELEASE_INFO_PATH=$OLD_RELEASE_INFO_PATH
-fi
+echo &apos;cd $MY_REPO/../stx-tools/centos-mirror-tools; ./mirror-check.sh -c ./yum.conf.sample || true&apos; | $DOCKER_CMD
 
-if [ -f $RELEASE_INFO_PATH ] ; then
-   export VER=$(grep &quot;PLATFORM_RELEASE=&quot; $RELEASE_INFO_PATH | cut -d = -f 2 | tr -d &apos;&quot;&apos;)
-fi
-
-mkdir -p $MY_WORKSPACE
-cd $MY_WORKSPACE
-mkdir -p $INFO_DIR
-
-echo &quot;###&quot; &gt; $INFO_FILE
-echo &quot;### StarlingX&quot; &gt;&gt; $INFO_FILE
-
-LAYER_PREFIX=${LAYER^^}
-if [ &quot;$LAYER&quot; == &quot;&quot; ] || [ &quot;$LAYER&quot; == &quot;all&quot; ]; then
-    LAYER_PREFIX=&quot;&quot;
-fi
-
-if [ &quot;$LAYER&quot; == &quot;&quot; ] || [ &quot;$LAYER&quot; == &quot;all&quot; ] || [ &quot;$LAYER&quot; == &quot;flock&quot; ] ; then
-    if [ &quot;$BRANCH&quot; == &quot;master&quot; ]; then
-       echo &quot;###     Built from master&quot; &gt;&gt; $INFO_FILE
-    else
-       echo &quot;###     Release $VER&quot; &gt;&gt; $INFO_FILE
-    fi
-else
-    echo &quot;###     Layer $LAYER built from branch $BRANCH&quot; &gt;&gt; $INFO_FILE
-fi
-
-echo &quot;###&quot; &gt;&gt; $INFO_FILE
-echo &quot;&quot; &gt;&gt; $INFO_FILE
-
-if [ &quot;$LAYER&quot; == &quot;&quot; ] || [ &quot;$LAYER&quot; == &quot;all&quot; ] || [ &quot;$LAYER&quot; == &quot;flock&quot; ] ; then
-    echo &quot;OS=\&quot;$OS\&quot;&quot; &gt;&gt; $INFO_FILE
-    echo &quot;SW_VERSION=\&quot;$VER\&quot;&quot; &gt;&gt; $INFO_FILE
-    echo &quot;BUILD_TARGET=\&quot;Host Installer\&quot;&quot; &gt;&gt; $INFO_FILE
-    echo &quot;BUILD_TYPE=\&quot;Formal\&quot;&quot; &gt;&gt; $INFO_FILE
-    if [ &quot;$BRANCH&quot; == &quot;master&quot; ]; then
-       echo &quot;BUILD_ID=\&quot;$TIMESTAMP\&quot;&quot; &gt;&gt; $INFO_FILE
-    else
-       echo &quot;BUILD_ID=\&quot;$BRANCH\&quot;&quot; &gt;&gt; $INFO_FILE
-    fi
-    echo &quot;&quot; &gt;&gt; $INFO_FILE
-    echo &quot;JOB=\&quot;$MASTER_JOB_NAME\&quot;&quot; &gt;&gt; $INFO_FILE
-    echo &quot;BUILD_BY=\&quot;starlingx.build@cengn.ca\&quot;&quot;  &gt;&gt; $INFO_FILE
-    echo &quot;BUILD_NUMBER=\&quot;$MASTER_BUILD_NUMBER\&quot;&quot; &gt;&gt; $INFO_FILE
-    echo &quot;BUILD_HOST=\&quot;$HOSTNAME\&quot;&quot; &gt;&gt; $INFO_FILE
-    date -u -d &quot;$(echo $TIMESTAMP | sed &apos;s/\([0-9][0-9][0-9][0-9]\)\([0-9][0-9]\)\([0-9][0-9]\)T\([0-9][0-9]\)\([0-9][0-9]\)\([0-9][0-9]\)Z/\1-\2-\3 \4:\5:\6 Z/&apos;)&quot; &quot;+BUILD_DATE=\&quot;%F %T %z\&quot;&quot; &gt;&gt; $INFO_FILE
-fi
-
-if [ &quot;$LAYER_PREFIX&quot;  != &quot;&quot; ]; then
-    echo &quot;&quot; &gt;&gt; $INFO_FILE
-    echo &quot;${LAYER_PREFIX}_OS=\&quot;$OS\&quot;&quot; &gt;&gt; $INFO_FILE
-    echo &quot;${LAYER_PREFIX}_JOB=\&quot;$MASTER_JOB_NAME\&quot;&quot; &gt;&gt; $INFO_FILE
-    echo &quot;${LAYER_PREFIX}_BUILD_BY=\&quot;starlingx.build@cengn.ca\&quot;&quot;  &gt;&gt; $INFO_FILE
-    echo &quot;${LAYER_PREFIX}_BUILD_NUMBER=\&quot;$MASTER_BUILD_NUMBER\&quot;&quot; &gt;&gt; $INFO_FILE
-    echo &quot;${LAYER_PREFIX}_BUILD_HOST=\&quot;$HOSTNAME\&quot;&quot; &gt;&gt; $INFO_FILE
-    date -u -d &quot;$(echo $TIMESTAMP | sed &apos;s/\([0-9][0-9][0-9][0-9]\)\([0-9][0-9]\)\([0-9][0-9]\)T\([0-9][0-9]\)\([0-9][0-9]\)\([0-9][0-9]\)Z/\1-\2-\3 \4:\5:\6 Z/&apos;)&quot; &quot;+${LAYER_PREFIX}_BUILD_DATE=\&quot;%F %T %z\&quot;&quot; &gt;&gt; $INFO_FILE
-
-    if [ &quot;$LAYER&quot; == &quot;flock&quot; ]; then
-        for f in $(find $MY_REPO/cgcs-centos-repo/layer_build_info/ -type f -name &apos;*_BUILD_INFO&apos; | sort -r); do
-            echo &quot;&quot; &gt;&gt; $INFO_FILE
-            cat $f &gt;&gt; $INFO_FILE
-        done
-    fi
-fi
-
-</command>
+PUBLISH_REPORTS_BASE=$PUBLISH_DISTRO_BASE/reports/
+mkdir -p $PUBLISH_REPORTS_BASE
+\mv -f $MY_REPO/../stx-tools/centos-mirror-tools/mirror-check-failures.log $PUBLISH_REPORTS_BASE/</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
@@ -233,7 +156,12 @@ fi
             <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
               <properties>BUILD_NM=$JOB_NAME
 BUILD_NUM=$BUILD_NUMBER
-PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
+PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE
+MY_REPO_ROOT=$MY_REPO_ROOT
+MY_WORKSPACE=$MY_WORKSPACE
+OS=$OS
+MASTER_JOB_NAME=$MASTER_JOB_NAME
+</properties>
               <textParamValueOnNewLine>false</textParamValueOnNewLine>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>

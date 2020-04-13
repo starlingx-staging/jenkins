@@ -1,7 +1,7 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>First pass build.  This build will not include the updated pxe-installer.</description>
+  <description>download mirror</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
@@ -13,24 +13,12 @@
         <hudson.model.StringParameterDefinition>
           <name>DOCKER_BUILD_ID</name>
           <description></description>
-          <defaultValue>builder</defaultValue>
+          <defaultValue>downloader</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>MY_REPO_ROOT</name>
           <description>/localdisk/designer/$USER/$PROJECT</description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>MY_WORKSPACE</name>
-          <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>MY_REPO</name>
-          <description>$MY_REPO_ROOT/cgcs-root</description>
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -47,13 +35,19 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>OS</name>
+          <name>MY_REPO</name>
           <description></description>
-          <defaultValue>centos</defaultValue>
+          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>MASTER_JOB_NAME</name>
+          <name>MY_WORKSPACE</name>
+          <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LAYER</name>
           <description></description>
           <defaultValue></defaultValue>
           <trim>false</trim>
@@ -71,41 +65,57 @@
   <builders>
     <hudson.tasks.Shell>
       <command>echo &quot;DOCKER_BUILD_ID=$DOCKER_BUILD_ID&quot;
-echo &quot;MY_REPO=$MY_REPO&quot;
 echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
+echo &quot;MY_REPO=$MY_REPO&quot;
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
-echo &quot;OS=$OS&quot;
-echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
+echo &quot;LAYER=$LAYER&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 
 [ -n &quot;$DOCKER_BUILD_ID&quot; ]
-[ -n &quot;$MY_REPO&quot; ]
 [ -n &quot;$MY_REPO_ROOT&quot; ]
+[ -n &quot;$MY_REPO&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
-[ -n &quot;$OS&quot; ]
-[ -n &quot;$MASTER_JOB_NAME&quot; ]
+[ -n &quot;$LAYER&quot; ]
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 
-MYUNAME=$(id -un)
+[ -d &quot;$MY_REPO_ROOT&quot; ]
 
-IMPORT_DIR=/import/mirrors/CentOS/stx-r1/CentOS/pike
-if [ ! -d $MY_REPO_ROOT_DIR ]; then
-    IMPORT_DIR=/import/mirrors/CentOS/stx-r1/CentOS
+if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
+    echo &quot;No new content.  Build not required&quot;
+    exit 0
 fi
 
-DOCKER_CMD=&quot;docker exec --interactive --user=${MYUNAME} -e MYUNAME=${MYUNAME} ${DOCKER_BUILD_ID} /bin/bash -i -&quot;
+export MIRROR_TOOLS_DIR=$MY_REPO_ROOT/stx-tools/centos-mirror-tools
+export DOCKER_BUILD_WORKDIR=$MY_REPO_ROOT/stx-tools
+export STX_INSTALLER_DIR=&quot;$DOCKER_BUILD_WORKDIR/centos-mirror-tools/output/stx-installer&quot;
 
-echo &apos;echo MY_REPO=$MY_REPO&apos; | $DOCKER_CMD
+docker exec -i $DOCKER_BUILD_ID /bin/bash -c &quot;cd $MIRROR_TOOLS_DIR; chown -R $(id -u) output logs&quot;
+docker exec -i $DOCKER_BUILD_ID /bin/bash -c &quot;export MY_REPO=$MY_REPO; cd $MIRROR_TOOLS_DIR; bash -x -e ./download_mirror.sh -l $LAYER&quot;
+docker exec -i $DOCKER_BUILD_ID /bin/bash -c &quot;cd $MIRROR_TOOLS_DIR; chown -R $(id -u) output logs&quot;
 
-echo &quot;\$MY_REPO_ROOT_DIR/stx-tools/toCOPY/generate-cgcs-centos-repo.sh $IMPORT_DIR/&quot; | $DOCKER_CMD
-    
-echo &quot;\$MY_REPO_ROOT_DIR/stx-tools/toCOPY/populate_downloads.sh $IMPORT_DIR/&quot; | $DOCKER_CMD
+# Test for missing files, assert ERRORS==0
+ERRORS=$(
+   (
+   cat $MIRROR_TOOLS_DIR/logs/*missing*.log
+   grep -v &apos;already_there_srpm:&apos;  $MIRROR_TOOLS_DIR/logs/*failmoved*.log
+   ) | wc -l )
+[ $ERRORS -eq 0 ]
 
-echo &apos;build-pkgs&apos; | $DOCKER_CMD
-
-echo &apos;build-iso&apos; | $DOCKER_CMD</command>
+cd $DOCKER_BUILD_WORKDIR
+FROM_DIR=centos-mirror-tools/output/stx-r1/CentOS/pike/Binary
+if [ ! -d $FROM_DIR ]; then
+    FROM_DIR=centos-mirror-tools/output/stx-r1/CentOS/Binary
+fi
+if [ -d $FROM_DIR/images ]; then
+    if [ ! -d $STX_INSTALLER_DIR ]; then
+         mkdir -p $STX_INSTALLER_DIR
+         cp $FROM_DIR/images/pxeboot/initrd.img $STX_INSTALLER_DIR/initrd.img
+         cp $FROM_DIR/images/pxeboot/vmlinuz $STX_INSTALLER_DIR/vmlinuz
+         cp $FROM_DIR/LiveOS/squashfs.img $STX_INSTALLER_DIR/squashfs.img
+    fi
+fi</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
@@ -152,16 +162,11 @@ echo &apos;build-iso&apos; | $DOCKER_CMD</command>
             <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
               <properties>BUILD_NM=$JOB_NAME
 BUILD_NUM=$BUILD_NUMBER
-PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE
-MY_REPO_ROOT=$MY_REPO_ROOT
-MY_WORKSPACE=$MY_WORKSPACE
-OS=$OS
-MASTER_JOB_NAME=$MASTER_JOB_NAME
-</properties>
+PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
               <textParamValueOnNewLine>false</textParamValueOnNewLine>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>copy_logs,copy_failed_package_logs</projects>
+          <projects>copy_logs</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>

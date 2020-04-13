@@ -80,6 +80,11 @@ echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 [ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
 
+if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
+    echo &quot;No new content.  Build not required&quot;
+    exit 0
+fi
+
 MYUNAME=$(id -un)
 
 DOCKER_CMD=&quot;docker exec --interactive --user=${MYUNAME} -e MYUNAME=${MYUNAME} ${DOCKER_BUILD_ID} /bin/bash -i -&quot;
@@ -93,8 +98,13 @@ ALT_IMAGE_SRC_DIR=$PUBLISH_DISTRO_BASE
 HELM_SAVE_DIR=$MY_WORKSPACE/helm-charts
 mkdir -p $HELM_SAVE_DIR
 ALT_IMAGE_DIR=$MY_WORKSPACE/alt_image_lists
-mkdir -p ${ALT_IMAGE_DIR}
-cp -v $ALT_IMAGE_SRC_DIR/images-${OS}*.lst $ALT_IMAGE_DIR/
+
+for f in $(find $ALT_IMAGE_SRC_DIR -maxdepth 1 -type f -name &quot;images-${OS}*.lst&quot;); do
+    # only create directory if there is something to copy
+    mkdir -p ${ALT_IMAGE_DIR}
+    cp -v $f $ALT_IMAGE_DIR/
+done
+
 if [ &quot;${IMAGE_DIR}&quot; == &quot;&quot; ]; then
     IMAGE_DIR=$ALT_IMAGE_DIR
 fi
@@ -131,7 +141,16 @@ if [ -d &quot;${IMAGE_DIR}&quot; ]; then
   done
 fi
 
-cp -v $HELM_SAVE_DIR/*.tgz $HELM_OUT_DIR/stx/</command>
+for f in $(grep --no-filename &apos;^stx-.*helm$&apos; $(find $MY_REPO -name centos_helm.inc) | grep -v &apos;^#&apos; | grep -v stx-openstack-helm  | sed &apos;s/-helm$//&apos;); do
+    echo &quot;build-helm-charts.sh --os ${OS} --app $f --verbose&quot; | $DOCKER_CMD
+    HELM_OUT_DIR=$(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm)
+    cp -v $HELM_OUT_DIR/stx/*.tgz $HELM_SAVE_DIR
+    rm -f $HELM_OUT_DIR/stx/*.tgz
+done
+
+for f in $(find $HELM_SAVE_DIR -maxdepth 1 -type f -name &apos;*.tgz&apos;); do
+    cp -v $f $HELM_OUT_DIR/stx/
+done</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>

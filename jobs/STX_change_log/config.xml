@@ -4,7 +4,7 @@
   <description>Create a change log</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -22,6 +22,17 @@
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>FORCE_BUILD</name>
+          <description></description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LAYER</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -36,48 +47,212 @@
     <hudson.tasks.Shell>
       <command>echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
+echo &quot;FORCE_BUILD=$FORCE_BUILD&quot;
+echo &quot;LAYER=$LAYER&quot;
 
 [ -n &quot;$MY_REPO_ROOT&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
-
 [ -d &quot;$MY_REPO_ROOT&quot; ]
-[ -d &quot;$MY_WORKSPACE&quot; ]
+
+if [ &quot;$LAYER&quot; == &quot;all&quot; ]; then
+    LAYER=&quot;&quot;
+fi
+
+sanitized_list () {
+    local list=&quot;$@&quot;
+    local f=&quot;&quot;
+
+    for f in $list; do 
+        if [ ! -e &quot;$f&quot; ]; then 
+            list=&quot;$(echo $list | sed &quot;s#^$f # #&quot; | sed &quot;s#^$f\$##&quot; | sed &quot;s# $f\$##&quot; | sed &quot;s# $f # #&quot; )&quot;
+        fi
+    done
+
+    echo &quot;$list&quot;
+}
 
 cd $MY_REPO_ROOT
+mkdir -p $MY_WORKSPACE
 
-for e in $(find . -type d -name .git)
+if [ ! -f $MY_WORKSPACE/../LAST_COMMITS ]; then
+    touch &quot;${MY_WORKSPACE}/NEED_BUILD&quot;
+fi
+
+if  $FORCE_BUILD ; then
+    touch &quot;${MY_WORKSPACE}/NEED_BUILD&quot;
+fi
+
+
+LAST_COMMITS=&quot;$MY_WORKSPACE/../LAST_COMMITS&quot;
+touch $LAST_COMMITS
+
+# Change log spanning all gits
+LOG=&quot;$MY_WORKSPACE/CHANGELOG&quot;
+for e in $(find . -type d -name .git | grep -v &apos;./.repo/repo/.git&apos;)
 do
  pushd $e/..
  f=$(/usr/bin/dirname $e)
  echo &quot;$f&quot;
  g=$(printf &quot;%-48s&quot; $f)
- c=$(grep $(echo $f | sed &apos;s:/:[/]:g&apos; | sed &apos;s:$:[^a-zA-Z0-9/_-]:&apos; | sed &apos;s:^[.][.]:^[.][.]:&apos; | sed &apos;s:^[.]:^[.]:&apos;) $MY_WORKSPACE/../LAST_COMMITS | awk &apos; { print $2 } &apos;)
- git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; --date=iso --after $(date --date=&apos;yesterday&apos; +%Y-%m-%d) &gt; $MY_WORKSPACE/CHANGELOG.PART
- cat $MY_WORKSPACE/CHANGELOG.PART &gt;&gt; $MY_WORKSPACE/CHANGELOG.OLD
+ c=$(grep $(echo $f | sed &apos;s:/:[/]:g&apos; | sed &apos;s:$:[^a-zA-Z0-9/_-]:&apos; | sed &apos;s:^[.][.]:^[.][.]:&apos; | sed &apos;s:^[.]:^[.]:&apos;) $LAST_COMMITS | awk &apos; { print $2 } &apos;)
+ git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; --date=iso --after $(date --date=&apos;yesterday&apos; +%Y-%m-%d) &gt; $LOG.PART
+ cat $LOG.PART &gt;&gt; $LOG.OLD
  if [ &quot;x$c&quot; != &quot;x&quot; ] ; then
-   git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; $c.. &gt;&gt; $MY_WORKSPACE/CHANGELOG || true
+   git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; $c.. $list &gt;&gt; $LOG || true
  else
-   cat $MY_WORKSPACE/CHANGELOG.PART &gt;&gt; $MY_WORKSPACE/CHANGELOG
+   cat $MY_WORKSPACE/CHANGELOG.PART &gt;&gt; $LOG
  fi
  popd
 done
-\rm $MY_WORKSPACE/CHANGELOG.PART
+\rm $LOG.PART
 
-for e in $(find . -type d -name .git)
-do
- pushd $e/..
- f=$(/usr/bin/dirname $e)
- echo &quot;$f&quot;
- g=`printf &quot;%-48s&quot; $f`
- git log --pretty=tformat:&quot;$g %H&quot; -n 1 &gt;&gt; $MY_WORKSPACE/LAST_COMMITS
- popd
-done
+# Change log spanning know config files
+DL_LOG=&quot;$MY_WORKSPACE/CHANGELOG_DL&quot;
+BLD_LOG=&quot;$MY_WORKSPACE/CHANGELOG_BUILD&quot;
+IMG_LOG=&quot;$MY_WORKSPACE/CHANGELOG_IMG&quot;
+ISO_LOG=&quot;$MY_WORKSPACE/CHANGELOG_ISO&quot;
 
-\cp $MY_WORKSPACE/LAST_COMMITS $MY_WORKSPACE/../LAST_COMMITS</command>
+f=&apos;./stx-tools&apos;
+pushd $f
+ list=&quot;$(sanitized_list centos-mirror-tools/yum.conf.sample centos-mirror-tools/config/centos/$LAYER)&quot;
+ g=$(printf &quot;%-48s&quot; $f)
+ c=$(grep $(echo $f | sed &apos;s:/:[/]:g&apos; | sed &apos;s:$:[^a-zA-Z0-9/_-]:&apos; | sed &apos;s:^[.][.]:^[.][.]:&apos; | sed &apos;s:^[.]:^[.]:&apos;) $LAST_COMMITS | awk &apos; { print $2 } &apos;)
+ git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; --date=iso --after $(date --date=&apos;yesterday&apos; +%Y-%m-%d) $list &gt; $DL_LOG.PART
+ if [ &quot;x$c&quot; != &quot;x&quot; ] ; then
+   git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; $c.. $list &gt;&gt; $DL_LOG || true
+ else
+   cat $DL_LOG.PART &gt;&gt; $DL_LOG
+ fi
+popd
+\rm $DL_LOG.PART
+
+f=&apos;./cgcs-root&apos;
+pushd $f
+ list=&quot;$(sanitized_list $(find build-tools/build_iso -name &apos;*.cfg&apos;) build-tools/build_iso/minimal_rpm_list.txt)&quot;
+ g=$(printf &quot;%-48s&quot; $f)
+ c=$(grep $(echo $f | sed &apos;s:/:[/]:g&apos; | sed &apos;s:$:[^a-zA-Z0-9/_-]:&apos; | sed &apos;s:^[.][.]:^[.][.]:&apos; | sed &apos;s:^[.]:^[.]:&apos;) $LAST_COMMITS | awk &apos; { print $2 } &apos;)
+ git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; --date=iso --after $(date --date=&apos;yesterday&apos; +%Y-%m-%d) $list &gt; $ISO_LOG.PART
+ if [ &quot;x$c&quot; != &quot;x&quot; ] ; then
+   git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; $c.. $list &gt;&gt; $ISO_LOG || true
+ else
+   cat $ISO_LOG.PART &gt;&gt; $ISO_LOG
+ fi
+popd
+\rm $ISO_LOG.PART
+
+f=&apos;./cgcs-root&apos;
+pushd $f
+ list=&quot;$(sanitized_list build-tools/signing build-tools/certificates)&quot;
+ g=$(printf &quot;%-48s&quot; $f)
+ c=$(grep $(echo $f | sed &apos;s:/:[/]:g&apos; | sed &apos;s:$:[^a-zA-Z0-9/_-]:&apos; | sed &apos;s:^[.][.]:^[.][.]:&apos; | sed &apos;s:^[.]:^[.]:&apos;) $LAST_COMMITS | awk &apos; { print $2 } &apos;)
+ git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; --date=iso --after $(date --date=&apos;yesterday&apos; +%Y-%m-%d) $list &gt; $BLD_LOG.PART
+ if [ &quot;x$c&quot; != &quot;x&quot; ] ; then
+   git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; $c.. $list &gt;&gt; $BLD_LOG || true
+ else
+   cat $BLD_LOG.PART &gt;&gt; $BLD_LOG
+ fi
+popd
+\rm $BLD_LOG.PART
+
+f=&apos;./cgcs-root&apos;
+pushd $f
+ list=&quot;$(sanitized_list build-tools/build-docker-images build-tools/build-wheels)&quot;
+ g=$(printf &quot;%-48s&quot; $f)
+ c=$(grep $(echo $f | sed &apos;s:/:[/]:g&apos; | sed &apos;s:$:[^a-zA-Z0-9/_-]:&apos; | sed &apos;s:^[.][.]:^[.][.]:&apos; | sed &apos;s:^[.]:^[.]:&apos;) $LAST_COMMITS | awk &apos; { print $2 } &apos;)
+ git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; --date=iso --after $(date --date=&apos;yesterday&apos; +%Y-%m-%d) $list &gt; $IMG_LOG.PART
+ if [ &quot;x$c&quot; != &quot;x&quot; ] ; then
+   git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; $c.. &gt;&gt; $IMG_LOG || true
+ else
+   cat $IMG_LOG.PART &gt;&gt; $IMG_LOG
+ fi
+popd
+\rm $IMG_LOG.PART
+
+
+if [ $(cat &quot;$LOG&quot; | \
+        grep -v &apos;^[.][/]cgcs-root/stx/docs &apos;  | \
+        grep -v &apos;^[.][/]cgcs-root/stx/test &apos;  | \
+        grep -v &apos;^[.][/]cgcs-root &apos;  | \
+        grep -v &apos;^[.][/]stx-tools &apos;  | \
+        grep -v &apos;^[.][/]cgcs-root/local-build-data &apos;  | \
+        wc -l) -gt 0 ]; then
+    touch &quot;${MY_WORKSPACE}/NEED_BUILD&quot;
+fi
+
+if [ $(cat &quot;$BLD_LOG&quot; &quot;$DL_LOG&quot; | wc -l) -gt 0 ]; then
+    touch &quot;${MY_WORKSPACE}/NEED_BUILD&quot;
+fi
+
+if [ &quot;$LAYER&quot; == &quot;flock&quot; ]; then
+    if [ $(cat &quot;$ISO_LOG&quot; &quot;$IMG_LOG&quot; | wc -l) -gt 0 ]; then
+        touch &quot;${MY_WORKSPACE}/NEED_BUILD&quot;
+    fi
+fi
+
+if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
+        touch &quot;${MY_WORKSPACE}/NO_BUILD_REQUIRED&quot;
+fi
+</command>
     </hudson.tasks.Shell>
   </builders>
-  <publishers/>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.23">
+      <recipients>scott.little@windriver.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
+      <recipientList>$DEFAULT_RECIPIENTS</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders>
+              <hudson.plugins.emailext.plugins.recipients.ListRecipientProvider/>
+            </recipientProviders>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+      </configuredTriggers>
+      <contentType>default</contentType>
+      <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+      <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
+      <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
+      <attachBuildLog>false</attachBuildLog>
+      <compressBuildLog>false</compressBuildLog>
+      <replyTo>$DEFAULT_REPLYTO</replyTo>
+      <from></from>
+      <saveOutput>false</saveOutput>
+      <disabled>false</disabled>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>copy_logs</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+        </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.BuildTrigger>
+  </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
   </buildWrappers>
 </project>

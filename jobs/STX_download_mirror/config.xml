@@ -34,6 +34,12 @@
           <defaultValue>https://127.0.0.1/</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_REPO</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -48,20 +54,27 @@
     <hudson.tasks.Shell>
       <command>echo &quot;DOCKER_BUILD_ID=$DOCKER_BUILD_ID&quot;
 echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
+echo &quot;MY_REPO=$MY_REPO&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 
 [ -n &quot;$DOCKER_BUILD_ID&quot; ]
 [ -n &quot;$MY_REPO_ROOT&quot; ]
+[ -n &quot;$MY_REPO&quot; ]
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 
 [ -d &quot;$MY_REPO_ROOT&quot; ]
 
 export MIRROR_TOOLS_DIR=$MY_REPO_ROOT/stx-tools/centos-mirror-tools
+export DOCKER_BUILD_WORKDIR=$MY_REPO_ROOT/stx-tools
+export STX_INSTALLER_DIR=&quot;$DOCKER_BUILD_WORKDIR/centos-mirror-tools/output/stx-installer&quot;
 
-docker exec -i $DOCKER_BUILD_ID /bin/bash -c &quot;cd $MIRROR_TOOLS_DIR; ./download_mirror.sh&quot;
-docker exec -i $DOCKER_BUILD_ID /bin/bash -c &quot;cd $MIRROR_TOOLS_DIR; chown -R $(id -u) output logs&quot;
+MYUNAME=$(id -un)
+
+DOCKER_CMD=&quot;docker exec --interactive --user=${MYUNAME} -e MYUNAME=${MYUNAME} $DOCKER_BUILD_ID /bin/bash -i -&quot;
+echo &quot;cd $MIRROR_TOOLS_DIR; ./download_mirror.sh&quot; | $DOCKER_CMD
+echo &quot;cd $MIRROR_TOOLS_DIR; sudo chown -R $(id -u) output logs&quot; | $DOCKER_CMD
 
 # Test for missing files, assert ERRORS==0
 ERRORS=$(
@@ -69,7 +82,19 @@ ERRORS=$(
    cat $MIRROR_TOOLS_DIR/logs/*missing*.log
    grep -v &apos;already_there_srpm:&apos;  $MIRROR_TOOLS_DIR/logs/*failmoved*.log
    ) | wc -l )
-[ $ERRORS -eq 0 ]</command>
+[ $ERRORS -eq 0 ]
+
+cd $DOCKER_BUILD_WORKDIR
+if [ ! -d centos-mirror-tools/output/stx-installer ]; then
+     mkdir -p centos-mirror-tools/output/stx-installer
+     FROM_DIR=centos-mirror-tools/output/stx-r1/CentOS/pike/Binary
+     if [ ! -d $FROM_DIR ]; then
+         FROM_DIR=centos-mirror-tools/output/stx-r1/CentOS/Binary
+     fi
+     cp $FROM_DIR/images/pxeboot/initrd.img $STX_INSTALLER_DIR/initrd.img
+     cp $FROM_DIR/images/pxeboot/vmlinuz $STX_INSTALLER_DIR/vmlinuz
+     cp $FROM_DIR/LiveOS/squashfs.img $STX_INSTALLER_DIR/squashfs.img
+fi</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
@@ -107,7 +132,7 @@ ERRORS=$(
       <replyTo>$DEFAULT_REPLYTO</replyTo>
       <from></from>
       <saveOutput>false</saveOutput>
-      <disabled>true</disabled>
+      <disabled>false</disabled>
     </hudson.plugins.emailext.ExtendedEmailPublisher>
     <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.35.2">
       <configs>

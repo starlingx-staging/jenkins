@@ -12,6 +12,7 @@
 .repo_.gitconfig.json
 .repoconfig/
 .ssh/
+.vim/
 .viminfo
 bin/
 credentials.xml
@@ -21,6 +22,11 @@ env.properties
 identity.key.enc
 jenkins.install.InstallUtil.lastExecVersion
 jenkins.install.UpgradeWizard.state
+layer-compiler/
+layer-containers/
+layer-distro/
+layer-flock/
+layer-kernel/
 logs/
 net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition.xml
 plugins/
@@ -29,6 +35,7 @@ secret.key
 secret.key.not-so-secret
 secrets/
 starlingx/
+stx-repo/
 stx-tools/
 updates/
 userContent/

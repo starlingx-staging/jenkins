@@ -4,7 +4,7 @@
   <description>Build docker images for the &apos;flock&apos;</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -97,7 +97,7 @@
         <hudson.model.StringParameterDefinition>
           <name>FLOCK_VERSION</name>
           <description>${PREFIX}-${OS}-${BUILD_STREAM}-${TIMESTAMP}
-dev-centos-pike-${TIMESTAMP}</description>
+dev-centos-stable-${TIMESTAMP}</description>
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -204,6 +204,11 @@ echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 
+if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
+    echo &quot;No new content.  Build not required&quot;
+    exit 0
+fi
+
 WEB_OUTPUTS_BASE=${PUBLISH_OUTPUTS_BASE#/export}
 
 $MY_REPO/build-tools/build-docker-images/build-stx-images.sh \
@@ -218,16 +223,34 @@ $MY_REPO/build-tools/build-docker-images/build-stx-images.sh \
     --attempts 5 \
     --push --latest \
     --clean
+    
+if [ &quot;${OS}&quot; == &quot;centos&quot; ]; then
+    # Use centos build as a proxy for building distroless images
+    DISTROLESS_OS=&quot;distroless&quot;
+    DISTROLESS_BASE=&quot;gcr.io/distroless/base&quot;
+    $MY_REPO/build-tools/build-docker-images/build-stx-images.sh \
+    --prefix ${PREFIX} \
+    --latest-prefix ${LATEST_PREFIX} \
+    --os ${DISTROLESS_OS} \
+    --stream ${BUILD_STREAM} \
+    --version ${PUBLISH_TIMESTAMP} \
+    --base ${DISTROLESS_BASE} \
+    --wheels http://${HOST}:${HOST_PORT}/${WEB_OUTPUTS_BASE}/wheels/stx-${OS}-${BUILD_STREAM}-wheels.tar \
+    --user ${REGISTRY_ORG} --registry ${REGISTRY} \
+    --attempts 5 \
+    --push --latest \
+    --clean
+fi
 </command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.65">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -278,6 +301,6 @@ PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
   </buildWrappers>
 </project>

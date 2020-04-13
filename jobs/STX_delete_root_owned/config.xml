@@ -4,7 +4,7 @@
   <description>Delete subdirectories we expect to be owned by root</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -59,7 +59,7 @@ MYUNAME=$(id -un)
 # echo &apos;echo MY_REPO=$MY_REPO&apos; | $DOCKER_CMD
 
 BUILD_TYPES=&quot;rt std installer containers&quot;
-BUILD_TYPES=&quot;$(find ${MY_WORKSPACE} -maxdepth 3 -type d -name mock -exec dirname &apos;{}&apos; \; | xargs --max-lines=1 --no-run-if-empty basename)&quot;
+BUILD_TYPES=&quot;$(find ${MY_WORKSPACE} -maxdepth 3 -type d -name mock -o -name cache -o -name result -o -name results -exec dirname &apos;{}&apos; \; | sort --unique | xargs --max-lines=1 --no-run-if-empty basename)&quot;
 for BUILD_TYPE in $BUILD_TYPES; do
    if [ -d &quot;$MY_WORKSPACE/$BUILD_TYPE/mock&quot; ]; then
        # echo &quot;sudo rm -rf $MY_WORKSPACE/$BUILD_TYPE/mock&quot; | $DOCKER_CMD
@@ -68,6 +68,14 @@ for BUILD_TYPE in $BUILD_TYPES; do
    if [ -d &quot;$MY_WORKSPACE/$BUILD_TYPE/cache&quot; ]; then
        # echo &quot;sudo rm -rf $MY_WORKSPACE/$BUILD_TYPE/cache&quot; | $DOCKER_CMD
        sudo /bin/rm -rf $MY_WORKSPACE/$BUILD_TYPE/cache
+   fi
+   if [ -d &quot;$MY_WORKSPACE/$BUILD_TYPE/result&quot; ]; then
+       # echo &quot;sudo chown -R $USER $MY_WORKSPACE/$BUILD_TYPE/result&quot; | $DOCKER_CMD
+       sudo chown -R $USER $MY_WORKSPACE/$BUILD_TYPE/result
+   fi
+      if [ -d &quot;$MY_WORKSPACE/$BUILD_TYPE/results&quot; ]; then
+       # echo &quot;sudo chown -R $USER $MY_WORKSPACE/$BUILD_TYPE/results&quot; | $DOCKER_CMD
+       sudo chown -R $USER $MY_WORKSPACE/$BUILD_TYPE/results
    fi
 done
 
@@ -93,6 +101,10 @@ for WHEEL_DIR in $(find $MY_WORKSPACE -maxdepth 2 -type d -name &apos;build-whee
     sudo chown -R $USER $WHEEL_DIR
 done
 
+for LOG in $(find $MY_WORKSPACE/std/result/ -name &apos;*.log&apos;); do
+    sudo chown -R $USER $LOG
+done
+
 REMAINDER=$(if [ -d $MY_WORKSPACE ]; then find $MY_WORKSPACE  -user root; fi)
 if [ ! -z &quot;${REMAINDER}&quot; ]; then
     echo &quot;Remaining items owned by root: $REMAINDER&quot;
@@ -104,13 +116,13 @@ fi
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com, don.penney@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
   </buildWrappers>
 </project>

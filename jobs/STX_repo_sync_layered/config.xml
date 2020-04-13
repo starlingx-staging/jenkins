@@ -1,7 +1,7 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>First pass build.  This build will not include the updated pxe-installer.</description>
+  <description>Download StarlingX software</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
@@ -11,26 +11,14 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>DOCKER_BUILD_ID</name>
+          <name>BRANCH</name>
           <description></description>
-          <defaultValue>builder</defaultValue>
+          <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>MY_REPO_ROOT</name>
-          <description>/localdisk/designer/$USER/$PROJECT</description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>MY_WORKSPACE</name>
-          <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>MY_REPO</name>
-          <description>$MY_REPO_ROOT/cgcs-root</description>
+          <description></description>
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
@@ -47,13 +35,7 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>OS</name>
-          <description></description>
-          <defaultValue>centos</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>MASTER_JOB_NAME</name>
+          <name>MANIFEST</name>
           <description></description>
           <defaultValue></defaultValue>
           <trim>false</trim>
@@ -70,42 +52,39 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>echo &quot;DOCKER_BUILD_ID=$DOCKER_BUILD_ID&quot;
-echo &quot;MY_REPO=$MY_REPO&quot;
+      <command>echo &quot;BRANCH=$BRANCH&quot;
+echo &quot;MANIFEST=$MANIFEST&quot;
 echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
-echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
-echo &quot;OS=$OS&quot;
-echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 
-[ -n &quot;$DOCKER_BUILD_ID&quot; ]
-[ -n &quot;$MY_REPO&quot; ]
-[ -n &quot;$MY_REPO_ROOT&quot; ]
-[ -n &quot;$MY_WORKSPACE&quot; ]
-[ -n &quot;$OS&quot; ]
-[ -n &quot;$MASTER_JOB_NAME&quot; ]
+
+[ -n &quot;$BRANCH&quot; ]
+[ -n &quot;$MANIFEST&quot; ]
+[ -n &quot;$MY_REPO_ROOT&quot;  ]
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 
-MYUNAME=$(id -un)
 
-IMPORT_DIR=/import/mirrors/CentOS/stx-r1/CentOS/pike
-if [ ! -d $MY_REPO_ROOT_DIR ]; then
-    IMPORT_DIR=/import/mirrors/CentOS/stx-r1/CentOS
+export BUILD_REPO_URL=https://opendev.org/starlingx/manifest
+
+mkdir -p $MY_REPO_ROOT
+cd $MY_REPO_ROOT
+
+if [ -d $MY_REPO_ROOT/stx/downloads ]; then
+    \rm -rf $MY_REPO_ROOT/stx/downloads 
 fi
 
-DOCKER_CMD=&quot;docker exec --interactive --user=${MYUNAME} -e MYUNAME=${MYUNAME} ${DOCKER_BUILD_ID} /bin/bash -i -&quot;
+if [ -d $MY_REPO_ROOT/cgcs-root/cgcs-centos-repo ]; then
+    \rm -rf $MY_REPO_ROOT/cgcs-root/cgcs-centos-repo 
+fi
 
-echo &apos;echo MY_REPO=$MY_REPO&apos; | $DOCKER_CMD
+if [ ! -d .repo ]; then
+    repo init -u ${BUILD_REPO_URL} -b ${BRANCH} -m ${MANIFEST}
+fi
+repo sync --force-sync --optimized-fetch -j$(nproc)
 
-echo &quot;\$MY_REPO_ROOT_DIR/stx-tools/toCOPY/generate-cgcs-centos-repo.sh $IMPORT_DIR/&quot; | $DOCKER_CMD
-    
-echo &quot;\$MY_REPO_ROOT_DIR/stx-tools/toCOPY/populate_downloads.sh $IMPORT_DIR/&quot; | $DOCKER_CMD
-
-echo &apos;build-pkgs&apos; | $DOCKER_CMD
-
-echo &apos;build-iso&apos; | $DOCKER_CMD</command>
+</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
@@ -152,16 +131,11 @@ echo &apos;build-iso&apos; | $DOCKER_CMD</command>
             <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
               <properties>BUILD_NM=$JOB_NAME
 BUILD_NUM=$BUILD_NUMBER
-PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE
-MY_REPO_ROOT=$MY_REPO_ROOT
-MY_WORKSPACE=$MY_WORKSPACE
-OS=$OS
-MASTER_JOB_NAME=$MASTER_JOB_NAME
-</properties>
+PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
               <textParamValueOnNewLine>false</textParamValueOnNewLine>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>copy_logs,copy_failed_package_logs</projects>
+          <projects>copy_logs</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>

@@ -20,6 +20,11 @@
           <description>Force build of stable stream containers.  Otherwise it&apos;s automatic based on day of week.</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>FORCE_BUILD</name>
+          <description>Always build, even if there are no changes.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -31,7 +36,9 @@
   <triggers>
     <hudson.triggers.TimerTrigger>
       <spec>30 21 * * 2,3,4,5,6
-30 19 * * 0,1</spec>
+0 19 * * 0,1
+# 30 1 * * 0,3,4,5,6
+# 30 23 * * 0,1</spec>
     </hudson.triggers.TimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
@@ -86,6 +93,46 @@
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
           </configs>
           <projects>STX_repo_sync</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_change_log</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -229,6 +276,26 @@
               <completeBuild>true</completeBuild>
             </failureThreshold>
           </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_build_lst_audit</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
           <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
@@ -405,7 +472,7 @@
               <onlyExactRuns>false</onlyExactRuns>
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
           </configs>
-          <projects>STX_change_log</projects>
+          <projects>STX_last_commits</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -716,6 +783,7 @@ export DISTRO=$OS
 export PUBLISH_BRANCH=&quot;&quot;
 export PUBLISH_TIMESTAMP=&quot;&quot;
 export MUNGED_BRANCH=$(echo $BRANCH | tr &apos;/&apos; &apos;-&apos;)
+export FORCE_BUILD=&quot;$FORCE_BUILD&quot;
 
 if [ &quot;$BRANCH&quot; == &quot;master&quot; ]; then
     PUBLISH_BRANCH=$BRANCH
@@ -738,6 +806,11 @@ elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9][.][Bb][0-9]* ]]; then
     PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
     PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
     MUNGED_BRANCH=&quot;m-$BRANCH&quot;
+elif [[ $BRANCH == r/stx[.]@([0-9])[.]@([0-9]) ]]; then
+    # release candidate branch r/stx.2.0
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/stx[.]\([0-9]*[.][0-9]*\).*$#rc/\1#&apos;)
+    PUBLISH_TIMESTAMP=$TIMESTAMP
+    MUNGED_BRANCH=$(echo $BRANCH | sed &apos;s#^r/stx[.]#rc-#&apos;)
 elif [[ $BRANCH == r/[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
     # release branch r/2018.10.5
     PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
@@ -764,12 +837,12 @@ export MY_REPO_ROOT=/localdisk/designer/$USER/$PROJECT
 export MY_REPO=$MY_REPO_ROOT/cgcs-root
 export MY_WORKSPACE=/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP
 
-if [ &quot;$OS&quot; == &quot;centos&quot; ] &amp;&amp; [ -f $MY_REPO_ROOT/stx-tools/centos-mirror-tools/yum.conf.sample ] ; then
-    export OS_VERSION=$( cd $MY_REPO_ROOT/stx-tools/centos-mirror-tools/; 
-                        yum --config=./yum.conf.sample --showduplicates list centos-release | \
-                          grep &apos;^centos-release&apos; | awk &apos;{print $2}&apos; | sort --unique | \
-                          tail -n 1 | tr &apos;-&apos; &apos;.&apos; | cut -d &apos;.&apos; -f -3 )
-fi
+# if [ &quot;$OS&quot; == &quot;centos&quot; ] &amp;&amp; [ -f $MY_REPO_ROOT/stx-tools/centos-mirror-tools/yum.conf.sample ] ; then
+#    export OS_VERSION=$( cd $MY_REPO_ROOT/stx-tools/centos-mirror-tools/; 
+#                        yum --config=./yum.conf.sample --showduplicates list centos-release | \
+#                          grep &apos;^centos-release&apos; | awk &apos;{print $2}&apos; | sort --unique | \
+#                          tail -n 1 | tr &apos;-&apos; &apos;.&apos; | cut -d &apos;.&apos; -f -3 )
+# fi
 
 export DOCKER_BUILD_ID=$USER-$PROJECT-$TIMESTAMP-builder
 export DOCKER_BUILD_TAG=$PROJECT-$TIMESTAMP-builder-image
@@ -783,6 +856,7 @@ export PUBLISH_LOGS_URL=$PUBLISH_URL/$(echo $PUBLISH_LOGS_BASE | sed &apos;s#^/e
 
 echo BUILD_CONTAINERS_DEV=$BUILD_CONTAINERS_DEV
 echo BUILD_CONTAINERS_STABLE=$BUILD_CONTAINERS_STABLE
+echo FORCE_BUILD=&quot;$FORCE_BUILD&quot;
 
 echo TIMESTAMP=$TIMESTAMP &gt; env.properties
 echo PUBLISH_TIMESTAMP=$PUBLISH_TIMESTAMP &gt;&gt; env.properties
@@ -807,7 +881,8 @@ echo PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE &gt;&gt; env.properties
 echo PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE &gt;&gt; env.properties
 echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt;&gt; env.properties
 echo BUILD_NM=$JOB_NAME &gt;&gt; env.properties
-echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties</scriptContent>
+echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties
+echo FORCE_BUILD=$FORCE_BUILD &gt;&gt; env.properties</scriptContent>
         <secureGroovyScript plugin="script-security@1.58">
           <script></script>
           <sandbox>false</sandbox>

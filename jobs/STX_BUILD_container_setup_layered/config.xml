@@ -55,6 +55,12 @@
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LAYER</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -77,6 +83,7 @@ echo &quot;PROJECT=$PROJECT&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 echo &quot;DOCKER_BUILD_RETRIES=$DOCKER_BUILD_RETRIES&quot;
+echo &quot;LAYER=$LAYER&quot;
 
 [ -n &quot;$DOCKER_BUILD_ID&quot; ]
 [ -n &quot;$DOCKER_BUILD_TAG&quot; ]
@@ -86,6 +93,12 @@ echo &quot;DOCKER_BUILD_RETRIES=$DOCKER_BUILD_RETRIES&quot;
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 [ -n &quot;$DOCKER_BUILD_RETRIES&quot; ]
+[ -n &quot;$LAYER&quot; ]
+
+if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
+    echo &quot;No new content.  Build not required&quot;
+    exit 0
+fi
 
 export DOCKER_BUILD_IMAGE=$USER:$DOCKER_BUILD_TAG
 export DOCKER_BUILD_WORKDIR=$MY_REPO_ROOT/stx-tools
@@ -142,6 +155,7 @@ cp ~/.gitconfig toCOPY
 cat &lt;&lt;- EOF &gt; localrc
 PROJECT=$PROJECT
 HOST_PREFIX=&quot;&quot;
+LAYER=$LAYER
 EOF
 
 if [ ! -d centos-mirror-tools/output/stx-installer ] &amp;&amp; [ -f $OS_BINARY_DIR/images/pxeboot/initrd.img ]; then
@@ -179,12 +193,13 @@ docker run -it --rm \
         --volume ${DOCKER_BUILD_WORKDIR}/centos-mirror-tools/output:/import/mirrors/CentOS:ro \
         --volume /sys/fs/cgroup:/sys/fs/cgroup:ro \
         --volume ~/.ssh:/mySSH:ro \
+        --volume /var/run/docker.sock:/var/run/docker.sock \
         -e &quot;container=docker&quot; \
         -e MYUNAME=${MYUNAME} \
         --privileged=true \
         --security-opt seccomp=unconfined \
+        --hostname=$(hostname) \
         ${DOCKER_BUILD_IMAGE}
-
 
 MY_BUILDRC=$(mktemp /tmp/buildrc_XXXXXX)
 cp ${DOCKER_BUILD_WORKDIR}/buildrc ${MY_BUILDRC}
@@ -192,6 +207,11 @@ sed -i &apos;s#export MY_BUILD_DIR=.*#export MY_BUILD_DIR=&apos;&quot;${MY_WORKS
 docker cp ${MY_BUILDRC} ${DOCKER_BUILD_ID}:/home/${MYUNAME}/buildrc
 docker cp ${DOCKER_BUILD_WORKDIR}/localrc ${DOCKER_BUILD_ID}:/home/${MYUNAME}
 \rm -f ${MY_BUILDRC}
+
+MYUNAME=$(id -un)
+DOCKER_GID=$(stat -c &apos;%g&apos;  /var/run/docker.sock)
+echo &quot;usermod -a -G $DOCKER_GID $MYUNAME&quot; | docker exec --interactive ${DOCKER_BUILD_ID} /bin/bash -i -
+
 
 </command>
     </hudson.tasks.Shell>

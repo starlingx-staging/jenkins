@@ -40,7 +40,14 @@
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
         <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <string>STX_BUILD_2.0</string>
+        <string>STX_BUILD_3.0</string>
         <string>STX_build_centos76_pike</string>
+        <string>STX_build_layer_all_master_master</string>
+        <string>STX_build_layer_compiler_master_master</string>
+        <string>STX_build_layer_containers_master_master</string>
+        <string>STX_build_layer_distro_master_master</string>
+        <string>STX_build_layer_flock_master_master</string>
         <string>STX_build_master_master</string>
         <string>STX_build_master_pike</string>
         <string>STX_build_stein_master</string>

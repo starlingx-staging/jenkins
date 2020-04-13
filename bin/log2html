@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#
+# Copyright (c) 2020 Wind River Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+#
+# Convert a jenkins log to a more html friendly format.
+# URLS to subjobs are munged to reflect where we will 
+# publish them.  
+#
+
+for log in $@; do
+    html=$(echo $log | sed 's/[.]log$/.log.html/' )
+    if [ -f $log ]; then
+        cat $log | \
+            sed 's@[[]8mha:////[a-zA-Z0-9=+/]*[[]0m\([^ ]*\) #\([0-9]*\)@\1 \2 http:jenkins-\1-\2.log.html@g' | \
+            sed 's@"[[]8mha:////[a-zA-Z0-9=+/]*[[]0m\([^ ]*\)"\([^^[]*\)[[]8mha:////[a-zA-Z0-9+/]*[^][[]0m\([0-9]*\)@\1\2 \3 http:jenkins-\1-\3.log.html@g' | \
+            sed 's@[[]8mha:////[a-zA-Z0-9=+/]*[[]0m\([^ ]*\)@\1@g' | \
+            sed 's@[[]0m@@g' | \
+            sed 's@[[]91m@@g' | \
+            sed "s/[‘’]/'/g" | \
+            text2html --lines --urls > $html
+            echo "wrote: $html"
+    else
+        echo "file not found: $log"
+    fi
+done

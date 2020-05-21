@@ -34,13 +34,15 @@ e.g. Starlingx-cengn_compiler_std_layer</description>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <hudson.triggers.TimerTrigger>
-      <spec>5 0,8,16 * * *</spec>
+      <spec>5 0,8 * * *
+# 5 0,8,16 * * *</spec>
     </hudson.triggers.TimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>~/bin/repo_update.sh
+      <command># ~/bin/repo_update.sh
+~/bin/repo_update_layered.sh
 
 EXTRA_ARGS=&quot;&quot;
 if [ &quot;$REPO_FILE&quot; != &quot;&quot; ]; then
@@ -59,6 +61,37 @@ fi
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
+      <recipientList>$DEFAULT_RECIPIENTS</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders>
+              <hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider/>
+            </recipientProviders>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+      </configuredTriggers>
+      <contentType>default</contentType>
+      <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+      <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
+      <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
+      <attachBuildLog>false</attachBuildLog>
+      <compressBuildLog>false</compressBuildLog>
+      <replyTo>$DEFAULT_REPLYTO</replyTo>
+      <from></from>
+      <saveOutput>false</saveOutput>
+      <disabled>false</disabled>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
   </publishers>
   <buildWrappers>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>

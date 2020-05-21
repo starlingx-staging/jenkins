@@ -138,12 +138,12 @@ get_repo_name () {
     local REPO_ID="$2"
     local NAME=""
 
-    NAME=$(cd $(dirname $YUM_CONF); 
+    NAME="$(cd $(dirname $YUM_CONF); 
           yum repoinfo --config="$(basename $YUM_CONF)" --disablerepo="*" --enablerepo="$REPO_ID" | \
               grep Repo-name | \
-              cut -d ' ' -f 3; 
+              sed 's#^[^:]*: ##';
           exit ${PIPESTATUS[0]}
-         )
+         )"
     if [ $? != 0 ]; then
         >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
         return 1
@@ -262,16 +262,16 @@ update_yum_repos_d () {
                 return 1
             fi
 
-            UPSTREAM_REPO_NAME=$(get_repo_name "$UPSTREAM_YUM_CONF" "$UPSTREAM_REPO_ID")
+            UPSTREAM_REPO_NAME="$(get_repo_name "$UPSTREAM_YUM_CONF" "$UPSTREAM_REPO_ID")"
             if [ $? != 0 ]; then
                 return 1
             fi
 
             UPSTREAM_DOWNLOAD_PATH="$DOWNLOAD_PATH_ROOT/$(repo_url_to_sub_path "$UPSTREAM_REPO_URL")"
 
-            echo "Processing: REPO=$UPSTREAM_REPO  REPO_ID=$UPSTREAM_REPO_ID  REPO_URL=$REPO_URL  DOWNLOAD_PATH=$DOWNLOAD_PATH"
+            echo "Processing: REPO=$UPSTREAM_REPO  REPO_ID=$UPSTREAM_REPO_ID  REPO_URL=$REPO_URL  DOWNLOAD_PATH=$DOWNLOAD_PATH  UPSTREAM_REPO_ID=$UPSTREAM_REPO_ID  UPSTREAM_REPO=$UPSTREAM_REPO"
 
-            REPO_ID=$(grep "^[[]$UPSTREAM_REPO_ID[]]" $REPO | sed 's#[][]##g')
+            REPO_ID=$(grep "^[[]$UPSTREAM_REPO_ID[]]" $REPO | sed 's#[][]##g' | head -n 1)
 
             if [ "$REPO_ID" == "" ]; then
                 copy_repo_id "$UPSTREAM_REPO_ID" "$UPSTREAM_REPO" "$REPO"
@@ -298,7 +298,7 @@ update_yum_repos_d () {
                 return 1
             fi
 
-            REPO_NAME=$(get_repo_name "$YUM_CONF" "$REPO_ID")
+            REPO_NAME="$(get_repo_name "$YUM_CONF" "$REPO_ID")"
             if [ $? != 0 ]; then
             #     >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
                 return 1

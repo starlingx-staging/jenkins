@@ -14,6 +14,7 @@
 #
 
 LOGFILE="/export/log/repo_update.log"
+BAD_REPOS_FILE="/export/log/bad_repos.log"
 YUM_CONF_DIR="/export/config"
 # YUM_CONF_DIR="/tmp/config"
 YUM_CONF="$YUM_CONF_DIR/yum.conf"
@@ -150,12 +151,12 @@ get_repo_name () {
     if [ "${REPO_FILE}" != "" ]; then
         EXTRA_ARGS="--setopt reposdir=$(dirname $REPO_FILE)"
     fi
-    NAME=$(cd $(dirname $YUM_CONF);
+    NAME="$(cd $(dirname $YUM_CONF);
           yum repoinfo --config="$YUM_CONF" ${EXTRA_ARGS} --disablerepo="*" --enablerepo="$REPO_ID" | \
               grep Repo-name | \
-              awk '{ print $3 }';
+              sed 's#^[^:]*: ##';
           exit ${PIPESTATUS[0]}
-         )
+         )"
     if [ $? != 0 ]; then
         >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
         return 1
@@ -274,29 +275,34 @@ update_yum_repos_d () {
 echo "UPSTREAM_YUM_CONF=$UPSTREAM_YUM_CONF"
 echo "UPSTREAM_REPO_ID=$UPSTREAM_REPO_ID"
 echo "UPSTREAM_REPO=$UPSTREAM_REPO"
-                UPSTREAM_REPO_URL=$(get_repo_url "$UPSTREAM_YUM_CONF" "$UPSTREAM_REPO_ID" "${UPSTREAM_REPO}")
+                UPSTREAM_REPO_URL=$(get_repo_url "${UPSTREAM_YUM_CONF}" "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}")
                 if [ $? != 0 ]; then
-                    return 1
+                    >&2 echo "Error: get_repo_url '${UPSTREAM_YUM_CONF}' '${UPSTREAM_REPO_ID}' '${UPSTREAM_REPO}'"
+                    echo "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}" >> "${BAD_REPOS_FILE}"
+                    continue
                 fi
 echo "UPSTREAM_REPO_URL=$UPSTREAM_REPO_URL"
 
-                UPSTREAM_REPO_NAME=$(get_repo_name "$UPSTREAM_YUM_CONF" "$UPSTREAM_REPO_ID" "${UPSTREAM_REPO}")
+                UPSTREAM_REPO_NAME="$(get_repo_name "${UPSTREAM_YUM_CONF}" "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}")"
                 if [ $? != 0 ]; then
-                    return 1
+                    >&2 echo "Error: get_repo_name '${UPSTREAM_YUM_CONF}' '${UPSTREAM_REPO_ID}' '${UPSTREAM_REPO}'"
+                    echo "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}" >> "${BAD_REPOS_FILE}"
+                    continue
                 fi
 echo "UPSTREAM_REPO_NAME=$UPSTREAM_REPO_NAME"
 
                 UPSTREAM_DOWNLOAD_PATH="$DOWNLOAD_PATH_ROOT/$(repo_url_to_sub_path "$UPSTREAM_REPO_URL")"
 
-                echo "Processing: REPO=$UPSTREAM_REPO  REPO_ID=$UPSTREAM_REPO_ID  REPO_URL=$REPO_URL  DOWNLOAD_PATH=$DOWNLOAD_PATH"
+                echo "Processing: REPO=$UPSTREAM_REPO  REPO_ID=$UPSTREAM_REPO_ID  REPO_URL=$REPO_URL  DOWNLOAD_PATH=$DOWNLOAD_PATH UPSTREAM_REPO_ID=$UPSTREAM_REPO_ID  UPSTREAM_REPO=$UPSTREAM_REPO"
 
-                REPO_ID=$(grep "^[[]$UPSTREAM_REPO_ID[]]" $REPO | sed 's#[][]##g')
+                REPO_ID=$(grep "^[[]$UPSTREAM_REPO_ID[]]" $REPO | sed 's#[][]##g' | head -n 1)
 
                 if [ "$REPO_ID" == "" ]; then
                     copy_repo_id "$UPSTREAM_REPO_ID" "$UPSTREAM_REPO" "$REPO"
                     if [ $? != 0 ]; then
                         >&2 echo "Error: copy_repo_id '$UPSTREAM_REPO_ID' '$UPSTREAM_REPO' '$REPO'"
-                        return 1
+                        echo "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}" >> "${BAD_REPOS_FILE}"
+                        continue
                     fi
                     continue
                 fi
@@ -318,7 +324,7 @@ echo "UPSTREAM_REPO_NAME=$UPSTREAM_REPO_NAME"
                 fi
 echo "REPO_URL=$REPO_URL"
 
-                REPO_NAME=$(get_repo_name "$YUM_CONF" "$REPO_ID")
+                REPO_NAME="$(get_repo_name "$YUM_CONF" "$REPO_ID")"
                 if [ $? != 0 ]; then
                 #     >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
                     return 1
@@ -355,12 +361,24 @@ echo "REPO_NAME=$REPO_NAME"
         done
     done
 
+    if [ -f "${BAD_REPOS_FILE}" ]; then
+        >&2 echo "Error: failed to update the following repos..."
+        >&2 echo "REPO_ID  REPO_FILE"
+        >&2 echo "=======  ========="
+        >&2 cat "${BAD_REPOS_FILE}"
+        return 1
+    fi
+
     return 0
 }
 
 
 if [ -f $LOGFILE ]; then
     \rm -f $LOGFILE
+fi
+
+if [ -f $BAD_REPOS_FILE ]; then
+    \rm -f $BAD_REPOS_FILE
 fi
 
 (

@@ -140,9 +140,9 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
 
     # for REPO in $(find $YUM_REPOS_DIR -name '*.repo'); do
     #     for REPO_ID in $(grep '^[[]' $REPO | sed 's#[][]##g'); do
-    for REPO_ID in $(yum repolist --noplugins --config=${YUM_CONF_TMP} --quiet | tail -n +2 | sed 's/^!//' | cut -d ' ' -f 1 | grep "$REPO_ID_FILTER"); do
+    for REPO_ID in $(yum -v repolist all --noplugins --config=${YUM_CONF_TMP} --quiet | grep Repo-id | sed 's#^[^:]*: ##' | cut -d '/' -f 1 | grep "$REPO_ID_FILTER"); do
 
-        REPO_URL=$(yum repoinfo --config="${YUM_CONF_TMP}"  --disablerepo="*" --enablerepo="$REPO_ID" | grep Repo-baseurl | cut -d ' ' -f 3)
+        REPO_URL=$(yum repoinfo --config="${YUM_CONF_TMP}"  --disablerepo="*" --enablerepo="$REPO_ID" | grep Repo-baseurl | sed 's#^[^:]*: ##' )
 
         if [ "${REPO_URL}" == "" ]; then
             echo "Error: yum repoinfo --config='${YUM_CONF_TMP}'  --disablerepo='*' --enablerepo='$REPO_ID'"

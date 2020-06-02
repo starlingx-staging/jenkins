@@ -119,6 +119,9 @@ fi
 
 export DISTRO=&quot;$OS&quot;
 
+export TMPDIR=&quot;$MY_WORKSPACE/tmp&quot;
+mkdir -p &quot;$TMPDIR&quot;
+
 LAYER_PREFIX=${LAYER^^}
 if [ &quot;$LAYER&quot; == &quot;&quot; ] || [ &quot;$LAYER&quot; == &quot;all&quot; ]; then
     LAYER_PREFIX=&quot;&quot;
@@ -332,6 +335,10 @@ if [ -d $MY_REPO_ROOT/cgcs-root/stx ]; then
     done
 fi
 
+# wheels.inc
+for f in $(find $MY_WORKSPACE/std -maxdepth 1 -name &apos;*wheels.inc&apos;); do
+    \cp $f $PUBLISH_OUTPUTS_BASE/
+done
 
 # set latest_build&apos; symlink
 if [ -L $PUBLISH_DISTRO_BASE/latest_build ]; then

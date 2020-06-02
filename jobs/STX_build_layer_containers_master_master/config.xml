@@ -610,7 +610,7 @@ OS_VERSION=7.5.1804</properties>
               <onlyExactRuns>false</onlyExactRuns>
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
           </configs>
-          <projects>STX_delete_root_owned,STX_BUILD_container_teardown_,copy_logs</projects>
+          <projects>STX_delete_root_owned,STX_BUILD_container_teardown,copy_logs</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>

@@ -168,25 +168,34 @@ pushd $f
 popd
 \rm $IMG_LOG.PART
 
-
-if [ $(cat &quot;$LOG&quot; | \
-        grep -v &apos;^[.][/]cgcs-root/stx/docs &apos;  | \
-        grep -v &apos;^[.][/]cgcs-root/stx/test &apos;  | \
-        grep -v &apos;^[.][/]cgcs-root &apos;  | \
-        grep -v &apos;^[.][/]stx-tools &apos;  | \
-        grep -v &apos;^[.][/]cgcs-root/local-build-data &apos;  | \
-        wc -l) -gt 0 ]; then
-    touch &quot;${MY_WORKSPACE}/NEED_BUILD&quot;
-fi
+# if [ &quot;$LAYER&quot; != &quot;containers&quot; ]; then
+    if [ $(cat &quot;$LOG&quot; | \
+            grep -v &apos;^[.][/]cgcs-root/stx/docs &apos;  | \
+            grep -v &apos;^[.][/]cgcs-root/stx/test &apos;  | \
+            grep -v &apos;^[.][/]cgcs-root &apos;  | \
+            grep -v &apos;^[.][/]stx-tools &apos;  | \
+            grep -v &apos;^[.][/]cgcs-root/local-build-data &apos;  | \
+            wc -l) -gt 0 ]; then
+        touch &quot;${MY_WORKSPACE}/NEED_BUILD&quot;
+    fi
+# fi
 
 if [ $(cat &quot;$BLD_LOG&quot; &quot;$DL_LOG&quot; | wc -l) -gt 0 ]; then
     touch &quot;${MY_WORKSPACE}/NEED_BUILD&quot;
 fi
 
 if [ &quot;$LAYER&quot; == &quot;flock&quot; ]; then
-    if [ $(cat &quot;$ISO_LOG&quot; &quot;$IMG_LOG&quot; | wc -l) -gt 0 ]; then
+    if [ $(cat &quot;$ISO_LOG&quot; | wc -l) -gt 0 ]; then
         touch &quot;${MY_WORKSPACE}/NEED_BUILD&quot;
     fi
+fi
+
+if [ &quot;$LAYER&quot; == &quot;containers&quot; ]; then
+    if [ $(cat &quot;$IMG_LOG&quot; | wc -l) -gt 0 ]; then
+        touch &quot;${MY_WORKSPACE}/NEED_BUILD&quot;
+    fi
+    # Just always build
+    touch &quot;${MY_WORKSPACE}/NEED_BUILD&quot;
 fi
 
 if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then

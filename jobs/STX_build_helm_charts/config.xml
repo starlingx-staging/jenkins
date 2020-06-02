@@ -94,7 +94,7 @@ echo &apos;echo MY_REPO=$MY_REPO&apos; | $DOCKER_CMD
 # echo &quot;build-helm-charts.sh --os ${OS} --image-file ${IMAGE_FILE} --label ${LABEL} --verbose&quot; | $DOCKER_CMD
 
 IMAGE_DIR=$(find $MY_WORKSPACE -maxdepth 2 -type d -name build-images)
-ALT_IMAGE_SRC_DIR=$PUBLISH_DISTRO_BASE
+ALT_IMAGE_SRC_DIR=${PUBLISH_DISTRO_BASE/flock/containers}
 HELM_SAVE_DIR=$MY_WORKSPACE/helm-charts
 mkdir -p $HELM_SAVE_DIR
 ALT_IMAGE_DIR=$MY_WORKSPACE/alt_image_lists

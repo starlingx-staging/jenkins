@@ -184,10 +184,27 @@ archive_repo_id () {
     EXTRA=$(echo $TEMP | sed 's#/tmp/repo_update_##')
     \rm $TEMP
 
-    echo "Archive: '$REPO_ID' as '$REPO_ID-$EXTRA' in file '$REPO'"
+    echo "Archiv: '$REPO_ID' as '$REPO_ID-$EXTRA' in file '$REPO'"
 
+    # Append $EXTRA to repo id and name
     sed -i "s#^[[]$REPO_ID[]]#[$REPO_ID-$EXTRA]#" "$REPO"
     sed -i "s#^name=$REPO_NAME\$#name=$REPO_NAME-$EXTRA#" "$REPO"
+
+    # Disable the repo.
+    # This one is trickey.
+    # It substitutes the 'enabled-' stat only for the section beginning with '[$REPO_ID-$EXTRA]'.
+    #
+    # It uses the 'h' hold buffer to store the current section ... anything bracketed by '[' and ']'
+    # Next it looks for a line that begins with 'enabled='
+    # Next 'x' exchange operator to swap edit and hold buffers
+    # It tests if we are in the target section 
+    #    if not, 'x' exchange buffers and 'b' break
+    #    if yes, 'x' exchange buffers and 'c' change the line to read 'enabled=0'
+    sed -i '/^\[.*\]/h
+/^enabled=.*/{x;/\['"$REPO_ID-$EXTRA"'\]/!{x;b;};x;c\
+enabled=0
+}' "$REPO"
+
     return 0
 }
 

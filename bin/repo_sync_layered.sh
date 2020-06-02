@@ -25,18 +25,26 @@ YUM_CONF="${YUM_CONF_DIR}/yum.conf"
 YUM_REPOS_DIR="${YUM_CONF_DIR}/yum.repos.d"
 DOWNLOAD_PATH_ROOT="/export/mirror/centos"
 URL_UTILS="url_utils.sh"
+INI_UTILS="ini_utils.sh"
 ERR_COUNT=0
 
 DAILY_REPO_SYNC_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
 
-if [ -f "$DAILY_REPO_SYNC_DIR/$URL_UTILS" ]; then
-    source "$DAILY_REPO_SYNC_DIR/$URL_UTILS"
-elif [ -f "$DAILY_REPO_SYNC_DIR/../$URL_UTILS" ]; then
-    source "$DAILY_REPO_SYNC_DIR/../$URL_UTILS"
+source_file () {
+    local FILE=$1
+if [ -f "$DAILY_REPO_SYNC_DIR/$FILE" ]; then
+    source "$DAILY_REPO_SYNC_DIR/$FILE"
+elif [ -f "$DAILY_REPO_SYNC_DIR/../$FILE" ]; then
+    source "$DAILY_REPO_SYNC_DIR/../$FILE"
 else
-    echo "Error: Can't find '$URL_UTILS'"
+    echo "Error: Can't find '$FILE'"
     exit 1
 fi
+}
+
+source_file ${URL_UTILS}
+source_file ${INI_UTILS}
+
 
 CREATEREPO=$(which createrepo_c)
 if [ $? -ne 0 ]; then
@@ -83,14 +91,14 @@ clean_repodata () {
     local f=""
     local f2=""
 
-    if [ ! -f ${repodata=}/repomd.xml ]; then
-        echo "Error: clean_repodata: file not found: ${repodata=}/repomd.xml"
+    if [ ! -f ${repodata}/repomd.xml ]; then
+        echo "Error: clean_repodata: file not found: ${repodata}/repomd.xml"
         return 1
     fi
 
-    for f in $(find ${repodata=} -name '[a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9]*'); do
+    for f in $(find ${repodata} -name '[a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9]*'); do
         f2=$(basename $f)
-        if ! grep -q $f2 ${repodata=}/repomd.xml; then
+        if ! grep -q $f2 ${repodata}/repomd.xml; then
             \rm $f
         fi
     done
@@ -142,10 +150,18 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
     #     for REPO_ID in $(grep '^[[]' $REPO | sed 's#[][]##g'); do
     for REPO_ID in $(yum -v repolist all --noplugins --config=${YUM_CONF_TMP} --quiet | grep Repo-id | sed 's#^[^:]*: ##' | cut -d '/' -f 1 | grep "$REPO_ID_FILTER"); do
 
-        REPO_URL=$(yum repoinfo --config="${YUM_CONF_TMP}"  --disablerepo="*" --enablerepo="$REPO_ID" | grep Repo-baseurl | sed 's#^[^:]*: ##' )
+        ENABLED=$(ini_field "${REPO_FILE}" "${REPO_ID}" enabled)
+        if [ $ENABLED -eq 0 ]; then
+            echo "Skipping disabled repo '$REPO_ID'"
+            continue
+        fi
+
+        # REPO_URL=$(yum repoinfo --config="${YUM_CONF_TMP}"  --disablerepo="*" --enablerepo="$REPO_ID" | grep Repo-baseurl | sed 's#^[^:]*: ##' )
+        REPO_URL=$(ini_field "${REPO_FILE}" "${REPO_ID}" baseurl | sed 's#^[^:]*://##' )
 
         if [ "${REPO_URL}" == "" ]; then
-            echo "Error: yum repoinfo --config='${YUM_CONF_TMP}'  --disablerepo='*' --enablerepo='$REPO_ID'"
+            # echo "Error: yum repoinfo --config='${YUM_CONF_TMP}'  --disablerepo='*' --enablerepo='$REPO_ID'"
+            echo "Error: ini_field '${REPO_FILE}' '${REPO_ID}' baseurl"
             ERR_COUNT=$((ERR_COUNT+1))
             continue
         fi

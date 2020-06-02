@@ -199,8 +199,25 @@ archive_repo_id () {
 
     echo "Archive: '$REPO_ID' as '$REPO_ID-$EXTRA' in file '$REPO'"
 
+    # Append $EXTRA to repo id and name
     sed -i "s#^[[]$REPO_ID[]]#[$REPO_ID-$EXTRA]#" "$REPO"
     sed -i "s#^name=$REPO_NAME\$#name=$REPO_NAME-$EXTRA#" "$REPO"
+
+    # Disable the repo.
+    # This one is trickey.  
+    # It substitutes the 'enabled-' stat only for the section beginning with '[$REPO_ID-$EXTRA]'.
+    #
+    # It uses the 'h' hold buffer to store the current section ... anything bracketed by '[' and ']'
+    # Next it looks for a line that begins with 'enabled='
+    # Next 'x' exchange operator to swap edit and hold buffers
+    # It tests if we are in the target section
+    #    if not, 'x' exchange buffers and 'b' break
+    #    if yes, 'x' exchange buffers and 'c' change the line to read 'enabled=0'
+    sed -i '/^\[.*\]/h
+/^enabled=.*/{x;/\['"$REPO_ID-$EXTRA"'\]/!{x;b;};x;c\
+enabled=0
+}' "$REPO"
+
     return 0
 }
 
@@ -293,7 +310,7 @@ echo "UPSTREAM_REPO_NAME=$UPSTREAM_REPO_NAME"
 
                 UPSTREAM_DOWNLOAD_PATH="$DOWNLOAD_PATH_ROOT/$(repo_url_to_sub_path "$UPSTREAM_REPO_URL")"
 
-                echo "Processing: REPO=$UPSTREAM_REPO  REPO_ID=$UPSTREAM_REPO_ID  REPO_URL=$REPO_URL  DOWNLOAD_PATH=$DOWNLOAD_PATH UPSTREAM_REPO_ID=$UPSTREAM_REPO_ID  UPSTREAM_REPO=$UPSTREAM_REPO"
+                echo "Processing: REPO=$UPSTREAM_REPO  REPO_ID=$UPSTREAM_REPO_ID  DOWNLOAD_PATH=$UPSTREAM_DOWNLOAD_PATH UPSTREAM_REPO_ID=$UPSTREAM_REPO_ID  UPSTREAM_REPO=$UPSTREAM_REPO"
 
                 REPO_ID=$(grep "^[[]$UPSTREAM_REPO_ID[]]" $REPO | sed 's#[][]##g' | head -n 1)
 
@@ -331,8 +348,9 @@ echo "REPO_URL=$REPO_URL"
                 fi
 echo "REPO_NAME=$REPO_NAME"
 
-                REPO_URL=$(yum repoinfo --config="$YUM_CONF"  --disablerepo="*" --enablerepo="$REPO_ID" | grep Repo-baseurl | cut -d ' ' -f 3)
+                # REPO_URL=$(yum repoinfo --config="$YUM_CONF"  --disablerepo="*" --enablerepo="$REPO_ID" | grep Repo-baseurl | cut -d ' ' -f 3)
                 DOWNLOAD_PATH="$DOWNLOAD_PATH_ROOT/$(repo_url_to_sub_path "$REPO_URL")"
+echo "DOWNLOAD_PATH=$DOWNLOAD_PATH"
 
                 # Check critical content is the same
                 if [ "$UPSTREAM_REPO_URL" == "$REPO_URL" ] && [ "$UPSTREAM_DOWNLOAD_PATH" == "$DOWNLOAD_PATH" ] && [ "$UPSTREAM_REPO_NAME" == "$REPO_NAME" ]; then

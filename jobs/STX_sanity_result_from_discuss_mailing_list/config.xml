@@ -125,12 +125,13 @@ for ym in $((date $DATE_FORMAT; date -d &apos;yesterday&apos; $DATE_FORMAT) | so
             echo &quot;Invalid directory: $path&quot;
             continue
         fi
-        update_sanity &quot;$path&quot; &quot;$status&quot;
+        update_sanity &quot;$path&quot; &quot;$status&quot; || continue
     done
     
     \rm -f $LOG
 done
-</command>
+
+\rm -rf $TMPDIR</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>

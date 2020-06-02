@@ -659,10 +659,15 @@ BUILD_NUM=$BUILD_NUMBER</properties>
         <scriptContent>export HOST=build.starlingx.cengn.ca
 export HOST_PORT=80
 if [ &quot;$LAYER&quot; == &quot;containers&quot; ]; then
-    export REGISTRY_ORG=slittlewrs
-else
     export REGISTRY_ORG=starlingx
+else
+    export REGISTRY_ORG=slittlewrs
 fi
+
+############### added by dpanech 2020-05-11
+export REGISTRY_ORG=starlingx
+###############
+
 export REGISTRY_USERID=slittlewrs
 export REGISTRY=docker.io
 

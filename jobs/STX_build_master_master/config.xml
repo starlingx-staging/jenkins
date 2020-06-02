@@ -35,10 +35,10 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <hudson.triggers.TimerTrigger>
-      <spec>30 21 * * 2,3,4,5,6
-0 19 * * 0,1
-# 30 1 * * 0,3,4,5,6
-# 30 23 * * 0,1</spec>
+      <spec># 30 21 * * 2,3,4,5,6
+# 0 19 * * 0,1
+0 4 * * *
+</spec>
     </hudson.triggers.TimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
@@ -500,6 +500,23 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.tasks.Shell>
+      <command>## copy helm charts from latest master-container build before publishing
+
+exit 0
+
+# dpanech 2020-05-11: disable until layered containers are working
+
+SRC_LAYER=&quot;master-containers&quot;
+SRC_WORKSPACE=$(readlink -f -v &quot;/localdisk/loadbuild/$USER/$SRC_LAYER/latest_build&quot;)
+SRC_TIMESTAMP=$(basename &quot;$SRC_WORKSPACE&quot;)
+SRC_DIR=$(readlink -f -v &quot;$SRC_WORKSPACE&quot;/helm-charts)
+DST_DIR=&quot;$MY_WORKSPACE/helm-charts-from-$SRC_LAYER-$SRC_TIMESTAMP&quot;/build-helm/stx
+
+mkdir -p &quot;$DST_DIR&quot;
+find &quot;$SRC_DIR&quot; -maxdepth 1 -type f -exec cp -f -v &apos;{}&apos; &quot;$DST_DIR&quot; \;
+</command>
+    </hudson.tasks.Shell>
     <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
@@ -847,7 +864,7 @@ export MY_WORKSPACE=/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP
 export DOCKER_BUILD_ID=$USER-$PROJECT-$TIMESTAMP-builder
 export DOCKER_BUILD_TAG=$PROJECT-$TIMESTAMP-builder-image
 
-export PUBLISH_DISTRO_BASE=/export/mirror/starlingx/$PUBLISH_BRANCH/$DISTRO
+export PUBLISH_DISTRO_BASE=/export/mirror/starlingx/$PUBLISH_BRANCH/$DISTRO/monolithic
 export PUBLISH_BUILD_BASE=$PUBLISH_DISTRO_BASE/$PUBLISH_TIMESTAMP
 export PUBLISH_INPUTS_BASE=$PUBLISH_BUILD_BASE/inputs
 export PUBLISH_OUTPUTS_BASE=$PUBLISH_BUILD_BASE/outputs

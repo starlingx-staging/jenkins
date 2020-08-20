@@ -86,8 +86,12 @@ MYUNAME=$(id -un)
 DOCKER_CMD=&quot;docker exec --interactive --user=${MYUNAME} -e MYUNAME=${MYUNAME} ${DOCKER_BUILD_ID} /bin/bash -i -&quot;
 
 if [ -f &quot;${MY_REPO}/build-tools/build-remote-cli.sh&quot; ]; then
-    # echo &quot;build-remote-cli.sh -t $FLOCK_VERSION.0&quot; | $DOCKER_CMD
-    echo &quot;build-remote-cli.sh --platform-image docker.io/starlingx/stx-platformclients:$FLOCK_VERSION.0 --application-image docker.io/starlingx/stx-openstackclients:$FLOCK_VERSION.0&quot; | $DOCKER_CMD
+    if grep -q -- &apos;--application-image&apos; &quot;${MY_REPO}/build-tools/build-remote-cli.sh&quot; ; then
+        CMD=&quot;build-remote-cli.sh --platform-image docker.io/starlingx/stx-platformclients:$FLOCK_VERSION.0 --application-image docker.io/starlingx/stx-openstackclients:$FLOCK_VERSION.0&quot;
+    else
+        CMD=&quot;build-remote-cli.sh -t $FLOCK_VERSION.0&quot;
+    fi
+    echo &quot;$CMD&quot; | $DOCKER_CMD
 fi</command>
     </hudson.tasks.Shell>
   </builders>

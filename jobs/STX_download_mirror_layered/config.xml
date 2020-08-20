@@ -91,7 +91,7 @@ export MIRROR_TOOLS_DIR=$MY_REPO_ROOT/stx-tools/centos-mirror-tools
 export DOCKER_BUILD_WORKDIR=$MY_REPO_ROOT/stx-tools
 export STX_INSTALLER_DIR=&quot;$DOCKER_BUILD_WORKDIR/centos-mirror-tools/output/stx-installer&quot;
 
-docker exec -i $DOCKER_BUILD_ID /bin/bash -c &quot;cd $MIRROR_TOOLS_DIR; chown -R $(id -u) output logs&quot;
+docker exec -i $DOCKER_BUILD_ID /bin/bash -c &quot;cd $MIRROR_TOOLS_DIR; mkdir -p output logs ; chown -R $(id -u) output logs&quot;
 docker exec -i $DOCKER_BUILD_ID /bin/bash -c &quot;export MY_REPO=$MY_REPO; cd $MIRROR_TOOLS_DIR; bash -x -e ./download_mirror.sh -l $LAYER&quot;
 docker exec -i $DOCKER_BUILD_ID /bin/bash -c &quot;cd $MIRROR_TOOLS_DIR; chown -R $(id -u) output logs&quot;
 
@@ -153,7 +153,7 @@ fi</command>
       <replyTo>$DEFAULT_REPLYTO</replyTo>
       <from></from>
       <saveOutput>false</saveOutput>
-      <disabled>false</disabled>
+      <disabled>true</disabled>
     </hudson.plugins.emailext.ExtendedEmailPublisher>
     <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.35.2">
       <configs>

@@ -266,6 +266,13 @@ function test_deletable {
     fi
 
     if [ "$LINK_DIR" != "" ] && [ -d $LINK_DIR ]; then
+        if [ -L $LINK_DIR/latest_build ]; then
+            if [ "$(basename $(readlink $LINK_DIR/latest_build))" == "$(basename $DIR)" ]; then
+                >&2 echo "   keep '$DIR' due to latest_build symlink"
+                KEEP=1
+            fi
+        fi
+
         if [ -L $LINK_DIR/latest_green_build ]; then
             if [ "$(basename $(readlink $LINK_DIR/latest_green_build))" == "$(basename $DIR)" ]; then
                 >&2 echo "   keep '$DIR' due to latest_green_build symlink"
@@ -326,7 +333,7 @@ function published_build_cleanup_by_age {
         return 1
     fi
 
-    if [[ $BUILD_DIR != $PUBLISHED_LOADS/master/* ]] && [[ $BUILD_DIR != $PUBLISHED_LOADS/feature/* ]] && [[ $BUILD_DIR != $PUBLISHED_LOADS/rc/* ]]; then
+    if [[ $BUILD_DIR != $PUBLISHED_LOADS/master/* ]] && [[ $BUILD_DIR != $PUBLISHED_LOADS/ussuri/* ]] && [[ $BUILD_DIR != $PUBLISHED_LOADS/feature/* ]] && [[ $BUILD_DIR != $PUBLISHED_LOADS/rc/* ]]; then
         >&2 echo "directory '$BUILD_DIR' does not start with '$PUBLISHED_LOADS/master/' or '$PUBLISHED_LOADS/feature/' or '$PUBLISHED_LOADS/rc/'"
         return 1
     fi
@@ -551,6 +558,26 @@ function delete_old_master_builds_and_publications {
     return 0
 }
 
+function delete_old_ussuri_builds_and_publications {
+    local TRIAL_RUN=$1
+    local DIR
+
+    if [ -z $TRIAL_RUN ]; then
+        TRIAL_RUN=0
+    elif [ "$TRIAL_RUN" == "t" ] || [ "$TRIAL_RUN" == "T" ] || [ "$TRIAL_RUN" == "true" ] || [ "$TRIAL_RUN" == "TRUE" ]; then
+        TRIAL_RUN=1
+    fi
+
+    for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d -name 'ussuri*' ) -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
+        workspace_cleanup_by_age $DIR $TRIAL_RUN
+    done
+    for DIR in $(find $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name 'ussuri' ) -maxdepth 4 -name SAVE_DATA -exec dirname {} \; ); do
+        published_build_cleanup_by_age $DIR $TRIAL_RUN
+    done
+
+    return 0
+}
+
 function delete_old_feature_builds_and_publications {
     local TRIAL_RUN=$1
     local DIR
@@ -742,6 +769,7 @@ done
 
 if [ $DELETE_MASTER -eq 1 ]; then
     delete_old_master_builds_and_publications $TRIAL
+    delete_old_ussuri_builds_and_publications $TRIAL
 fi
 if [ $DELETE_FEATURES -eq 1 ]; then
     delete_old_feature_builds_and_publications $TRIAL

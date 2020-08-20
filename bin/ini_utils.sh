@@ -23,5 +23,19 @@ ini_field () {
     local section="$2"
     local field="$3"
 
+    if [ ! -f "${ini_file}" ]; then
+        return 1
+    fi
+
     ini_section "${ini_file}" "${section}" | grep "^${field}=" | sed -e "s#^${field}=##" -e 's#^"##' -e 's#"$##'
+}
+
+ini_section_list () {
+    local ini_file="$1"
+
+    if [ ! -f "${ini_file}" ]; then
+        return 1
+    fi
+
+    grep '^\[.*\]' "${ini_file}" | sed -e 's#^\[##' -e 's#\]$##'
 }

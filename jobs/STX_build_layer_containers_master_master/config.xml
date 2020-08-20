@@ -408,31 +408,31 @@
                 <days>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>2</day>
-                    <selected>false</selected>
+                    <selected>true</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>3</day>
-                    <selected>false</selected>
+                    <selected>true</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>4</day>
-                    <selected>false</selected>
+                    <selected>true</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>5</day>
-                    <selected>false</selected>
+                    <selected>true</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>6</day>
-                    <selected>false</selected>
+                    <selected>true</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>7</day>
-                    <selected>false</selected>
+                    <selected>true</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>1</day>
-                    <selected>false</selected>
+                    <selected>true</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                 </days>
               </daySelector>

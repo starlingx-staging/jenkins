@@ -88,6 +88,8 @@ for ym in $((date $DATE_FORMAT; date -d &apos;yesterday&apos; $DATE_FORMAT) | so
         continue
     fi
 
+    sed -i -e &apos;/^Subject.*Sanity/{:1 N;/[^t]:/b; s/\n//; b1}&apos; $ARCHIVE
+    
     # Look for messages with a subject suggesting a sanity test result
     grep &quot;^Subject: \[Starlingx-discuss\] FW: Sanity Test&quot; $ARCHIVE &gt; $HEADERS || true
     grep &quot;^Subject: \[Starlingx-discuss\] Sanity Test&quot; $ARCHIVE &gt;&gt; $HEADERS || true

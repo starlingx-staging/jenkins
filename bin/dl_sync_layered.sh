@@ -117,7 +117,7 @@ raw_dl_from_non_rpm_lst () {
         TARBALL_NAME="${TAR//!/}"
         if [[ "$TAR" =~ ^'!' ]]; then
             case $METHOD in
-                http|http_script)
+                http|https|http_script)
                     dl_file_from_url "$URL"
                     if [ $? -ne 0 ]; then
                         echo "Error: Failed to download '$URL' while processing '$TARBALL_NAME'"

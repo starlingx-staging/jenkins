@@ -148,7 +148,8 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
 
     # for REPO in $(find $YUM_REPOS_DIR -name '*.repo'); do
     #     for REPO_ID in $(grep '^[[]' $REPO | sed 's#[][]##g'); do
-    for REPO_ID in $(yum -v repolist all --noplugins --config=${YUM_CONF_TMP} --quiet | grep Repo-id | sed 's#^[^:]*: ##' | cut -d '/' -f 1 | grep "$REPO_ID_FILTER"); do
+    # for REPO_ID in $(yum -v repolist all --noplugins --config=${YUM_CONF_TMP} --quiet | grep Repo-id | sed 's#^[^:]*: ##' | cut -d '/' -f 1 | grep "$REPO_ID_FILTER"); do
+    for REPO_ID in $(ini_section_list "${REPO_FILE}" | grep "$REPO_ID_FILTER"); do
 
         ENABLED=$(ini_field "${REPO_FILE}" "${REPO_ID}" enabled)
         if [ $ENABLED -eq 0 ]; then
@@ -157,7 +158,8 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
         fi
 
         # REPO_URL=$(yum repoinfo --config="${YUM_CONF_TMP}"  --disablerepo="*" --enablerepo="$REPO_ID" | grep Repo-baseurl | sed 's#^[^:]*: ##' )
-        REPO_URL=$(ini_field "${REPO_FILE}" "${REPO_ID}" baseurl | sed 's#^[^:]*://##' )
+        # REPO_URL=$(ini_field "${REPO_FILE}" "${REPO_ID}" baseurl | sed 's#^[^:]*://##' )
+        REPO_URL=$(ini_field "${REPO_FILE}" "${REPO_ID}" baseurl )
 
         if [ "${REPO_URL}" == "" ]; then
             # echo "Error: yum repoinfo --config='${YUM_CONF_TMP}'  --disablerepo='*' --enablerepo='$REPO_ID'"

@@ -252,11 +252,14 @@
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
     <EnvInjectBuildWrapper plugin="envinject@2.1.6">
       <info>
-        <scriptContent>echo FORCE_BUILD=&quot;$FORCE_BUILD&quot;
+        <scriptContent>BUILD_CONTAINERS_STABLE=true
+echo FORCE_BUILD=&quot;$FORCE_BUILD&quot;
 echo BUILD_CONTAINERS=&quot;$BUILD_CONTAINERS&quot;
+echo BUILD_CONTAINERS_STABLE=$BUILD_CONTAINERS_STABLE
 
 echo FORCE_BUILD=$FORCE_BUILD &gt; env.properties
-echo BUILD_CONTAINERS=$BUILD_CONTAINERS &gt;&gt; env.properties</scriptContent>
+echo BUILD_CONTAINERS=$BUILD_CONTAINERS &gt;&gt; env.properties
+echo BUILD_CONTAINERS_STABLE=$BUILD_CONTAINERS_STABLE &gt;&gt;env.properties</scriptContent>
         <secureGroovyScript plugin="script-security@1.58">
           <script></script>
           <sandbox>false</sandbox>

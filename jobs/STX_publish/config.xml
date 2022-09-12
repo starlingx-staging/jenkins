@@ -4,6 +4,14 @@
   <description>Publish build products to http://mirror.starlingx.cengn.ca</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>30</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
@@ -76,6 +84,18 @@
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RETRIES</name>
+          <description></description>
+          <defaultValue>13</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RETRY_INTERVAL_SEC</name>
+          <description></description>
+          <defaultValue>300</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -100,6 +120,9 @@ echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
 echo &quot;LAYER=$LAYER&quot;
+echo &quot;RETRIES=$RETRIES&quot;
+echo &quot;RETRY_INTERVAL_SEC=$RETRY_INTERVAL_SEC&quot;
+
 
 [ -n &quot;$MY_REPO_ROOT&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
@@ -112,8 +135,17 @@ echo &quot;LAYER=$LAYER&quot;
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 [ -n &quot;$MASTER_JOB_NAME&quot; ]
 
+source ~/bin/retries.sh
+function with_default_retries {
+    local cmd=$1
+    shift 1
+    with_retries ${RETRIES:-1} ${RETRY_INTERVAL_SEC:-1} &quot;${cmd}&quot; &quot;$@&quot;
+}
+
 if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; -a &quot;${FORCE_BUILD}&quot; != &quot;true&quot; ]; then
     echo &quot;No new content.  Build not required&quot;
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE
+    with_default_retries bash -c &quot;echo &apos;No new content.  Build not required&apos; &gt; $PUBLISH_OUTPUTS_BASE/No_New_Content&quot;
     exit 0
 fi
 
@@ -127,7 +159,7 @@ if [ &quot;$LAYER&quot; == &quot;&quot; ] || [ &quot;$LAYER&quot; == &quot;all&q
     LAYER_PREFIX=&quot;&quot;
 fi
 
-mkdir -p $PUBLISH_DISTRO_BASE
+with_default_retries mkdir -p $PUBLISH_DISTRO_BASE
 LN=&quot;$MY_WORKSPACE/../publish_dir&quot;
 if [ ! -L $LN ]; then
     ln -s $PUBLISH_DISTRO_BASE $LN
@@ -138,155 +170,181 @@ BUILD_TYPES=( &quot;std&quot; &quot;rt&quot; &quot;installer&quot; &quot;contain
 
 
 for BUILD_TYPE in &quot;${BUILD_TYPES[@]}&quot;; do
-    mkdir -p $PUBLISH_OUTPUTS_BASE/RPMS/$BUILD_TYPE
-    mkdir -p $PUBLISH_OUTPUTS_BASE/SRPMS/$BUILD_TYPE
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE/RPMS/$BUILD_TYPE
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE/SRPMS/$BUILD_TYPE
 done
-mkdir -p $PUBLISH_LOGS_BASE
+with_default_retries mkdir -p $PUBLISH_LOGS_BASE
 
 ENV_FILE=&quot;~/workspace/$MASTER_JOB_NAME/env.properties&quot;
 if [ -f &quot;$ENV_FILE&quot; ]; then
-    \cp -v $ENV_FILE $PUBLISH_LOGS_BASE/
+    with_default_retries \cp -v $ENV_FILE $PUBLISH_LOGS_BASE/
 fi
 
 # Publish iso
 if [ -d $MY_WORKSPACE/export ]; then
-    mkdir -p $PUBLISH_OUTPUTS_BASE/iso
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE/iso
     for ISO_FILE in $(find $MY_WORKSPACE/export -maxdepth 1 -type f -name &apos;bootimage.*&apos;); do
-        cp -L -v $ISO_FILE $PUBLISH_OUTPUTS_BASE/iso/
+        with_default_retries \cp -L -v $ISO_FILE $PUBLISH_OUTPUTS_BASE/iso/
     done
 fi
 
 # Publish output rpms and src.rpms
 for BUILD_TYPE in $(find $MY_WORKSPACE -maxdepth 2 -type d -name rpmbuild -exec dirname {} \; | xargs --max-lines=1 --no-run-if-empty basename); do
-    \cp -r -L -v $MY_WORKSPACE/$BUILD_TYPE/rpmbuild/RPMS/./ $PUBLISH_OUTPUTS_BASE/RPMS/$BUILD_TYPE/
+    with_default_retries \cp -r -L -v $MY_WORKSPACE/$BUILD_TYPE/rpmbuild/RPMS/./ $PUBLISH_OUTPUTS_BASE/RPMS/$BUILD_TYPE/
     (
     cd $PUBLISH_OUTPUTS_BASE/RPMS/$BUILD_TYPE
-    \rm -f *.src.rpm
+    with_default_retries \rm -f *.src.rpm
     if [ -f srpm.lst ]; then
-        \rm -f srpm.lst
+        with_default_retries \rm -f srpm.lst
     fi
-    createrepo_c --update .
+    with_default_retries createrepo_c --update .
     )
     
-    \cp -r -L -v $MY_WORKSPACE/$BUILD_TYPE/rpmbuild/SRPMS/./ $PUBLISH_OUTPUTS_BASE/SRPMS/$BUILD_TYPE/
+    with_default_retries \cp -r -L -v $MY_WORKSPACE/$BUILD_TYPE/rpmbuild/SRPMS/./ $PUBLISH_OUTPUTS_BASE/SRPMS/$BUILD_TYPE/
     (
     cd $PUBLISH_OUTPUTS_BASE/SRPMS/$BUILD_TYPE
     if [ -f rpm.lst ]; then
-        \rm -f rpm.lst
+        with_default_retries \rm -f rpm.lst
     fi
-    createrepo_c --update .
+    with_default_retries createrepo_c --update .
     )
 done
 
 # Publish image inc files
 for IMAGE_INC in $(find $MY_WORKSPACE/std -maxdepth 1 -type f -name &apos;image*.inc&apos;); do
-    \cp -r -L -v $IMAGE_INC $PUBLISH_OUTPUTS_BASE/
+    with_default_retries \cp -r -L -v $IMAGE_INC $PUBLISH_OUTPUTS_BASE/
 done
 
 # Publish installer
 if [ -d $MY_REPO_ROOT/stx-tools/centos-mirror-tools/output/stx-installer ]; then
-    mkdir -p $PUBLISH_OUTPUTS_BASE/installer
-    \cp -L -v $MY_REPO_ROOT/stx-tools/centos-mirror-tools/output/stx-installer/* $PUBLISH_OUTPUTS_BASE/installer/
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE/installer
+    with_default_retries \cp -L -v $MY_REPO_ROOT/stx-tools/centos-mirror-tools/output/stx-installer/* $PUBLISH_OUTPUTS_BASE/installer/
 fi
 
 # Publish helm charts
 for d in $(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm); do
-    mkdir -p $PUBLISH_OUTPUTS_BASE/helm-charts
-    \cp -v $d/stx/*.tgz $PUBLISH_OUTPUTS_BASE/helm-charts
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE/helm-charts
+    with_default_retries \cp -v $d/stx/*.tgz $PUBLISH_OUTPUTS_BASE/helm-charts
 done
 
 # Publish context
 if [ -f $MY_WORKSPACE/CONTEXT ]; then
-   \cp -v $MY_WORKSPACE/CONTEXT $PUBLISH_OUTPUTS_BASE/CONTEXT.sh
+   with_default_retries \cp -v $MY_WORKSPACE/CONTEXT $PUBLISH_OUTPUTS_BASE/CONTEXT.sh
 fi
 
 # Publish change log
 if [ -f $MY_WORKSPACE/CHANGELOG ]; then
-   \cp -v $MY_WORKSPACE/CHANGELOG $PUBLISH_OUTPUTS_BASE/CHANGELOG.txt
+   with_default_retries \cp -v $MY_WORKSPACE/CHANGELOG $PUBLISH_OUTPUTS_BASE/CHANGELOG.txt
 fi
 
 # Publish build info
 if [ &quot;$LAYER&quot; == &quot;&quot; ] || [ &quot;$LAYER&quot; == &quot;flock&quot; ]; then
     if [ -f $MY_WORKSPACE/BUILD ]; then
-       \cp -v $MY_WORKSPACE/BUILD $PUBLISH_OUTPUTS_BASE/ISO_BUILD_INFO.txt
+       with_default_retries \cp -v $MY_WORKSPACE/BUILD $PUBLISH_OUTPUTS_BASE/ISO_BUILD_INFO.txt
     fi
 fi
 
 if [ &quot;$LAYER&quot; == &quot;&quot; ] ; then
     if [ -f &quot;$MY_WORKSPACE/BUILD&quot;  ]; then
-        cp -v &quot;$MY_WORKSPACE/BUILD&quot; $PUBLISH_OUTPUTS_BASE/BUILD_INFO
-        cp -v $PUBLISH_OUTPUTS_BASE/BUILD_INFO $PUBLISH_OUTPUTS_BASE/BUILD_INFO.txt
+        with_default_retries \cp -v &quot;$MY_WORKSPACE/BUILD&quot; $PUBLISH_OUTPUTS_BASE/BUILD_INFO
+        with_default_retries \cp -v $PUBLISH_OUTPUTS_BASE/BUILD_INFO $PUBLISH_OUTPUTS_BASE/BUILD_INFO.txt
     fi
 else
     if [ -f &quot;$MY_WORKSPACE/BUILD&quot;  ]; then
-        grep &quot;^${LAYER_PREFIX}_&quot; &quot;$MY_WORKSPACE/BUILD&quot; &gt; $PUBLISH_OUTPUTS_BASE/BUILD_INFO
-        cp -v $PUBLISH_OUTPUTS_BASE/BUILD_INFO $PUBLISH_OUTPUTS_BASE/BUILD_INFO.txt
+        with_default_retries bash -c &quot;grep &apos;^${LAYER_PREFIX}_&apos; &apos;$MY_WORKSPACE/BUILD&apos; &gt; $PUBLISH_OUTPUTS_BASE/BUILD_INFO&quot;
+        with_default_retries \cp -v $PUBLISH_OUTPUTS_BASE/BUILD_INFO $PUBLISH_OUTPUTS_BASE/BUILD_INFO.txt
     fi
 fi
 
 # Copy build-pkg logs
 for BUILD_TYPE in $(find $MY_WORKSPACE -maxdepth 2 -type d -name rpmbuild -exec dirname {} \; | xargs --max-lines=1 --no-run-if-empty basename); do
     for f in $(find $MY_WORKSPACE/$BUILD_TYPE -maxdepth 1 -type f -name &apos;*.log&apos;); do
-        mkdir -p $PUBLISH_LOGS_BASE/std/
-        \cp -v $f $PUBLISH_LOGS_BASE/std/
+        with_default_retries mkdir -p $PUBLISH_LOGS_BASE/std/
+        with_default_retries \cp -v $f $PUBLISH_LOGS_BASE/std/
     done
     
     if [ -f $MY_WORKSPACE/build-$BUILD_TYPE.log ]; then
-        \cp -v $MY_WORKSPACE/build-$BUILD_TYPE.log $PUBLISH_LOGS_BASE/
+        with_default_retries \cp -v $MY_WORKSPACE/build-$BUILD_TYPE.log $PUBLISH_LOGS_BASE/
     fi
     
     # Add failure logs of individual packages
     for d in $(find $MY_WORKSPACE/$BUILD_TYPE/results/ -type f -name &apos;fail&apos; -exec dirname {} \; ); do
         b=$(basename $d)
-       mkdir -p $PUBLISH_LOGS_BASE/std/failed-packages/$b
-        cp -v $d/*log $PUBLISH_LOGS_BASE/std/failed-packages/$b/
+        with_default_retries mkdir -p $PUBLISH_LOGS_BASE/std/failed-packages/$b
+        with_default_retries \cp -v $d/*log $PUBLISH_LOGS_BASE/std/failed-packages/$b/
     done
 done
 
 # Copy downloads directory
 if [ -d $MY_REPO_ROOT/cgcs-root/stx/downloads ]; then
-   mkdir -p $PUBLISH_INPUTS_BASE/downloads
+    with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/downloads
     cd $MY_REPO_ROOT/cgcs-root/stx/downloads
-    find . -type d -exec mkdir -p $PUBLISH_INPUTS_BASE/downloads/{} \;
-    find . -type f -exec cp -v {} $PUBLISH_INPUTS_BASE/downloads/{} \;
+    for d in $(find . -type d); do
+        with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/downloads/$d
+    done
+    for f in $(find . -type f); do
+        with_default_retries \cp -v $f $PUBLISH_INPUTS_BASE/downloads/$f
+    done
+    pwd
     for l in $(find . -type l); do
         d=$(dirname $l)
         f=$(readlink $l | sed &quot;s#^/import/mirrors/CentOS/#${MY_REPO_ROOT}/stx-tools/centos-mirror-tools/output/#&quot;)
 
         if [ -f &quot;${f}&quot; ]; then
-            \cp -v $f $PUBLISH_INPUTS_BASE/downloads/$d
+            with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/downloads/$d
+            with_default_retries \cp -v $f $PUBLISH_INPUTS_BASE/downloads/$d
         fi
     done
+    pwd
+fi
+
+# New or old distro repo path?
+DISTRO_REPO=$MY_REPO_ROOT/cgcs-root/centos-repo
+if [ ! -d $DISTRO_REPO ]; then
+   DISTRO_REPO=$MY_REPO_ROOT/cgcs-root/cgcs-centos-repo
+   if [ ! -d $DISTRO_REPO ]; then
+      DISTRO_REPO=$MY_REPO_ROOT/cgcs-root/centos-repo
+   fi
 fi
 
 # Publish input rpms
-if [ -d $MY_REPO_ROOT/cgcs-root/cgcs-centos-repo/Binary ]; then
-    mkdir -p $PUBLISH_INPUTS_BASE/RPMS
-    cd $MY_REPO_ROOT/cgcs-root/cgcs-centos-repo/Binary
-    find . -type d -exec mkdir -p $PUBLISH_INPUTS_BASE/RPMS/{} \;
-    find . -type f -exec cp -v {} $PUBLISH_INPUTS_BASE/RPMS/{} \;
+if [ -d $DISTRO_REPO/Binary ]; then
+    with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/RPMS
+    cd $DISTRO_REPO/Binary
+    for d in $(find . -type d); do
+        with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/RPMS/$d
+    done
+    for f in $(find . -type f); do
+        with_default_retries \cp -v $f $PUBLISH_INPUTS_BASE/RPMS/$f
+    done
     for l in $(find . -type l); do
         d=$(dirname $l)
         f=$(readlink $l | sed &quot;s#^/import/mirrors/CentOS/#${MY_REPO_ROOT}/stx-tools/centos-mirror-tools/output/#&quot;)
 
         if [ -f &quot;${f}&quot; ]; then
-            \cp -v $f $PUBLISH_INPUTS_BASE/RPMS/$d
+            with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/RPMS/$d
+            with_default_retries \cp -v $f $PUBLISH_INPUTS_BASE/RPMS/$d
         fi
     done
 fi
 
 # Publish input src.rpms
-if [ -d $MY_REPO_ROOT/cgcs-root/cgcs-centos-repo/Source ]; then
-    mkdir -p $PUBLISH_INPUTS_BASE/SRPMS
-    cd $MY_REPO_ROOT/cgcs-root/cgcs-centos-repo/Source
-    find . -type d -exec mkdir -p $PUBLISH_INPUTS_BASE/SRPMS/{} \;
-    find . -type f -exec cp -v {} $PUBLISH_INPUTS_BASE/SRPMS/{} \;
+if [ -d $DISTRO_REPO/Source ]; then
+    with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/SRPMS
+    cd $DISTRO_REPO/Source
+    for d in $(find . -type d); do
+        with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/SRPMS/$d
+    done
+    for f in $(find . -type f); do
+        with_default_retries \cp -v $f $PUBLISH_INPUTS_BASE/SRPMS/$f
+    done
     for l in $(find . -type l); do
         d=$(dirname $l)
         f=$(readlink $l | sed &quot;s#^/import/mirrors/CentOS/#${MY_REPO_ROOT}/stx-tools/centos-mirror-tools/output/#&quot;)
 
         if [ -f &quot;${f}&quot; ]; then
-            \cp -v $f $PUBLISH_INPUTS_BASE/SRPMS/$d
+            with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/SRPMS/$d
+            with_default_retries \cp -v $f $PUBLISH_INPUTS_BASE/SRPMS/$d
         fi
     done
 fi
@@ -296,6 +354,11 @@ get_latest_tag_on_branch () {
     local branch=${1}
     git log --simplify-by-decoration --decorate --pretty=oneline ${branch} | grep &apos;tag: &apos; | sed &apos;s/.*tag: \([^,)]*\).*/\1/&apos; | grep &apos;[0-9][.][0-9]&apos; | head -n 1
     # git describe --tags --abbrev=0 ${branch}
+}
+
+get_latest_simple_tag_on_branch () {
+    local branch=${1}
+    git log --simplify-by-decoration --decorate --pretty=oneline ${branch} | grep &apos;tag: &apos; | sed &apos;s/.*tag: \([^,)]*\).*/\1/&apos; | grep &apos;[0-9][.][0-9]&apos; | grep -v &apos;/&apos; | head -n 1
 }
 
 get_commits_since_tag () {
@@ -314,7 +377,7 @@ get_commits_since_tag () {
 
 # Tarballs of stx repos
 if [ -d $MY_REPO_ROOT/cgcs-root/stx ]; then
-    mkdir -p $PUBLISH_OUTPUTS_BASE/tarballs
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE/tarballs
     excludes=&apos;--exclude=*.git --exclude=*.gitignore --exclude=*.gitreview --exclude=*.zuul.yaml&apos;
 
     for d in $(find $MY_REPO_ROOT/cgcs-root/stx -maxdepth 1 -mindepth 1 -type d -not -name git -not -name downloads); do
@@ -322,7 +385,7 @@ if [ -d $MY_REPO_ROOT/cgcs-root/stx ]; then
         cd $d
         dir=$(basename ${d})
         tar_name=${dir}
-        tag=$(get_latest_tag_on_branch )
+        tag=$(get_latest_simple_tag_on_branch )
         if [ ! -z &quot;${tag}&quot; ]; then
             tar_name+=&quot;-${tag}&quot;
             commit_count=$(get_commits_since_tag ${tag})
@@ -330,22 +393,22 @@ if [ -d $MY_REPO_ROOT/cgcs-root/stx ]; then
                 tar_name+=&quot;-${commit_count}&quot;
             fi
         fi
-        tar ${excludes} --transform=&quot;s/^[.]/${tar_name}/&quot; -czvf $PUBLISH_OUTPUTS_BASE/tarballs/${tar_name}.tgz .
+        with_default_retries tar ${excludes} --transform=&quot;s/^[.]/${tar_name}/&quot; -czvf $PUBLISH_OUTPUTS_BASE/tarballs/${tar_name}.tgz .
         )
     done
 fi
 
 # wheels.inc
 for f in $(find $MY_WORKSPACE/std -maxdepth 1 -name &apos;*wheels.inc&apos;); do
-    \cp $f $PUBLISH_OUTPUTS_BASE/
+    with_default_retries \cp $f $PUBLISH_OUTPUTS_BASE/
 done
 
 # set latest_build&apos; symlink
 if [ -L $PUBLISH_DISTRO_BASE/latest_build ]; then
-    \rm -f $PUBLISH_DISTRO_BASE/latest_build 
+    with_default_retries \rm -f $PUBLISH_DISTRO_BASE/latest_build 
 fi
 
-ln -s $TIMESTAMP $PUBLISH_DISTRO_BASE/latest_build
+with_default_retries ln -s $TIMESTAMP $PUBLISH_DISTRO_BASE/latest_build
 
 if [ &quot;${LAYER}&quot; != &quot;&quot; ]; then
     ~/bin/repo_sync_layered.sh --repo-file-filter StarlingX_cengn_${LAYER}_layer

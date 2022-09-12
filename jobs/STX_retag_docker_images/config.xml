@@ -4,6 +4,14 @@
   <description>Retag images we don&apos;t normally build</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
@@ -47,15 +55,15 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>HOST</name>
+          <name>WEB_HOST</name>
           <description></description>
-          <defaultValue>build.starlingx.cengn.ca</defaultValue>
+          <defaultValue>mirror.starlingx.cengn.ca</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>HOST_PORT</name>
+          <name>WEB_HOST_PORT</name>
           <description></description>
-          <defaultValue>8089</defaultValue>
+          <defaultValue>80</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -184,8 +192,8 @@ echo &quot;BUILD_STREAM=$BUILD_STREAM&quot;
 echo &quot;REGISTRY=$REGISTRY&quot;
 echo &quot;REGISTRY_ORG=$REGISTRY_ORG&quot;
 echo &quot;REGISTRY_USERID=$REGISTRY_USERID&quot;
-echo &quot;HOST=$HOST&quot;
-echo &quot;HOST_PORT=$HOST_PORT&quot;
+echo &quot;WEB_HOST=$WEB_HOST&quot;
+echo &quot;WEB_HOST_PORT=$WEB_HOST_PORT&quot;
 echo &quot;MY_REPO=$MY_REPO&quot;
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
 echo &quot;PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE&quot;
@@ -205,8 +213,8 @@ echo &quot;RETAG_IMAGE_LIST=$RETAG_IMAGE_LIST&quot;
 [ -n &quot;$REGISTRY&quot; ]
 [ -n &quot;$REGISTRY_ORG&quot; ]
 [ -n &quot;$REGISTRY_USERID&quot; ]
-[ -n &quot;$HOST&quot; ]
-[ -n &quot;$HOST_PORT&quot; ]
+[ -n &quot;$WEB_HOST&quot; ]
+[ -n &quot;$WEB_HOST_PORT&quot; ]
 [ -n &quot;$MY_REPO&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
 [ -n &quot;$PUBLISH_OUTPUTS_BASE&quot; ]

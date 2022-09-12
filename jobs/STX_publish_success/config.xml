@@ -1,7 +1,7 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Publish wheel tarball</description>
+  <description>Publish build products to http://mirror.starlingx.cengn.ca</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -19,19 +19,19 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>OS</name>
+          <name>PUBLISH_DISTRO_BASE</name>
           <description></description>
-          <defaultValue>centos</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>BUILD_STREAM</name>
-          <description>dev or stable</description>
-          <defaultValue>dev</defaultValue>
+          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>PUBLISH_OUTPUTS_BASE</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_INPUTS_BASE</name>
           <description></description>
           <defaultValue></defaultValue>
           <trim>false</trim>
@@ -49,6 +49,18 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
+          <name>OS</name>
+          <description></description>
+          <defaultValue>centos</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TIMESTAMP</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>PUBLISH_LOGS_BASE</name>
           <description></description>
           <defaultValue>/tmp/logs</defaultValue>
@@ -61,15 +73,15 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>PUBLISH_DISTRO_BASE</name>
-          <description></description>
-          <defaultValue>/export/mirror/starlingx/feature/stein/centos</defaultValue>
+          <name>MASTER_JOB_NAME</name>
+          <description>Top of tree build job name</description>
+          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>TIMESTAMP</name>
+          <name>LAYER</name>
           <description></description>
-          <defaultValue>19000101T010101Z</defaultValue>
+          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -96,27 +108,32 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
+      <command>
+echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
 echo &quot;OS=$OS&quot;
+echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
+echo &quot;PUBLISH_INPUTS_BASE=$PUBLISH_INPUTS_BASE&quot;
 echo &quot;PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE&quot;
-echo &quot;BUILD_STREAM=$BUILD_STREAM&quot;
+echo &quot;TIMESTAMP=$TIMESTAMP&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
-echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
-echo &quot;TIMESTAMP=$TIMESTAMP&quot;
+echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
+echo &quot;LAYER=$LAYER&quot;
 echo &quot;RETRIES=$RETRIES&quot;
 echo &quot;RETRY_INTERVAL_SEC=$RETRY_INTERVAL_SEC&quot;
+
 
 [ -n &quot;$MY_REPO_ROOT&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
 [ -n &quot;$OS&quot; ]
+[ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
+[ -n &quot;$PUBLISH_INPUTS_BASE&quot; ]
 [ -n &quot;$PUBLISH_OUTPUTS_BASE&quot; ]
-[ -n &quot;$BUILD_STREAM&quot; ]
+[ -n &quot;$TIMESTAMP&quot; ]
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
-[ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
-[ -n &quot;$TIMESTAMP&quot; ]
+[ -n &quot;$MASTER_JOB_NAME&quot; ]
 
 source ~/bin/retries.sh
 function with_default_retries {
@@ -125,23 +142,35 @@ function with_default_retries {
     with_retries ${RETRIES:-1} ${RETRY_INTERVAL_SEC:-1} &quot;${cmd}&quot; &quot;$@&quot;
 }
 
-if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
+if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; -a &quot;${FORCE_BUILD}&quot; != &quot;true&quot; ]; then
     echo &quot;No new content.  Build not required&quot;
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE
+    with_default_retries bash -c &quot;echo &apos;No new content.  Build not required&apos; &gt; $PUBLISH_OUTPUTS_BASE/No_New_Content&quot;
     exit 0
 fi
 
+echo &quot;Build was successful&quot; &gt; $PUBLISH_OUTPUTS_BASE/Success
+echo &quot;Build was successful&quot; &gt; $PUBLISH_LOGS_BASE/Success
 
-PUBLISH_WHEELS_BASE=$PUBLISH_OUTPUTS_BASE/wheels
+exit 0
 
-SRC_WHEELS_DIR=$MY_WORKSPACE/std/build-wheels-${OS}-${BUILD_STREAM}
-
-with_default_retries mkdir -p $PUBLISH_WHEELS_BASE
-
-with_default_retries cp -L -v ${SRC_WHEELS_DIR}/stx-${OS}-${BUILD_STREAM}-wheels.tar ${PUBLISH_WHEELS_BASE}/
-
-if [ -f ${SRC_WHEELS_DIR}/stx-${OS}-${BUILD_STREAM}-wheels-py2.tar ]; then
-    with_default_retries cp -L -v ${SRC_WHEELS_DIR}/stx-${OS}-${BUILD_STREAM}-wheels-py2.tar ${PUBLISH_WHEELS_BASE}/
+# set latest_build&apos; symlink
+if [ -L $PUBLISH_DISTRO_BASE/latest_build ]; then
+    with_default_retries \rm -f $PUBLISH_DISTRO_BASE/latest_build 
 fi
+
+with_default_retries ln -s $TIMESTAMP $PUBLISH_DISTRO_BASE/latest_build
+
+if [ &quot;${LAYER}&quot; != &quot;&quot; ]; then
+    ~/bin/repo_sync_layered.sh --repo-file-filter StarlingX_cengn_${LAYER}_layer
+fi
+
+if [ &quot;${REPO_FILE}&quot; != &quot;&quot; ]; then
+    ~/bin/repo_sync_layered.sh --repo-file-filter ${REPO_FILE}
+fi
+
+
+
 </command>
     </hudson.tasks.Shell>
   </builders>

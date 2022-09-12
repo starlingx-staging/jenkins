@@ -4,6 +4,14 @@
   <description>Create a change log</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
@@ -88,7 +96,7 @@ touch $LAST_COMMITS
 
 # Change log spanning all gits
 LOG=&quot;$MY_WORKSPACE/CHANGELOG&quot;
-for e in $(find . -type d -name .git | grep -v &apos;./.repo/repo/.git&apos;)
+for e in $(find . -xtype d -name .git | grep -v &apos;./.repo/repo/.git&apos;)
 do
  pushd $e/..
  f=$(/usr/bin/dirname $e)
@@ -104,13 +112,30 @@ do
  fi
  popd
 done
-\rm $LOG.PART
+if [ -f $LOG.PART ]; then
+    \rm -f $LOG.PART
+fi
 
 # Change log spanning know config files
 DL_LOG=&quot;$MY_WORKSPACE/CHANGELOG_DL&quot;
 BLD_LOG=&quot;$MY_WORKSPACE/CHANGELOG_BUILD&quot;
 IMG_LOG=&quot;$MY_WORKSPACE/CHANGELOG_IMG&quot;
 ISO_LOG=&quot;$MY_WORKSPACE/CHANGELOG_ISO&quot;
+DEB_BUILDER_LOG=&quot;$MY_WORKSPACE/CHANGELOG_DEB_BUILDER&quot;
+
+f=&apos;./stx-tools&apos;
+pushd $f
+ list=&quot;$(sanitized_list stx/dockerfiles stx/toCOPY)&quot;
+ g=$(printf &quot;%-48s&quot; $f)
+ c=$(grep $(echo $f | sed &apos;s:/:[/]:g&apos; | sed &apos;s:$:[^a-zA-Z0-9/_-]:&apos; | sed &apos;s:^[.][.]:^[.][.]:&apos; | sed &apos;s:^[.]:^[.]:&apos;) $LAST_COMMITS | awk &apos; { print $2 } &apos;)
+ git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; --date=iso --after $(date --date=&apos;yesterday&apos; +%Y-%m-%d) $list &gt; $DEB_BUILDER_LOG.PART
+ if [ &quot;x$c&quot; != &quot;x&quot; ] ; then
+   git log --pretty=tformat:&quot;$g  %H  %ci%x09%cn%x09%ce%x09%s&quot; $c.. $list &gt;&gt; $DEB_BUILDER_LOG || true
+ else
+   cat $DEB_BUILDER_LOG.PART &gt;&gt; $DEB_BUILDER_LOG
+ fi
+popd
+\rm $DEB_BUILDER_LOG.PART
 
 f=&apos;./stx-tools&apos;
 pushd $f
@@ -196,6 +221,15 @@ if [ &quot;$LAYER&quot; == &quot;containers&quot; ]; then
     fi
     # Just always build
     touch &quot;${MY_WORKSPACE}/NEED_BUILD&quot;
+fi
+
+if [ &quot;$LAYER&quot; == &quot;build-containers&quot; ]; then
+    if ! $FORCE_BUILD &amp;&amp; [ -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
+        \rm -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot;
+    fi
+    if [ $(cat &quot;$DEB_BUILDER_LOG&quot; | wc -l) -gt 0 ]; then
+        touch &quot;${MY_WORKSPACE}/NEED_BUILD&quot;
+    fi
 fi
 
 if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then

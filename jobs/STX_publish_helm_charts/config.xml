@@ -4,6 +4,14 @@
   <description>Publish build products to http://mirror.starlingx.cengn.ca</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
@@ -70,6 +78,18 @@
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RETRIES</name>
+          <description></description>
+          <defaultValue>13</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RETRY_INTERVAL_SEC</name>
+          <description></description>
+          <defaultValue>300</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -93,6 +113,8 @@ echo &quot;TIMESTAMP=$TIMESTAMP&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
+echo &quot;RETRIES=$RETRIES&quot;
+echo &quot;RETRY_INTERVAL_SEC=$RETRY_INTERVAL_SEC&quot;
 
 [ -n &quot;$MY_REPO_ROOT&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
@@ -105,6 +127,13 @@ echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 [ -n &quot;$MASTER_JOB_NAME&quot; ]
 
+source ~/bin/retries.sh
+function with_default_retries {
+    local cmd=$1
+    shift 1
+    with_retries ${RETRIES:-1} ${RETRY_INTERVAL_SEC:-1} &quot;${cmd}&quot; &quot;$@&quot;
+}
+
 if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
     echo &quot;No new content.  Build not required&quot;
     exit 0
@@ -113,12 +142,12 @@ fi
 export DISTRO=&quot;$OS&quot;
 
 
-mkdir -p $PUBLISH_OUTPUTS_BASE/helm-charts
-mkdir -p $PUBLISH_LOGS_BASE
+with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE/helm-charts
+with_default_retries mkdir -p $PUBLISH_LOGS_BASE
 
 
 for d in $(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm); do
-    \cp -v $d/stx/*.tgz $PUBLISH_OUTPUTS_BASE/helm-charts
+    with_default_retries \cp -v $d/stx/*.tgz $PUBLISH_OUTPUTS_BASE/helm-charts
 done
 
 

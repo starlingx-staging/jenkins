@@ -4,6 +4,14 @@
   <description>Update build info</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
@@ -179,7 +187,14 @@ if [ &quot;$LAYER_PREFIX&quot;  != &quot;&quot; ]; then
     date -u -d &quot;$(echo $TIMESTAMP | sed &apos;s/\([0-9][0-9][0-9][0-9]\)\([0-9][0-9]\)\([0-9][0-9]\)T\([0-9][0-9]\)\([0-9][0-9]\)\([0-9][0-9]\)Z/\1-\2-\3 \4:\5:\6 Z/&apos;)&quot; &quot;+${LAYER_PREFIX}_BUILD_DATE=\&quot;%F %T %z\&quot;&quot; &gt;&gt; $INFO_FILE
 
     if [ &quot;$LAYER&quot; == &quot;flock&quot; ]; then
-        for f in $(find $MY_REPO/cgcs-centos-repo/layer_build_info/ -type f -name &apos;*_BUILD_INFO&apos; | sort -r); do
+        DISTRO_REPO=$MY_REPO/centos-repo
+        if [ ! -d $DISTRO_REPO ]; then
+            DISTRO_REPO=$MY_REPO/cgcs-centos-repo
+            if [ ! -d $DISTRO_REPO ]; then
+                DISTRO_REPO=$MY_REPO/centos-repo
+            fi
+        fi
+        for f in $(find $DISTRO_REPO/layer_build_info/ -type f -name &apos;*_BUILD_INFO&apos; | sort -r); do
             echo &quot;&quot; &gt;&gt; $INFO_FILE
             cat $f &gt;&gt; $INFO_FILE
         done

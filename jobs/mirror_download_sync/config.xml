@@ -4,6 +4,14 @@
   <description>download sync</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>15</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
@@ -23,7 +31,8 @@
   <builders>
     <hudson.tasks.Shell>
       <command>#~/bin/dl_sync.sh
-~/bin/dl_sync_layered.sh
+set -x
+~/bin/dl_sync_layered.sh | tee /tmp/jdl
 </command>
     </hudson.tasks.Shell>
   </builders>

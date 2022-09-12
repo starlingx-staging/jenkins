@@ -4,6 +4,14 @@
   <description>Build docker images, and wheel tarball</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
@@ -148,8 +156,8 @@ echo &quot;BUILD_STREAM=$BUILD_STREAM&quot;
 echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
 echo &quot;MY_REPO=$MY_REPO&quot;
 echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
-# echo &quot;HOST=$HOST&quot;
-# echo &quot;HOST_PORT=$HOST_PORT&quot;
+# echo &quot;WEB_HOST=$WEB_HOST&quot;
+# echo &quot;WEB_HOST_PORT=$WEB_HOST_PORT&quot;
 echo &quot;DOCKER_BUILD_ID=$DOCKER_BUILD_ID&quot;
 echo &quot;PUBLISH_INPUTS_BASE=$PUBLISH_INPUTS_BASE&quot;
 echo &quot;PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE&quot;
@@ -174,8 +182,8 @@ echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
 [ -n &quot;$MY_REPO_ROOT&quot; ]
 [ -n &quot;$MY_REPO&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
-# [ -n &quot;$HOST&quot; ]
-# [ -n &quot;$HOST_PORT&quot; ]
+# [ -n &quot;$WEB_HOST&quot; ]
+# [ -n &quot;$WEB_HOST_PORT&quot; ]
 [ -n &quot;$DOCKER_BUILD_ID&quot; ]
 [ -n &quot;$PUBLISH_INPUTS_BASE&quot; ]
 [ -n &quot;$PUBLISH_OUTPUTS_BASE&quot; ]
@@ -192,7 +200,32 @@ if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
     echo &quot;No new content.  Build not required&quot;
     exit 0
 fi
-</command>
+
+# The following is a hack to work around CENGN networking quirk whereby 
+# the IPADDR of  mirror.starlingx.cengn.ca returned by DNS  won&apos;t work, and
+# we need to substitute an alternate id address via /etc/hosts.  
+# We need to inject the /etc/hosts hack into all the docker images we build
+
+HACK_LIST=${MY_WORKSPACE}/hack.list
+
+if [ -f ${HACK_LIST} ]; then
+    \rm -f ${HACK_LIST}
+fi
+
+HOSTS_HACK=$(grep mirror.starlingx.cengn.ca /etc/hosts | head -n 1)
+if [ &quot;${HOSTS_HACK}&quot; != &quot;&quot; ]; then
+    ADD=&quot;echo &apos;$HOSTS_HACK&apos; &gt;&gt; /etc/hosts; \\\\&quot;
+    ADD2=&quot;echo &apos;$HOSTS_HACK&apos; &gt;&gt; /etc/hosts; cat /etc/hosts; &quot;
+
+    for DOCKER_FILE in $(find $MY_REPO/ -name &apos;Dockerfile*&apos;); do
+        sed -i &quot;s#^RUN \(.*\)\$#RUN ${ADD2}\1#&quot; ${DOCKER_FILE}
+        echo &quot;${DOCKER_FILE}&quot; &gt;&gt; ${HACK_LIST}
+    done
+    
+    sed -i &apos;s#get_git [$][{]LOCI_REPO[}] [$][{]LOCI_REF[}]#get_git \${LOCI_REPO} \${LOCI_REF} \&amp;\&amp; sed -i &quot;s%^RUN /opt/loci/scripts/install.sh%RUN &apos;&quot;${ADD2}&quot;&apos; /opt/loci/scripts/install.sh%&quot; &apos;&quot;${MY_WORKSPACE}&quot;&apos;/std/build-images/loci/Dockerfile#&apos;  $MY_REPO/build-tools/build-docker-images/build-stx-images.sh
+    echo &quot;$MY_REPO/build-tools/build-docker-images/build-stx-images.sh&quot; &gt;&gt; ${HACK_LIST}
+    echo &quot;${MY_WORKSPACE}/std/build-images/loci/Dockerfile&quot; &gt;&gt; ${HACK_LIST}
+fi</command>
     </hudson.tasks.Shell>
     <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
       <configs>
@@ -644,7 +677,7 @@ BUILD_NUM=$BUILD_NUMBER</properties>
               <textParamValueOnNewLine>false</textParamValueOnNewLine>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
-          <projects>copy_logs,copy_failed_image_logs,docker_prune</projects>
+          <projects>copy_logs,copy_failed_image_logs,docker_prune,host_hack_cleanup</projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
           <triggerFromChildProjects>false</triggerFromChildProjects>
@@ -656,8 +689,8 @@ BUILD_NUM=$BUILD_NUMBER</properties>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
     <EnvInjectBuildWrapper plugin="envinject@2.1.6">
       <info>
-        <scriptContent>export HOST=build.starlingx.cengn.ca
-export HOST_PORT=80
+        <scriptContent>export WEB_HOST=mirror.starlingx.cengn.ca
+export WEB_HOST_PORT=80
 if [ &quot;$LAYER&quot; == &quot;containers&quot; ]; then
     #export REGISTRY_ORG=starlingx
    export REGISTRY_ORG=slittlewrs
@@ -717,8 +750,8 @@ echo BUILD_STREAM=$BUILD_STREAM &gt;&gt; env.properties
 echo MY_REPO_ROOT=$MY_REPO_ROOT &gt;&gt; env.properties
 echo MY_REPO=$MY_REPO &gt;&gt; env.properties
 echo MY_WORKSPACE=$MY_WORKSPACE &gt;&gt; env.properties
-echo HOST=$HOST &gt;&gt; env.properties
-echo HOST_PORT=$HOST_PORT &gt;&gt; env.properties
+echo WEB_HOST=$WEB_HOST &gt;&gt; env.properties
+echo WEB_HOST_PORT=$WEB_HOST_PORT &gt;&gt; env.properties
 echo DOCKER_BUILD_ID=$DOCKER_BUILD_ID &gt;&gt; env.properties
 echo PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE &gt;&gt; env.properties
 echo PUBLISH_INPUTS_BASE=$PUBLISH_INPUTS_BASE &gt;&gt; env.properties

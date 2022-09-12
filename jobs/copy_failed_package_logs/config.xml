@@ -4,7 +4,15 @@
   <description>Publish build products to http://mirror.starlingx.cengn.ca</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -40,6 +48,18 @@
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RETRIES</name>
+          <description></description>
+          <defaultValue>13</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RETRY_INTERVAL_SEC</name>
+          <description></description>
+          <defaultValue>300</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -58,6 +78,8 @@ echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
 echo &quot;OS=$OS&quot;
 echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
+echo &quot;RETRIES=$RETRIES&quot;
+echo &quot;RETRY_INTERVAL_SEC=$RETRY_INTERVAL_SEC&quot;
 
 [ -n &quot;$MY_REPO_ROOT&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
@@ -65,32 +87,39 @@ echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$MASTER_JOB_NAME&quot; ]
 
+source ~/bin/retries.sh
+function with_default_retries {
+    local cmd=$1
+    shift 1
+    with_retries ${RETRIES:-1} ${RETRY_INTERVAL_SEC:-1} &quot;${cmd}&quot; &quot;$@&quot;
+}
+
 export DISTRO=&quot;$OS&quot;
 
 
 # Note: should probably discover this, rather than hard code it
 LAYERS=( &quot;std&quot; &quot;rt&quot; &quot;installer&quot; &quot;containers&quot;)
 
-mkdir -p $PUBLISH_LOGS_BASE
+with_default_retries mkdir -p $PUBLISH_LOGS_BASE
 
 ENV_FILE=&quot;~/workspace/$MASTER_JOB_NAME/env.properties&quot;
 if [ -f &quot;$ENV_FILE&quot; ]; then
-    \cp -v $ENV_FILE $PUBLISH_LOGS_BASE/
+    with_default_retries \cp -v $ENV_FILE $PUBLISH_LOGS_BASE/
 fi
 
 
 for LAYER in $(find $MY_WORKSPACE -maxdepth 2 -type d -name rpmbuild -exec dirname {} \; | xargs --max-lines=1 --no-run-if-empty basename); do
-    for f in $(find $MY_WORKSPACE/$LAYER -maxdepth 1 -type rf -name &apos;*.log&apos;); do
-        mkdir -p $PUBLISH_LOGS_BASE/std/
-        \cp -v $f $PUBLISH_LOGS_BASE/std/
+    for f in $(find $MY_WORKSPACE/$LAYER -maxdepth 1 -type f -name &apos;*.log&apos;); do
+        with_default_retries mkdir -p $PUBLISH_LOGS_BASE/std/
+        with_default_retries \cp -v $f $PUBLISH_LOGS_BASE/std/
     done
     if [ -f $MY_WORKSPACE/build-$LAYER.log ]; then
-        \cp -v $MY_WORKSPACE/build-$LAYER.log $PUBLISH_LOGS_BASE/
+        with_default_retries \cp -v $MY_WORKSPACE/build-$LAYER.log $PUBLISH_LOGS_BASE/
     fi
     for d in $(find $MY_WORKSPACE/$LAYER/results/ -type f -name &apos;fail&apos; -exec dirname {} \; ); do
         b=$(basename $d)
-       mkdir -p $PUBLISH_LOGS_BASE/std/failed-packages/$b
-        cp -v $d/*log $PUBLISH_LOGS_BASE/std/failed-packages/$b/
+        with_default_retries mkdir -p $PUBLISH_LOGS_BASE/std/failed-packages/$b
+        with_default_retries cp -v $d/*log $PUBLISH_LOGS_BASE/std/failed-packages/$b/
     done
 done
 
@@ -98,13 +127,13 @@ done
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
   </buildWrappers>
 </project>

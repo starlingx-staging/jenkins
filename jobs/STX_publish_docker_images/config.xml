@@ -4,6 +4,14 @@
   <description>Publish build products associated with STX docker images</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
@@ -64,6 +72,18 @@
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RETRIES</name>
+          <description></description>
+          <defaultValue>13</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RETRY_INTERVAL_SEC</name>
+          <description></description>
+          <defaultValue>300</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -85,6 +105,8 @@ echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
 echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
 echo &quot;TIMESTAMP=$TIMESTAMP&quot;
+echo &quot;RETRIES=$RETRIES&quot;
+echo &quot;RETRY_INTERVAL_SEC=$RETRY_INTERVAL_SEC&quot;
 
 [ -n &quot;$MY_REPO_ROOT&quot; ]
 [ -n &quot;$MY_WORKSPACE&quot; ]
@@ -95,6 +117,13 @@ echo &quot;TIMESTAMP=$TIMESTAMP&quot;
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 [ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
 [ -n &quot;$TIMESTAMP&quot; ]
+
+source ~/bin/retries.sh
+function with_default_retries {
+    local cmd=$1
+    shift 1
+    with_retries ${RETRIES:-1} ${RETRY_INTERVAL_SEC:-1} &quot;${cmd}&quot; &quot;$@&quot;
+}
 
 if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
     echo &quot;No new content.  Build not required&quot;
@@ -110,38 +139,38 @@ PUBLISH_IMAGE_LOGS_BASE=$PUBLISH_LOGS_BASE/docker-images
 SRC_WHEELS_DIR=$MY_WORKSPACE/std/build-wheels-${OS}-${BUILD_STREAM}
 SRC_IMAGES_DIR=$MY_WORKSPACE/std/build-images
 
-mkdir -p $PUBLISH_DISTRO_BASE
-mkdir -p $PUBLISH_WHEELS_BASE
-mkdir -p $PUBLISH_IMAGES_BASE
-mkdir -p $PUBLISH_IMAGE_LOGS_BASE
+with_default_retries mkdir -p $PUBLISH_DISTRO_BASE
+with_default_retries mkdir -p $PUBLISH_WHEELS_BASE
+with_default_retries mkdir -p $PUBLISH_IMAGES_BASE
+with_default_retries mkdir -p $PUBLISH_IMAGE_LOGS_BASE
 
-cp -L -v ${SRC_WHEELS_DIR}/stx-${OS}-${BUILD_STREAM}-wheels.tar ${PUBLISH_WHEELS_BASE}/
-cp -v ${SRC_IMAGES_DIR}/*${OS}-${BUILD_STREAM}.rpmlst ${PUBLISH_IMAGES_BASE}/
-cp -v ${SRC_IMAGES_DIR}/*${OS}-${BUILD_STREAM}.piplst ${PUBLISH_IMAGES_BASE}/
-cp -v ${SRC_IMAGES_DIR}/*${OS}-${BUILD_STREAM}.log ${PUBLISH_IMAGE_LOGS_BASE}/
+with_default_retries cp -L -v ${SRC_WHEELS_DIR}/stx-${OS}-${BUILD_STREAM}-wheels.tar ${PUBLISH_WHEELS_BASE}/
+with_default_retries cp -v ${SRC_IMAGES_DIR}/*${OS}-${BUILD_STREAM}.rpmlst ${PUBLISH_IMAGES_BASE}/
+with_default_retries cp -v ${SRC_IMAGES_DIR}/*${OS}-${BUILD_STREAM}.piplst ${PUBLISH_IMAGES_BASE}/
+with_default_retries cp -v ${SRC_IMAGES_DIR}/*${OS}-${BUILD_STREAM}.log ${PUBLISH_IMAGE_LOGS_BASE}/
 
 VER_LIST=&quot;${SRC_IMAGES_DIR}/images-${OS}-${BUILD_STREAM}-versioned.lst&quot;
 LATEST_LIST=&quot;${SRC_IMAGES_DIR}/images-${OS}-${BUILD_STREAM}-latest.lst&quot;
 
 if [ -f &quot;${VER_LIST}&quot; ]; then
-    cp -v &quot;${VER_LIST}&quot; ${PUBLISH_IMAGES_BASE}/
-    cp -v &quot;${VER_LIST}&quot; ${PUBLISH_DISTRO_BASE}/
+    with_default_retries  cp -v &quot;${VER_LIST}&quot; ${PUBLISH_IMAGES_BASE}/
+    with_default_retries  cp -v &quot;${VER_LIST}&quot; ${PUBLISH_DISTRO_BASE}/
 fi
 
 if [ -f &quot;${LATEST_LIST}&quot; ]; then
-    cp -v &quot;${LATEST_LIST}&quot; ${PUBLISH_DISTRO_BASE}/
+    with_default_retries  cp -v &quot;${LATEST_LIST}&quot; ${PUBLISH_DISTRO_BASE}/
 fi
 
 if [ &quot;${OS}&quot; == &quot;centos&quot; ]; then
     DISTROLESS_OS=&quot;distroless&quot;
     for f in $(find ${SRC_IMAGES_DIR}/ -name &quot;*${DISTROLESS_OS}-${BUILD_STREAM}.rpmlst&quot;); do
-        cp -v $f ${PUBLISH_IMAGES_BASE}/
+        with_default_retries  cp -v $f ${PUBLISH_IMAGES_BASE}/
     done
     for f in $(find ${SRC_IMAGES_DIR}/ -name &quot;*${DISTROLESS_OS}-${BUILD_STREAM}.piplst&quot;); do
-        cp -v $f ${PUBLISH_IMAGES_BASE}/
+        with_default_retries  cp -v $f ${PUBLISH_IMAGES_BASE}/
     done
     for f in $(find ${SRC_IMAGES_DIR}/ -name &quot;*${DISTROLESS_OS}-${BUILD_STREAM}.log&quot;); do
-        cp -v $f ${PUBLISH_IMAGE_LOGS_BASE}/
+        with_default_retries  cp -v $f ${PUBLISH_IMAGE_LOGS_BASE}/
     done
     
     
@@ -149,19 +178,19 @@ if [ &quot;${OS}&quot; == &quot;centos&quot; ]; then
     LATEST_LIST=&quot;${SRC_IMAGES_DIR}/images-${DISTROLESS_OS}-${BUILD_STREAM}-latest.lst&quot;
 
     if [ -f &quot;${VER_LIST}&quot; ]; then
-        cp -v &quot;${VER_LIST}&quot; ${PUBLISH_IMAGES_BASE}/
-        cp -v &quot;${VER_LIST}&quot; ${PUBLISH_DISTRO_BASE}/
+        with_default_retries  cp -v &quot;${VER_LIST}&quot; ${PUBLISH_IMAGES_BASE}/
+        with_default_retries  cp -v &quot;${VER_LIST}&quot; ${PUBLISH_DISTRO_BASE}/
     fi
 
     if [ -f &quot;${LATEST_LIST}&quot; ]; then
-        cp -v &quot;${LATEST_LIST}&quot; ${PUBLISH_DISTRO_BASE}/
+        with_default_retries  cp -v &quot;${LATEST_LIST}&quot; ${PUBLISH_DISTRO_BASE}/
     fi
 fi
 
 if [ -L $PUBLISH_DISTRO_BASE/latest_docker_image_build ]; then
-    \rm -f $PUBLISH_DISTRO_BASE/latest_docker_image_build 
+    with_default_retries  \rm -f $PUBLISH_DISTRO_BASE/latest_docker_image_build 
 fi
-ln -s $TIMESTAMP $PUBLISH_DISTRO_BASE/latest_docker_image_build
+with_default_retries  ln -s $TIMESTAMP $PUBLISH_DISTRO_BASE/latest_docker_image_build
 
 </command>
     </hudson.tasks.Shell>

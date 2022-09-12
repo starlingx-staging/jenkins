@@ -4,6 +4,14 @@
   <description>download mirror</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
@@ -40,6 +48,12 @@
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -71,10 +85,14 @@ export DOCKER_BUILD_WORKDIR=$MY_REPO_ROOT/stx-tools
 export STX_INSTALLER_DIR=&quot;$DOCKER_BUILD_WORKDIR/centos-mirror-tools/output/stx-installer&quot;
 
 MYUNAME=$(id -un)
-
+mkdir -p $MIRROR_TOOLS_DIR/output
 DOCKER_CMD=&quot;docker exec --interactive --user=${MYUNAME} -e MYUNAME=${MYUNAME} $DOCKER_BUILD_ID /bin/bash -i -&quot;
-echo &quot;cd $MIRROR_TOOLS_DIR; ./download_mirror.sh&quot; | $DOCKER_CMD
-echo &quot;cd $MIRROR_TOOLS_DIR; sudo chown -R $(id -u) output logs&quot; | $DOCKER_CMD
+# echo &quot;export MY_REPO=$MY_REPO; cd $MIRROR_TOOLS_DIR; ./download_mirror.sh&quot; | $DOCKER_CMD
+# echo &quot;cd $MIRROR_TOOLS_DIR; sudo chown -R $(id -u) output logs&quot; | $DOCKER_CMD
+
+docker exec -i $DOCKER_BUILD_ID /bin/bash -c &quot;cd $MIRROR_TOOLS_DIR; mkdir -p output logs ; chown -R $(id -u) output logs&quot;
+docker exec -i $DOCKER_BUILD_ID /bin/bash -c &quot;export MY_REPO=$MY_REPO; cd $MIRROR_TOOLS_DIR; bash -x -e ./download_mirror.sh&quot;
+docker exec -i $DOCKER_BUILD_ID /bin/bash -c &quot;cd $MIRROR_TOOLS_DIR; chown -R $(id -u) output logs&quot;
 
 # Test for missing files, assert ERRORS==0
 ERRORS=$(
@@ -90,6 +108,9 @@ if [ ! -d centos-mirror-tools/output/stx-installer ]; then
      FROM_DIR=centos-mirror-tools/output/stx-r1/CentOS/pike/Binary
      if [ ! -d $FROM_DIR ]; then
          FROM_DIR=centos-mirror-tools/output/stx-r1/CentOS/Binary
+     fi
+     if [ ! -d $FROM_DIR ]; then
+         FROM_DIR=centos-mirror-tools/output/stx/CentOS/Binary
      fi
      cp $FROM_DIR/images/pxeboot/initrd.img $STX_INSTALLER_DIR/initrd.img
      cp $FROM_DIR/images/pxeboot/vmlinuz $STX_INSTALLER_DIR/vmlinuz

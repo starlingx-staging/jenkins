@@ -4,6 +4,14 @@
   <description>Build wheel (whl) files for python packages and collect them in a tarball</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
@@ -103,6 +111,17 @@ echo &quot;time $MY_REPO/build-tools/build-wheels/build-wheel-tarball.sh \
               --os ${OS} \
               --os-version ${OS_VERSION} \
               --stream ${BUILD_STREAM}&quot;  | $DOCKER_CMD
+# build -py2 tarball if the script supports it
+echo &quot;
+if $MY_REPO/build-tools/build-wheels/build-wheel-tarball.sh --help 2&gt;&amp;1 | grep -q -- --python2 ; then \
+	time $MY_REPO/build-tools/build-wheels/build-wheel-tarball.sh \
+              --attempts 5 \
+              --os ${OS} \
+              --os-version ${OS_VERSION} \
+              --stream ${BUILD_STREAM}  \
+              --python2 ; \
+fi
+&quot; | $DOCKER_CMD
 
 </command>
     </hudson.tasks.Shell>

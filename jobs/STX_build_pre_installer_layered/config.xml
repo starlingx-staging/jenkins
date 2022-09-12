@@ -4,6 +4,14 @@
   <description>First pass build.  This build will not include the updated pxe-installer.</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
@@ -70,6 +78,11 @@
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
+          <name>BUILD_IMG</name>
+          <description></description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
           <name>FULL_BUILD</name>
           <description>do not use build avoidance</description>
           <defaultValue>false</defaultValue>
@@ -115,10 +128,11 @@ fi
 MYUNAME=$(id -un)
 
 IMPORT_DIR=/import/mirrors/CentOS/stx-r1/CentOS/pike
-
-
 if [ ! -d $MY_REPO_ROOT/stx-tools/centos-mirror-tools/output/stx-r1/CentOS/pike ]; then
     IMPORT_DIR=/import/mirrors/CentOS/stx-r1/CentOS
+fi
+if [ ! -d $MY_REPO_ROOT/stx-tools/centos-mirror-tools/output/stx-r1/CentOS ]; then
+    IMPORT_DIR=/import/mirrors/CentOS/stx/CentOS
 fi
 
 DOCKER_CMD=&quot;docker exec --interactive --user=${MYUNAME} -e MYUNAME=${MYUNAME} ${DOCKER_BUILD_ID} /bin/bash -i -&quot;
@@ -154,7 +168,12 @@ done
 
 if $BUILD_ISO; then
     echo &apos;build-iso&apos; | $DOCKER_CMD
-fi</command>
+    if $BUILD_IMG; then
+        echo &apos;build-iso --force --sudo&apos; | $DOCKER_CMD
+    fi
+fi
+
+</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>

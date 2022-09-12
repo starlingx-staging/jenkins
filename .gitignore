@@ -58,4 +58,9 @@ jobs/*/lastSuccessful
 jobs/*/nextBuildNumber
 jobs/*/cobertura/
 jobs/*/workspace/
-
+jobs/*dpanech*/
+org.codefirst.SimpleThemeDecorator.xml
+*dpanech*
+stx-repo
+caches/
+cengn-debian-dl/

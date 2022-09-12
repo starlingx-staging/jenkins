@@ -19,6 +19,9 @@
 
 set -x
 
+REPO_SYNC_LAYERED_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
+export PATH=$PATH:$REPO_SYNC_LAYERED_DIR
+
 LOGFILE="/export/log/daily_repo_sync.log"
 YUM_CONF_DIR="/export/config"
 YUM_CONF="${YUM_CONF_DIR}/yum.conf"
@@ -64,14 +67,14 @@ get_remote_dir () {
     local dest_dir="${2}"
     mkdir -p "${dest_dir}" || return 1
     \rm "${dest_dir}/"index.html*
-    wget  -c -N --recursive --no-parent --no-host-directories --no-directories --directory-prefix="${dest_dir}" "${url}/"
+    wget  -c -N -e robots=off --recursive --no-parent --no-host-directories --no-directories --progress=dot:mega --directory-prefix="${dest_dir}" "${url}/"
 }
 
 get_remote_file () {
     local url="${1}"
     local dest_dir="${2}"
     mkdir -p "${dest_dir}" || return 1
-    wget  -c -N --no-parent --no-host-directories --no-directories --directory-prefix="${dest_dir}" "${url}"
+    wget  -c -N --no-parent --no-host-directories --no-directories --progress=dot:mega --directory-prefix="${dest_dir}" "${url}"
 }
 
 get_remote_file_overwrite () {
@@ -83,7 +86,7 @@ get_remote_file_overwrite () {
     if [ -f "${dest_file}" ]; then
         \rm "${dest_file}"
     fi
-    wget  -c -N --no-parent --no-host-directories --no-directories --directory-prefix="${dest_dir}" "${url}"
+    wget  -c -N --no-parent --no-host-directories --no-directories --progress=dot:mega --directory-prefix="${dest_dir}" "${url}"
 }
 
 clean_repodata () {
@@ -102,6 +105,32 @@ clean_repodata () {
             \rm $f
         fi
     done
+}
+
+update_repodata () {
+    local repo_url="${1}"
+    local repodata_path="${2}"
+
+    local repodata_url="${repo_url}/repodata"
+
+    get_remote_file_overwrite "${repodata_url}/repomd.xml" "${repodata_path}/"
+    if [ $? -ne 0 ]; then
+        echo "Error: get_remote_file_overwrite ${repodata_url}/repomd.xml ${repodata_path}/"
+        return 1
+    fi
+
+    for f in $( grep 'href=' ${repodata_path}/repomd.xml | sed -e 's#.*href="##' -e 's#".*##' ); do
+        if [ ! -f "${repodata_path}/$f" ]; then
+            get_remote_file_overwrite "${repo_url}/$f" "${repodata_path}/"
+            if [ $? -ne 0 ]; then
+                echo "Error: get_remote_file_overwrite ${repo_url}/$f}/"
+                return 1
+            fi
+        fi
+    done
+
+    clean_repodata "${repodata_path}/"
+    return 0
 }
 
 usage () {
@@ -135,8 +164,12 @@ if [ ! -f "$YUM_CONF" ]; then
     exit 1
 fi
 
+# dpanech: output of below block is redirected to $LOGFILE
+{
+
 YUM_CONF_TMP="$(mktemp ${YUM_CONF}.XXXXXX)"
 TMP=$(echo ${YUM_CONF_TMP} | sed "s#^${YUM_CONF}.##")
+FIND_TMP="find_${TMP}.lst"
 YUM_REPOS_DIR_TMP="${YUM_REPOS_DIR}.${TMP}"
 \cp ${YUM_CONF} ${YUM_CONF_TMP}
 sed -i "s#^reposdir=.*#reposdir=${YUM_REPOS_DIR_TMP}#" ${YUM_CONF_TMP}
@@ -159,7 +192,7 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
 
         # REPO_URL=$(yum repoinfo --config="${YUM_CONF_TMP}"  --disablerepo="*" --enablerepo="$REPO_ID" | grep Repo-baseurl | sed 's#^[^:]*: ##' )
         # REPO_URL=$(ini_field "${REPO_FILE}" "${REPO_ID}" baseurl | sed 's#^[^:]*://##' )
-        REPO_URL=$(ini_field "${REPO_FILE}" "${REPO_ID}" baseurl )
+        REPO_URL=$(ini_field "${REPO_FILE}" "${REPO_ID}" baseurl | sed 's#$basearch#x86_64#')
 
         if [ "${REPO_URL}" == "" ]; then
             # echo "Error: yum repoinfo --config='${YUM_CONF_TMP}'  --disablerepo='*' --enablerepo='$REPO_ID'"
@@ -175,9 +208,9 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
         echo "Processing: REPO_ID=$REPO_ID  REPO_URL=$REPO_URL  DOWNLOAD_PATH=$DOWNLOAD_PATH"
 
         #
-        # Alway audit cengn.  Other stuff randomly audited say 1 out of 50 updates
+        # Alway audit cengn and updates.  Other stuff randomly audited say 1 out of 10 updates
         #
-        if echo ${DOWNLOAD_PATH_NEW} | grep -q starlingx.cengn.ca || [ $(( ( RANDOM % 50 ) )) -eq 0 ]; then
+        if [[ "${DOWNLOAD_PATH_NEW}" == *"starlingx.cengn.ca"* ]] || [[ "${REPO_ID}" == *"updates"* ]] || [ "${REPO_ID_FILTER}" != "" ] || [ "${REPO_FILE_FILTER}" != "" ] || [ $(( ( RANDOM % 10 ) )) -eq 0 ]; then
 
             #
             # Update repo with audit.
@@ -197,21 +230,7 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
             fi
 
             #  Download latest repodata 
-            get_remote_dir "${REPO_URL}/repodata" "${DOWNLOAD_PATH_NEW}/repodata.upstream"
-            if [ $? -ne 0 ]; then
-                echo "Error: get_remote_dir ${REPO_URL}/repodata ${DOWNLOAD_PATH_NEW}/repodata.upstream"
-                ERR_COUNT=$((ERR_COUNT+1))
-                continue
-            fi
- 
-            get_remote_file_overwrite "${REPO_URL}/repodata/repomd.xml" "${DOWNLOAD_PATH_NEW}/repodata.upstream/"
-            if [ $? -ne 0 ]; then
-                echo "Error: get_remote_file_overwrite ${REPO_URL}/repodata/repomd.xml ${DOWNLOAD_PATH_NEW}/repodata.upstream/"
-                ERR_COUNT=$((ERR_COUNT+1))
-                continue
-            fi
-
-            clean_repodata "${DOWNLOAD_PATH_NEW}/repodata.upstream/"
+            update_repodata  "${REPO_URL}" "${DOWNLOAD_PATH_NEW}/repodata.upstream"
 
             #  Download latest rpm.lst
             get_remote_file_overwrite "${REPO_URL}/rpm.lst" "${DOWNLOAD_PATH_NEW}/"
@@ -242,11 +261,35 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
                 continue
             fi
 
+            # delete any cached find data
+            if [ -f "${FIND_TMP}" ]; then
+                CMD="\rm -f ${FIND_TMP}"
+                echo "$CMD"
+                eval $CMD
+                if [ $? -ne 0 ]; then
+                    echo "Error: $CMD"
+                    ERR_COUNT=$((ERR_COUNT+1))
+                    continue
+                fi
+            fi
+    
             # Do the audit, delete anything broken
             LOOP_RC=0
-            for f in $(verifytree -a file://${DOWNLOAD_PATH_NEW} | grep ' FAILED$' | awk '{ print $2 }' | sed 's/^[0-9]*://'); do
-                for f_path in $(find ${DOWNLOAD_PATH_NEW} -name ${f}.rpm); do
-                    CMD="\rm ${f_path}"
+            for f in $(verifytree-stx -a file://${DOWNLOAD_PATH_NEW} | grep ' FAILED$' | awk '{ print $2 }' | sed 's/^[0-9]*://'); do
+                if [ ! -f "${FIND_TMP}" ]; then
+                    # cache find data
+                    CMD="find ${DOWNLOAD_PATH_NEW} -name '*.rpm' > ${FIND_TMP}"
+                    echo "$CMD"
+                    eval $CMD
+                    if [ $? -ne 0 ]; then
+                        echo "Error: $CMD"
+                        ERR_COUNT=$((ERR_COUNT+1))
+                        continue
+                    fi
+                fi
+
+                for f_path in $(grep "/${f}.rpm$" ${FIND_TMP}); do
+                    CMD="\rm -f ${f_path}"
                     echo "$CMD"
                     eval $CMD
                     if [ $? -ne 0 ]; then
@@ -260,6 +303,9 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
             if [ $LOOP_RC -ne 0 ]; then
                 continue
             fi
+
+            # verifytree sometimes creates these files and failes to clean them
+            \rm -rf __export_mirror_*.new
 
             # deactivate and restore upstream repo data
             CMD="\mv ${DOWNLOAD_PATH_NEW}/repodata ${DOWNLOAD_PATH_NEW}/repodata.upstream"
@@ -297,9 +343,11 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
             eval $CMD
             if [ $? -ne 0 ]; then
                 echo "Error: $CMD"
+                echo "reposync result: failed on repoid=$REPO_ID download_path='$DOWNLOAD_PATH_NEW'"
                 ERR_COUNT=$((ERR_COUNT+1))
                 continue
             fi
+            echo "reposync result: success on repoid=$REPO_ID download_path='$DOWNLOAD_PATH_NEW'"
 
             CMD="pushd '${DOWNLOAD_PATH_NEW}'"
             echo "$CMD"
@@ -308,6 +356,18 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
                 echo "Error: $CMD"
                 ERR_COUNT=$((ERR_COUNT+1))
                 continue
+            fi
+
+            # remove any half-complete repodata
+            if [ -d "${DOWNLOAD_PATH_NEW}/.repodata" ]; then
+                CMD="\rm -rf ${DOWNLOAD_PATH_NEW}/.repodata"
+                echo "$CMD"
+                eval $CMD
+                if [ $? -ne 0 ]; then
+                    echo "Error: $CMD"
+                    ERR_COUNT=$((ERR_COUNT+1))
+                    continue
+                fi
             fi
 
             # Update the repodata
@@ -371,6 +431,10 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
             # Update repo without audit
             #
 
+            # Unaudited reposync can leave broken rpms if the download fails.
+            # Safer to only use audited updates.
+            continue
+
             # Assume it's a repo of binary rpms unless repoid ends in
             # some variation of 'source'.
             SOURCE_FLAG=""
@@ -395,9 +459,11 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
             eval $CMD
             if [ $? -ne 0 ]; then
                 echo "Error: $CMD"
+                echo "reposync result: failed on repoid=$REPO_ID download_path='$DOWNLOAD_PATH'"
                 ERR_COUNT=$((ERR_COUNT+1))
                 continue
             fi
+            echo "reposync result: success on repoid=$REPO_ID download_path='$DOWNLOAD_PATH'"
 
             CMD="pushd '$DOWNLOAD_PATH'"
             echo "$CMD"
@@ -433,14 +499,18 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
 
     # \rm ${YUM_REPOS_DIR_TMP}/*.repo
 
-done | tee $LOGFILE
+done
 
 if [ ! -z ${YUM_CONF_TMP} ] && [ -f ${YUM_CONF_TMP} ]; then
-    \rm -rf ${YUM_CONF_TMP}
+    \rm -f ${YUM_CONF_TMP}
 fi
 
 if [ ! -z ${YUM_REPOS_DIR_TMP} ] && [ -d ${YUM_REPOS_DIR_TMP} ]; then
     \rm -rf ${YUM_REPOS_DIR_TMP}
+fi
+
+if [ ! -z ${FIND_TMP} ] && [ -f ${FIND_TMP} ]; then
+    \rm -f ${FIND_TMP}
 fi
 
 echo ERR_COUNT=$ERR_COUNT
@@ -449,3 +519,8 @@ if [ $ERR_COUNT -ne 0 ]; then
 fi
 
 exit 0
+
+} 2>&1 | tee $LOGFILE
+
+exit ${PIPESTATUS[0]}
+

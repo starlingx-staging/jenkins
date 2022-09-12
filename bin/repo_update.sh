@@ -274,7 +274,7 @@ update_yum_repos_d () {
         fi
 
         for UPSTREAM_REPO_ID in $(grep '^[[]' $UPSTREAM_REPO | sed 's#[][]##g'); do
-            UPSTREAM_REPO_URL=$(get_repo_url "$UPSTREAM_YUM_CONF" "$UPSTREAM_REPO_ID")
+            UPSTREAM_REPO_URL=$(get_repo_url "$UPSTREAM_YUM_CONF" "$UPSTREAM_REPO_ID" | sed 's#\([^/]\)/$#\1#')
             if [ $? != 0 ]; then
                 return 1
             fi

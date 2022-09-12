@@ -1,4 +1,5 @@
 #!/bin/bash
+# vim: ts=4 sts=4 sw=4 et
 
 #
 # Copyright (c) 2020 Wind River Systems, Inc.
@@ -63,7 +64,7 @@ extract_published_images_from_logs () {
 
         cat "${LOG}" | sed -ne  '/^The following tags were pushed/{ :a; n; p; ba; }' | tac | sed -ne  '/^Sending e-mails to:/{ :a; n; p; ba; }' | tac
         cat "${LOG}" | sed -ne  '/^The following tags were pushed/{ :a; n; p; ba; }' | tac | sed -ne  '/^No emails were triggered./{ :a; n; p; ba; }' | tac | grep -v 'Sending e-mails'
-        grep --no-filename '^Pushing image: ' "${LOG}" | sed 's/^Pushing image: //'
+        grep --no-filename -e '^Pushing image: ' -e '^[[][0-9A-Z .:-]\+[]] Pushing image: ' "${LOG}" | sed 's/^.* Pushing image: //'
     done | sort --unique
     return 0
 }
@@ -106,7 +107,14 @@ extract_non_latest_published_images_from_log_dir () {
         return 1
     fi
 
-    extract_non_latest_published_images_from_logs $(ls -1 $DIR/*docker*image*.log)
+    local -a log_files
+    log_files=($(find $DIR -mindepth 1 -maxdepth 1 -xtype f \
+           -name '*docker*image*.log' -o -name '*docker*image*.log.txt' \
+        -o -name '*docker*base*.log' -o -name '*docker*base*.log.txt'))
+
+    if [[ "${#log_files[@]}" -gt 0 ]] ; then
+        extract_non_latest_published_images_from_logs "${log_files[@]}"
+    fi
     return $?
 }
 
@@ -164,24 +172,41 @@ get_latest_timestamp_from_base_dir () {
     return 0
 }
 
-get_project_list_from_base_dir () {
+get_project_list_from_build_dir () {
     local BASE_DIR="$1"
+    local TIMESTAMP="$2"
 
     if [ ! -d "$BASE_DIR" ]; then
-        >&2 echo "get_project_list_from_base_dir: directory not found '$BASE_DIR'"
+        >&2 echo "get_project_list_from_build_dir: directory not found '$BASE_DIR'"
         return 1
     fi
 
-    local TIMESTAMP=""
-    TIMESTAMP=$(get_latest_timestamp_from_base_dir "$BASE_DIR")
+    local latest_timestamp=""
+    latest_timestamp=$(get_latest_timestamp_from_base_dir "$BASE_DIR")
     if [ $? -ne 0 ]; then
-        >&2 echo "get_project_list_from_base_dir: Failed to find docker build timestamp from '$BASE_DIR'"
+        >&2 echo "get_project_list_from_build_dir: Failed to find docker build timestamp from '$BASE_DIR'"
         return 1
     fi
 
-    get_project_list_from_lst_dir "$BASE_DIR/$TIMESTAMP/outputs/docker-images"
-    # get_project_list_from_log_dir "$BASE_DIR/$TIMESTAMP/logs"
-    return $?
+    local timestamp dir subdir
+    for timestamp in $TIMESTAMP $latest_timestamp ; do
+        local -a lst_dirs=("outputs/docker-images" "workspace/std/build-images" "std/build-images")
+        for subdir in "${lst_dirs[@]}" ; do
+            dir="$BASE_DIR/$timestamp/$subdir"
+            if [[ -d "$dir" ]] ; then
+                get_project_list_from_lst_dir "$dir"
+            fi
+        done
+
+        local -a log_dirs=("logs")
+        for subdir in "${log_dirs[@]}" ; do
+            dir="$BASE_DIR/$timestamp/$subdir"
+            if [[ -d "$dir" ]] ; then
+                get_project_list_from_log_dir "$dir"
+            fi
+        done
+    done
+    return 0
 }
 
 get_still_publised_images () {
@@ -209,8 +234,7 @@ get_still_publised_images () {
         return 1
     fi
 
-    # for PROJECT in $( ( get_project_list_from_base_dir "$BASE_DIR"; get_project_list_from_log_dir "$BASE_DIR/$TIMESTAMP/logs" ) | sort --unique); do
-    for PROJECT in $( ( get_project_list_from_base_dir "$BASE_DIR"; get_project_list_from_lst_dir "$BASE_DIR/$TIMESTAMP/outputs/docker-images" ) | sort --unique); do
+    for PROJECT in $(get_project_list_from_build_dir "$BASE_DIR" $TIMESTAMP | sort --unique); do
         for TAG in $(get_project_tags "$DEFAULT_REGISTRY" "$PROJECT" "$DEFAULT_ORGANIZATION" | grep "$TIMESTAMP"); do
             echo "$PROJECT:$TAG"
         done
@@ -265,10 +289,17 @@ delete_tag () {
 delete_still_publised_images () {
     local BASE_DIR="$1"
     local TIMESTAMP="$2"
+    local TRIAL_RUN="$3"
 
     local IMAGE_TAG
     local IMAGE
     local TAG
+
+    if [[ "$TRIAL_RUN" == 1 || "$TRIAL_RUN" == "t" || "$TRIAL_RUN" == "T" || "$TRIAL_RUN" == "true" || "$TRIAL_RUN" == "TRUE" ]] ; then
+        TRIAL_RUN=1
+    else
+        TRIAL_RUN=0
+    fi
 
     if [ -z "$BASE_DIR" ]; then
         >&2 echo "delete_still_publised_images: BASE_DIR not given"
@@ -289,7 +320,9 @@ delete_still_publised_images () {
         IMAGE=$(echo $IMAGE_TAG | cut -d ':' -f 1)
         TAG=$(echo $IMAGE_TAG | cut -d ':' -f 2)
         echo delete_tag "$DEFAULT_IMAGE_API_HOST" "$DEFAULT_USERNAME" "xxxxxxxx" "$DEFAULT_ORGANIZATION"  "$IMAGE" "$TAG"
-        delete_tag "$DEFAULT_IMAGE_API_HOST" "$DEFAULT_USERNAME" "$(cat ~/docker_io_slittlewrs.cred)" "$DEFAULT_ORGANIZATION"  "$IMAGE" "$TAG"
+        if [[ $TRIAL_RUN -ne 1 ]] ; then
+            delete_tag "$DEFAULT_IMAGE_API_HOST" "$DEFAULT_USERNAME" "$(cat ~/docker_io_slittlewrs.cred)" "$DEFAULT_ORGANIZATION"  "$IMAGE" "$TAG"
+        fi
     done
 }
 

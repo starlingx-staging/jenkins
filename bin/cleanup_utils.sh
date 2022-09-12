@@ -13,7 +13,7 @@
 
 FILE_UTILS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
 
-source "${FILE_UTILS_DIR}/docker_hub_utils.sh"
+source "${FILE_UTILS_DIR}/docker_hub_utils.sh" || exit 1
 
 USR=jenkins
 
@@ -159,7 +159,7 @@ function workspace_age {
         return 1
     fi
 
-    for f in $DIR/BUILD $DIR/build-std.log $DIR/CHANGELOG; do
+    for f in $DIR/BUILD $DIR/build-std.log $DIR/build.log $DIR/CHANGELOG* $DIR/PUBLISHED; do
         if [ -f $f ]; then
             AGE=$(file_age $f days)
             if [ $? -eq 0 ]; then
@@ -251,17 +251,20 @@ function test_deletable {
     if [ $AGE -le $KEEP_AGE ]; then
         >&2 echo "   keep '$DIR' due to age $AGE <= $KEEP_AGE (sanity $SANITY)"
         KEEP=1
+        return $KEEP
     fi
 
     if [ -f "$KF" ]; then
         >&2 echo "   keep '$DIR' due to keep file"
         KEEP=1
+        return $KEEP
     fi
 
-    if [ "x$KEPT" != "X" ]; then
+    if [ "x$KEPT" != "x" ]; then
         if [ $KEPT -lt $SAVE_MIN_KEEP ]; then
             >&2 echo "   keep '$DIR' due to min keep"
             KEEP=1
+            return $KEEP
         fi
     fi
 
@@ -270,6 +273,7 @@ function test_deletable {
             if [ "$(basename $(readlink $LINK_DIR/latest_build))" == "$(basename $DIR)" ]; then
                 >&2 echo "   keep '$DIR' due to latest_build symlink"
                 KEEP=1
+                return $KEEP
             fi
         fi
 
@@ -277,6 +281,7 @@ function test_deletable {
             if [ "$(basename $(readlink $LINK_DIR/latest_green_build))" == "$(basename $DIR)" ]; then
                 >&2 echo "   keep '$DIR' due to latest_green_build symlink"
                 KEEP=1
+                return $KEEP
             fi
         fi
 
@@ -284,11 +289,12 @@ function test_deletable {
             if [ "$(basename $(readlink $LINK_DIR/latest_docker_image_build))" == "$(basename $DIR)" ]; then
                 >&2 echo "   keep '$DIR' due to latest_docker_image_build symlink"
                 KEEP=1
+                return $KEEP
             fi
         fi
     fi
 
-    for hcd in $(find /export/mirror/starlingx/ -type d -name helm-charts | grep -v $DIR); do
+    for hcd in $(find /export/mirror/starlingx/ -maxdepth 6 -type d -name helm-charts | grep -v $DIR); do
         for tgz in $(find $hcd -type f -name '*tgz'); do
             tar xzvf $tgz --wildcards "*.yaml" --to-stdout 2> /dev/null | grep 'docker.io[/]starlingx' | grep $DIR
             # tar xzvf $tgz --wildcards "*.yaml" --to-stdout 2> /dev/null | grep 'docker.io[/]starlingx'
@@ -297,6 +303,7 @@ function test_deletable {
     if [ $? -eq 0 ]; then
         >&2 echo "   keep '$DIR' due to referenced docker images"
         KEEP=1
+        return $KEEP
     fi
 
     echo $KEEP
@@ -364,17 +371,15 @@ function published_build_cleanup_by_age {
     dirs=$(ls -dr1 $WILD)
 
     for d in $dirs; do
-       echo "Considiering '$d'"
+       echo "Considering '$d'"
        echo "   test_deletable '$d' '$num_keep' '$DIR_TYPE' '$d/outputs/' '.'"
        test_deletable "$d" "$num_keep" "$DIR_TYPE" "$d/outputs/" "."
        if [ $? -eq 0 ]; then
-           echo "Delete: $d"
+           echo "Delete: $BUILD_DIR/$d"
            NO_RM=0
            if [ $NO_RM -ne 1 ]; then
               echo "delete_still_publised_images '$BUILD_DIR' '$d'"
-              if [ $TRIAL_RUN -ne 1 ]; then
-                  delete_still_publised_images "$BUILD_DIR" "$d"
-              fi
+              delete_still_publised_images "$BUILD_DIR" "$d" "$TRIAL_RUN"
 
               echo "rm -rf $d"
               if [ $TRIAL_RUN -ne 1 ]; then
@@ -435,9 +440,11 @@ function workspace_cleanup_by_age {
         TRIAL_RUN=1
     fi
 
+    DELETE_STILL_PUBLISHED_DOCKER_IMAGES=
     if [ -f "$SD" ]; then
         source "$SD"
     fi
+    : ${DELETE_STILL_PUBLISHED_DOCKER_IMAGES:=0}
 
     echo "SAVE_DAYS_GREEN=$SAVE_DAYS_GREEN"
     echo "SAVE_DAYS_YELLOW=$SAVE_DAYS_YELLOW"
@@ -445,16 +452,21 @@ function workspace_cleanup_by_age {
     echo "SAVE_DAYS_UNKNOWN=$SAVE_DAYS_UNKNOWN"
     echo "SAVE_MIN_KEEP=$SAVE_MIN_KEEP"
     echo "TRIAL_RUN=$TRIAL_RUN"
+    echo "DELETE_STILL_PUBLISHED_DOCKER_IMAGES=$DELETE_STILL_PUBLISHED_DOCKER_IMAGES"
 
     dirs=$(ls -dr1 $WILD)
 
     for d in $dirs; do
-       echo "Considiering '$d'"
+       echo "Considering '$d'"
        echo "   test_deletable '$d' '$num_keep' '$DIR_TYPE' 'publish_dir/$d/outputs/' 'publish_dir'"
        test_deletable "$d" "$num_keep" "$DIR_TYPE" "publish_dir/$d/outputs/" "publish_dir"
        if [ $? -eq 0 ]; then
            echo "Delete: $d"
            NO_RM=0
+           if [ $NO_RM -ne 1 -a $DELETE_STILL_PUBLISHED_DOCKER_IMAGES -eq 1 ]; then
+              echo "delete_still_publised_images '$BUILD_DIR' '$d'"
+              delete_still_publised_images "$BUILD_DIR" "$d" $TRIAL_RUN
+           fi
            if [ -f /usr/bin/mock ]; then
               for cfg in $(ls -1 $(pwd)/$d/*/configs/$USR-*/$USR-*.b[0-9].cfg 2>> /dev/null) \
                          $(ls -1 $(pwd)/$d/*/$USR-*.cfg 2>> /dev/null) \
@@ -523,6 +535,17 @@ function workspace_cleanup_by_age {
               done
            fi
 
+           if [ -d $d/docker ]; then
+              echo "deleting $d/docker"
+              jenkins_rm root $d/docker
+           fi
+
+           if [ -d $d/localdisk ]; then
+              # Most of the build directories owned by root are inside localdisk
+              echo "deleting $d/localdisk"
+              jenkins_rm root $d/localdisk
+           fi
+
            if [ $NO_RM -ne 1 ]; then
               echo "rm -rf $d"
               if [ $TRIAL_RUN -ne 1 ]; then
@@ -548,7 +571,7 @@ function delete_old_master_builds_and_publications {
         TRIAL_RUN=1
     fi
 
-    for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d -name 'master*' ) -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
+    for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d \( -name 'master*' -o -name 'debian-master*' \) ) -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
         workspace_cleanup_by_age $DIR $TRIAL_RUN
     done
     for DIR in $(find $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name 'master' ) -maxdepth 4 -name SAVE_DATA -exec dirname {} \; ); do
@@ -561,6 +584,7 @@ function delete_old_master_builds_and_publications {
 function delete_old_ussuri_builds_and_publications {
     local TRIAL_RUN=$1
     local DIR
+    local BASE_DIR
 
     if [ -z $TRIAL_RUN ]; then
         TRIAL_RUN=0
@@ -568,11 +592,15 @@ function delete_old_ussuri_builds_and_publications {
         TRIAL_RUN=1
     fi
 
-    for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d -name 'ussuri*' ) -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
-        workspace_cleanup_by_age $DIR $TRIAL_RUN
+    for BASE_DIR in $(find $WORKSPACE_BASE/ -maxdepth 1 -type d -name 'ussuri*' ); do
+        for DIR in $(find ${BASE_DIR} -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
+            workspace_cleanup_by_age $DIR $TRIAL_RUN
+        done
     done
-    for DIR in $(find $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name 'ussuri' ) -maxdepth 4 -name SAVE_DATA -exec dirname {} \; ); do
-        published_build_cleanup_by_age $DIR $TRIAL_RUN
+    for BASE_DIR in $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name 'ussuri' ); do
+        for DIR in $(find ${BASE_DIR} -maxdepth 4 -name SAVE_DATA -exec dirname {} \; ); do
+            published_build_cleanup_by_age $DIR $TRIAL_RUN
+        done
     done
 
     return 0
@@ -608,7 +636,7 @@ function delete_old_release_candidates_builds_and_publications {
         TRIAL_RUN=1
     fi
 
-    for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d -name 'rc-*' ) -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
+    for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d \( -name 'rc-*' -o -name 'debian-rc-*' \) ) -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
         workspace_cleanup_by_age $DIR $TRIAL_RUN
     done
     for DIR in $(find $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name rc ) -maxdepth 4 -name SAVE_DATA -exec dirname {} \; ); do
@@ -690,9 +718,7 @@ function delete_old_release_and_milestone_builds_and_publications {
         DIR=$PUBLISHED_MILESTONE_BASE/$m_delete_dir
 
         echo "delete_still_publised_images '$PUBLISHED_MILESTONE_BASE' '$m_delete_dir'"
-        if [ $TRIAL_RUN -ne 1 ]; then
-            delete_still_publised_images "$PUBLISHED_MILESTONE_BASE" "$m_delete_dir"
-        fi
+        delete_still_publised_images "$PUBLISHED_MILESTONE_BASE" "$m_delete_dir" $TRIAL_RUN
 
         echo "m_delete_dirs: rm -rf $DIR"
         if [ $TRIAL_RUN -ne 1 ]; then
@@ -715,9 +741,7 @@ function delete_old_release_and_milestone_builds_and_publications {
         DIR=$PUBLISHED_RELEASE_BASE/$delete_dir
 
         echo "delete_still_publised_images '$PUBLISHED_RELEASE_BASE' '$delete_dir'"
-        if [ $TRIAL_RUN -ne 1 ]; then
-            delete_still_publised_images "$PUBLISHED_RELEASE_BASE" "$delete_dir"
-        fi
+        delete_still_publised_images "$PUBLISHED_RELEASE_BASE" "$delete_dir" $TRIAL_RUN
 
         echo "delete_dirs: rm -rf $DIR"
         if [ $TRIAL_RUN -ne 1 ]; then

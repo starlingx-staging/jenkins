@@ -27,7 +27,7 @@ ini_field () {
         return 1
     fi
 
-    ini_section "${ini_file}" "${section}" | grep "^${field}=" | sed -e "s#^${field}=##" -e 's#^"##' -e 's#"$##'
+    ini_section "${ini_file}" "${section}" | grep "^${field}=" | sed -e "s#^${field}=##" -e 's#^"##' -e 's#"$##' | head -n 1
 }
 
 ini_section_list () {

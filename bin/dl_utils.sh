@@ -307,13 +307,27 @@ dl_repo_from_url () {
         return 1
     fi
 
-    CMD="repo sync --force-sync"
+    # Temporary hack for 'scond reposync fails on yocto issue
+    # https://bugs.chromium.org/p/gerrit/issues/detail?id=14700&q=tyranscooter&can=2
+    # CMD="rm -rf .repo/project-objects/linux-yocto.git* .repo/projects/cgcs-root/stx/git/linux-yocto-*"
+    # echo "$CMD"
+    # eval $CMD
+
+    CMD="repo sync --force-sync -j20"
     echo "$CMD"
     eval $CMD
     if [ $? -ne 0 ]; then
-        echo "Error: $CMD"
-        cd "$SAVE_DIR"
-        return 1
+        CMD="repo sync --force-sync -j20 --no-clone-bundle"
+        echo "$CMD"
+        eval $CMD
+        if [ $? -ne 0 ]; then
+            echo "Error: $CMD"
+            cd "$SAVE_DIR"
+            return 1
+        fi
+        # echo "Error: $CMD"
+        # cd "$SAVE_DIR"
+        # return 1
     fi
 
     cd "$SAVE_DIR"

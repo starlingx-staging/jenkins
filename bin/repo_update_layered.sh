@@ -116,6 +116,23 @@ update_gpg_keys () {
     return 0
 }
 
+repo_is_enabled () {
+    local YUM_CONF="$1"
+    local REPO_ID="$2"
+    local REPO_FILE="$3"
+    local URL=""
+    local EXTRA_ARGS=""
+
+    if [ "${REPO_FILE}" != "" ]; then
+        EXTRA_ARGS="--setopt reposdir=$(dirname $REPO_FILE)"
+    fi
+    (cd $(dirname $YUM_CONF);
+      yum repolist --cacheonly --config="$YUM_CONF" ${EXTRA_ARGS} enabled | \
+              grep "^$REPO_ID "
+      exit ${PIPESTATUS[1]}
+     )
+}
+
 get_repo_url () {
     local YUM_CONF="$1"
     local REPO_ID="$2"
@@ -133,8 +150,18 @@ get_repo_url () {
           exit ${PIPESTATUS[0]}
          )
     if [ $? != 0 ]; then
-        >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
-        return 1
+        # Second chance after cleaning the cached metadata
+        URL=$(cd $(dirname $YUM_CONF);
+              yum --config="$YUM_CONF" ${EXTRA_ARGS} --disablerepo="*" --enablerepo="$REPO_ID" clean metadata > /dev/null;
+              yum repoinfo --config="$YUM_CONF" ${EXTRA_ARGS} --disablerepo="*" --enablerepo="$REPO_ID" | \
+              grep Repo-baseurl | \
+              awk '{ print $3 }';
+              exit ${PIPESTATUS[0]}
+             )
+        if [ $? != 0 ]; then
+            >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
+            return 1
+        fi
     fi
 
     echo "$URL"
@@ -252,7 +279,7 @@ copy_repo_id () {
         return 1
     fi
 
-    FRAGMENT=$(grep -l "$REPO_ID" $TEMPDIR/* | head -n 1)
+    FRAGMENT=$(grep -l "\[$REPO_ID\]" $TEMPDIR/* | head -n 1)
     if [ "$TEMPDIR" == "" ]; then
         >&2 echo "ERROR: grep -l '$REPO_ID' $TEMPDIR/* | head -n 1"
         return 1
@@ -292,10 +319,12 @@ update_yum_repos_d () {
 echo "UPSTREAM_YUM_CONF=$UPSTREAM_YUM_CONF"
 echo "UPSTREAM_REPO_ID=$UPSTREAM_REPO_ID"
 echo "UPSTREAM_REPO=$UPSTREAM_REPO"
-                UPSTREAM_REPO_URL=$(get_repo_url "${UPSTREAM_YUM_CONF}" "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}")
+                UPSTREAM_REPO_URL=$(get_repo_url "${UPSTREAM_YUM_CONF}" "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}" | sed 's#\([^/]\)/$#\1#')
                 if [ $? != 0 ]; then
                     >&2 echo "Error: get_repo_url '${UPSTREAM_YUM_CONF}' '${UPSTREAM_REPO_ID}' '${UPSTREAM_REPO}'"
-                    echo "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}" >> "${BAD_REPOS_FILE}"
+                    if repo_is_enabled "${UPSTREAM_YUM_CONF}" "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}" ; then
+                        echo "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}" >> "${BAD_REPOS_FILE}"
+                    fi
                     continue
                 fi
 echo "UPSTREAM_REPO_URL=$UPSTREAM_REPO_URL"
@@ -334,7 +363,7 @@ echo "UPSTREAM_REPO_NAME=$UPSTREAM_REPO_NAME"
                 #                grep Repo-baseurl | \
                 #                cut -d ' ' -f 3;
                 #            exit ${PIPESTATUS[0]})
-                REPO_URL=$(get_repo_url "$YUM_CONF" "$REPO_ID")
+                REPO_URL=$(get_repo_url "$YUM_CONF" "$REPO_ID" | sed 's#\([^/]\)/$#\1#')
                 if [ $? != 0 ]; then
                 #     >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
                     return 1
@@ -384,6 +413,7 @@ echo "DOWNLOAD_PATH=$DOWNLOAD_PATH"
         >&2 echo "REPO_ID  REPO_FILE"
         >&2 echo "=======  ========="
         >&2 cat "${BAD_REPOS_FILE}"
+        >&2 echo "=======  ========="
         return 1
     fi
 

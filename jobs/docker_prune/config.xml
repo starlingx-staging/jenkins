@@ -1,9 +1,18 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
+  <actions/>
   <description>prune unused docker containers and images</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -23,7 +32,7 @@ docker image prune -f</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com, don.penney@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>

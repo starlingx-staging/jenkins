@@ -4,6 +4,14 @@
   <description>Download StarlingX software</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
@@ -65,6 +73,10 @@ cd $MY_REPO_ROOT
 
 if [ -d $MY_REPO_ROOT/stx/downloads ]; then
     \rm -rf $MY_REPO_ROOT/stx/downloads 
+fi
+
+if [ -d $MY_REPO_ROOT/cgcs-root/centos-repo ]; then
+    \rm -rf $MY_REPO_ROOT/cgcs-root/centos-repo 
 fi
 
 if [ -d $MY_REPO_ROOT/cgcs-root/cgcs-centos-repo ]; then

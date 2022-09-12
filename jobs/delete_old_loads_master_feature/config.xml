@@ -28,7 +28,7 @@
   </builders>
   <publishers>
     <hudson.tasks.Mailer plugin="mailer@1.23">
-      <recipients>scott.little@windriver.com don.penney@windriver.com</recipients>
+      <recipients>scott.little@windriver.com jason.norton@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>

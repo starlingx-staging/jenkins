@@ -17,10 +17,10 @@ DEFAULT_IMAGE_API_HOST="hub.docker.com"
 DEFAULT_ORGANIZATION="starlingx"
 DEFAULT_USERNAME="slittlewrs"
 
-get_project_tags () {
-    REGISTRY=$1
-    PROJECT=$2
-    ORGANIZATION=$3
+get_project_tags() {
+    local REGISTRY=$1
+    local PROJECT=$2
+    local ORGANIZATION=$3
 
     if [ -z "$REGISTRY" ]; then
         >&2 echo "get_project_tags: REGISTRY not provided"
@@ -31,20 +31,51 @@ get_project_tags () {
         >&2 echo "get_project_tags: PROJECT not provided"
         return 1
     fi
-    
+
     if [ -z "$ORGANIZATION" ]; then
-        URL="https://$REGISTRY/v1/repositories/$PROJECT/tags"
+        URL="https://$REGISTRY/v2/repositories/$PROJECT/tags"
     else
-        URL="https://$REGISTRY/v1/repositories/$ORGANIZATION/$PROJECT/tags"
+        URL="https://$REGISTRY/v2/repositories/$ORGANIZATION/$PROJECT/tags"
     fi
 
-    wget -q $URL -O -  | sed -e 's/[][]//g' -e 's/"//g' -e 's/ //g' | tr '}' '\n'  | awk -F: '{print $3}'
-    if [ ${PIPESTATUS[0]} -ne 0 ];then
-        >&2 echo "get_project_tags: Bad URL='$URL'"
-        return 1
+    __get_project_tags  "$URL"
+    
+}
+__get_project_tags() {
+    local url="$1"
+    local json
+
+    echo ">>> $url" >&2
+    json="$(wget -q -O - "$url")"
+
+    # success
+    if [[ $? -eq 0 && -n "$json" ]] ; then
+        echo -n "$json" | python2 -c '
+import sys, json
+y=json.loads(sys.stdin.read())
+if y and y.get("next"):
+    print("next %s" % y.get("next"))
+if y and y.get("results"):
+    for res in y.get("results"):
+        if res.get("name"):
+            print("%s" % res.get("name"))
+' \
+        | while read key value; do
+            if [ "${key}" = "next" ]; then
+                __get_project_tags "$value"
+                status=$?
+                if [[ $status -ne 0 ]] ; then
+                    exit $status
+                fi
+            else
+                echo "${key}"
+            fi
+        done
+        return 0
     fi
 
-    return 0
+    echo "get_project_tags: failed to retrieve tags from $url" >&2
+    return 1
 }
 
 extract_published_images_from_logs () {

@@ -440,11 +440,9 @@ function workspace_cleanup_by_age {
         TRIAL_RUN=1
     fi
 
-    DELETE_STILL_PUBLISHED_DOCKER_IMAGES=
     if [ -f "$SD" ]; then
         source "$SD"
     fi
-    : ${DELETE_STILL_PUBLISHED_DOCKER_IMAGES:=0}
 
     echo "SAVE_DAYS_GREEN=$SAVE_DAYS_GREEN"
     echo "SAVE_DAYS_YELLOW=$SAVE_DAYS_YELLOW"
@@ -452,7 +450,6 @@ function workspace_cleanup_by_age {
     echo "SAVE_DAYS_UNKNOWN=$SAVE_DAYS_UNKNOWN"
     echo "SAVE_MIN_KEEP=$SAVE_MIN_KEEP"
     echo "TRIAL_RUN=$TRIAL_RUN"
-    echo "DELETE_STILL_PUBLISHED_DOCKER_IMAGES=$DELETE_STILL_PUBLISHED_DOCKER_IMAGES"
 
     dirs=$(ls -dr1 $WILD)
 
@@ -463,10 +460,6 @@ function workspace_cleanup_by_age {
        if [ $? -eq 0 ]; then
            echo "Delete: $d"
            NO_RM=0
-           if [ $NO_RM -ne 1 -a $DELETE_STILL_PUBLISHED_DOCKER_IMAGES -eq 1 ]; then
-              echo "delete_still_publised_images '$BUILD_DIR' '$d'"
-              delete_still_publised_images "$BUILD_DIR" "$d" $TRIAL_RUN
-           fi
            if [ -f /usr/bin/mock ]; then
               for cfg in $(ls -1 $(pwd)/$d/*/configs/$USR-*/$USR-*.b[0-9].cfg 2>> /dev/null) \
                          $(ls -1 $(pwd)/$d/*/$USR-*.cfg 2>> /dev/null) \

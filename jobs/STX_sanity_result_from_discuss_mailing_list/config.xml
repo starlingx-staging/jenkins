@@ -115,12 +115,23 @@ process_sanity_headers () {
         sed -n -e  &quot;/^$pattern$/,/^Subject:/{ /^$pattern$/d; /^Subject:/d; p}&quot; $ARCHIVE &gt; $RECORD
 
         # expect to find two pieces of  info from the message, load url and test status
-        url=$(grep &apos;http://mirror.starlingx.cengn.ca/mirror/starlingx&apos; $RECORD | grep -v latest_build | grep -v helm-charts | grep -v &apos;^[&gt;[]&apos; | sed &apos;s/^.*&lt;//&apos;  | sed &apos;s/^.*[\(]//&apos; | sed &apos;s/[\)].*$//&apos;  | sed &apos;s/&gt;.*$//&apos; | head -n 1 | sed &apos;s#[ ]*$##&apos; | sed &apos;s#iso/$##&apos; | sed &apos;s#outputs/$##&apos;)
+                url=$(grep &apos;http://mirror.starlingx.cengn.ca/mirror/starlingx&apos; $RECORD | grep -v latest_build | grep -v helm-charts | grep -v &apos;^[&gt;[]&apos; | sed -e &apos;s/^.*&lt;//&apos; -e &apos;s/^.*[\(]//&apos; -e &apos;s/[\)].*$//&apos; -e &apos;s/&gt;.*$//&apos; -e &apos;s#.*\(http.*\)#\1#&apos; | head -n 1 | sed -e &apos;s#[ ]*$##&apos; -e &apos;s#iso/$##&apos; -e &apos;s#outputs/$##&apos;)
         
-        status=$(grep &apos;^Status: [YRGyrg]&apos;  $RECORD | grep -v &apos;^[&gt;]&apos; | sed &apos;s/^Status: //&apos; | awk &apos;{ print $1 }&apos; | head -n 1)
-        if [ &quot;$status&quot; == &quot;&quot; ]; then
-            status=$(grep &apos;^ Status: [YRGyrg]&apos;  $RECORD | grep -v &apos;^[&gt;]&apos; | sed &apos;s/^ Status: //&apos; | awk &apos;{ print $1 }&apos; | head -n 1)
+        if [ &quot;$url&quot; == &quot;&quot; ]; then
+            # perhaps they used a &apos;latest_build&apos; path.  We can only use this if BUILD_ID is given
+
+            build_id=$(grep &apos;^BUILD_ID=&apos; $RECORD | sed -e &apos;s#^BUILD_ID=##&apos; -e &quot;s#^&apos;\([^&apos;]*\)&apos;\$#\1#&quot; -e &apos;s#^&quot;\([^&quot;]*\)&quot;$#\1#&apos;)
+            if [ &quot;$build_id&quot; != &quot;&quot; ]; then
+                        url=$(grep &apos;http://mirror.starlingx.cengn.ca/mirror/starlingx&apos; $RECORD | grep latest_build | grep -v helm-charts | grep -v &apos;^[&gt;[]&apos; | sed -e &apos;s/^.*&lt;//&apos; -e &apos;s/^.*[\(]//&apos; -e &apos;s/[\)].*$//&apos; -e &apos;s/&gt;.*$//&apos; -e &apos;s#.*\(http.*\)#\1#&apos; -e &quot;s#latest_build#${build_id}#&quot; | head -n 1 | sed -e &apos;s#[ ]*$##&apos; -e &apos;s#iso/$##&apos; -e &apos;s#outputs/$##&apos;)
+            fi
+            
         fi
+        
+        status=$( (
+                  grep &apos;^Status: [YRGyrg]&apos;  $RECORD | grep -v &apos;^[&gt;]&apos; | sed &apos;s/^Status: //&apos; | awk &apos;{ print $1 }&apos;
+                  grep &apos;^ Status: [YRGyrg]&apos;  $RECORD | grep -v &apos;^[&gt;]&apos; | sed &apos;s/^ Status: //&apos; | awk &apos;{ print $1 }&apos;
+                  grep &apos;^Overall Status: [YRGyrg]&apos;  $RECORD | grep -v &apos;^[&gt;]&apos; | sed &apos;s/^Overall Status: //&apos; | awk &apos;{ print $1 }&apos;
+                  ) | head -n 1)
         
         # convert to uppercase
         status=${status^^}
@@ -130,8 +141,8 @@ process_sanity_headers () {
         fi
 
         # Convert url to file system path
-        path=$(echo $url | sed &apos;s#http://mirror.starlingx.cengn.ca#/export#&apos; | sed &apos;s#/$##&apos;)
-
+        path=$(echo $url | sed &apos;s#http://mirror.starlingx.cengn.ca#/export#&apos; | sed &apos;s#/$##&apos; | sed &apos;s#^\(.*/[0-9]*T[0-9]*Z\)/.*$#\1#&apos;)
+        
         # process this entry
         echo &quot;$status: $path&quot;
         if [ ! -d $path ]; then
@@ -155,7 +166,8 @@ for ym in $((date $DATE_FORMAT; date -d &apos;yesterday&apos; $DATE_FORMAT) | so
         continue
     fi
 
-    sed -i -e &apos;/^Subject.*Sanity/{:1 N;/[^t]:/b; s/\n//; b1}&apos; $ARCHIVE
+    # Merge multi-line subjects into a single line
+    sed -i -e &apos;/^Subject.*[sS]anity/{:1 N;/[^t]:/b; s/\n//; b1}&apos; $ARCHIVE
     
     # Look for messages with a subject suggesting a sanity test result
     grep &quot;^Subject: \[Starlingx-discuss\] FW: Sanity Test&quot; $ARCHIVE &gt; $HEADERS || true
@@ -164,6 +176,7 @@ for ym in $((date $DATE_FORMAT; date -d &apos;yesterday&apos; $DATE_FORMAT) | so
     grep &quot;^Subject: \[Starlingx-discuss\][ ]*\[Containers\][ ]*Sanity Test&quot; $ARCHIVE &gt;&gt; $HEADERS || true
     grep &quot;^Subject: \[Starlingx-discuss\] Sanity Master Test&quot; $ARCHIVE &gt;&gt; $HEADERS || true
     grep &quot;^Subject: \[Starlingx-discuss\]  Sanity Master Test&quot; $ARCHIVE &gt;&gt; $HEADERS || true
+    grep &quot;^Subject: \[Starlingx-discuss\] StarlingX + STX-Openstack MASTER build sanity results&quot; $ARCHIVE &gt;&gt; $HEADERS || true
 
     process_sanity_headers master
     

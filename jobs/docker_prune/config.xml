@@ -26,7 +26,9 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>docker container prune -f
+      <command>#!/bin/bash
+echo $SHELL
+docker container prune -f
 sleep 60
 docker image prune -f
 sleep 60
@@ -57,6 +59,9 @@ while read line ; do
         current=$((current +1))
     fi
     timestamp=&quot;${a[$current]}&quot;
+    if [ &quot;$timestamp&quot; == &quot;latest&quot; ]; then
+        continue
+    fi
     
     key=&quot;$image:$branch&quot;
     if [ &quot;$os&quot; != &quot;&quot; ]; then key+=&quot;-$os&quot;; fi

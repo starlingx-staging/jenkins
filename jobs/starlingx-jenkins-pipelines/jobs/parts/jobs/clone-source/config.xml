@@ -9,6 +9,7 @@
         <string>DRY_RUN</string>
         <string>PUBLISH_TIMESTAMP</string>
         <string>MASTER_BUILD_NUMBER</string>
+        <string>PATCH_LIST</string>
         <string>TIMESTAMP</string>
         <string>JENKINS_SCRIPTS_BRANCH</string>
         <string>MASTER_JOB_NAME</string>
@@ -60,6 +61,11 @@
           <name>REFRESH_SOURCE</name>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>PATCH_LIST</name>
+          <defaultValue>-</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <jenkins.model.BuildDiscarderProperty>

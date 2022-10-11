@@ -21,7 +21,9 @@
         <string>SHELL_XTRACE</string>
         <string>BUILD_ISO</string>
         <string>IMPORT_BUILD</string>
+        <string>BUILD_HELM_CHARTS</string>
         <string>MASTER_BUILD_NUMBER</string>
+        <string>PATCH_LIST</string>
         <string>DOCKER_IMAGE_LIST</string>
         <string>PUSH_DOCKER_IMAGES</string>
         <string>CLEAN_DOCKER</string>
@@ -120,6 +122,10 @@
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
+          <name>BUILD_HELM_CHARTS</name>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
           <name>FORCE_BUILD_WHEELS</name>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
@@ -155,6 +161,24 @@
           <name>JENKINS_SCRIPTS_BRANCH</name>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>PATCH_LIST</name>
+          <description>&lt;pre&gt;&lt;code&gt;List of Gerrit URLs to apply before running the build, one per line &quot;[PATH] URL REF&quot;, eg:
+
+  https://review.opendev.org/starlingx/config     refs/changes/71/859571/4
+  https://review.opendev.org/starlingx/stx-puppet refs/changes/75/859575/1
+  https://review.opendev.org/starlingx/tools      refs/changes/76/859576/2
+
+or with paths relative to repo root:
+
+  cgcs-root/stx/config     https://review.opendev.org/starlingx/config     refs/changes/71/859571/4
+  cgcs-root/stx/stx-puppet https://review.opendev.org/starlingx/stx-puppet refs/changes/75/859575/1
+  stx-tools                https://review.opendev.org/starlingx/tools      refs/changes/76/859576/2
+&lt;/code&gt;&lt;/pre&gt;
+            </description>
+          <defaultValue>-</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <jenkins.model.BuildDiscarderProperty>

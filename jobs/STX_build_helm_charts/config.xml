@@ -60,6 +60,12 @@
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MAIN_HELM_CHART_RPM_NAME</name>
+          <description></description>
+          <defaultValue>stx-openstack-helm</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -87,6 +93,7 @@ echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
 [ -n &quot;$PUBLISH_LOGS_URL&quot; ]
 [ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
+[ -n &quot;$MAIN_HELM_CHART_RPM_NAME&quot; ]
 
 if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
     echo &quot;No new content.  Build not required&quot;
@@ -140,7 +147,7 @@ if [ -d &quot;${IMAGE_DIR}&quot; ]; then
         IMAGE_ARG=&quot;$(echo $IMAGE_ARG | sed &apos;s/^,//&apos;)&quot;
 
         echo &quot;Building chart for image file: ${IMAGE_ARG}&quot;
-        echo &quot;build-helm-charts.sh --os ${OS} --image-record ${IMAGE_ARG} --label ${LABEL} --app stx-openstack --rpm stx-openstack-helm --verbose&quot; | $DOCKER_CMD
+        echo &quot;build-helm-charts.sh --os ${OS} --image-record ${IMAGE_ARG} --label ${LABEL} --app stx-openstack --rpm $MAIN_HELM_CHART_RPM_NAME --verbose&quot; | $DOCKER_CMD
         HELM_OUT_DIR=$(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm)
         cp -v $HELM_OUT_DIR/stx/*.tgz $HELM_SAVE_DIR
         rm -f $HELM_OUT_DIR/stx/*.tgz
@@ -149,7 +156,7 @@ if [ -d &quot;${IMAGE_DIR}&quot; ]; then
   done
 fi
 
-for f in $(grep --no-filename &apos;^stx-.*helm$&apos; $(find $MY_REPO -name centos_helm.inc) | grep -v &apos;^#&apos; | grep -v stx-openstack-helm  | sed &apos;s/-helm$//&apos;); do
+for f in $(grep --no-filename &apos;^stx-.*helm$&apos; $(find $MY_REPO -name centos_helm.inc) | grep -v &apos;^#&apos; | grep -v $MAIN_HELM_CHART_RPM_NAME  | sed &apos;s/-helm$//&apos;); do
     echo &quot;build-helm-charts.sh --os ${OS} --app $f --verbose&quot; | $DOCKER_CMD
     HELM_OUT_DIR=$(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm)
     cp -v $HELM_OUT_DIR/stx/*.tgz $HELM_SAVE_DIR

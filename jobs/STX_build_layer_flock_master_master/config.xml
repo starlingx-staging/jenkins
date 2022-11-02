@@ -667,6 +667,7 @@ export OS_VERSION=7.5.1804
 export BUILD_ISO=true
 export BUILD_IMG=true
 export PUBLISH_URL=http://mirror.starlingx.cengn.ca
+export MAIN_HELM_CHART_RPM_NAME=stx-openstack-helm-fluxcd
 
 export TIMESTAMP=$BUILD_TIMESTAMP
 export MASTER_BUILD_NUMBER=$BUILD_NUMBER
@@ -775,7 +776,8 @@ echo PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE &gt;&gt; env.properties
 echo PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE &gt;&gt; env.properties
 echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt;&gt; env.properties
 echo BUILD_NM=$JOB_NAME &gt;&gt; env.properties
-echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties</scriptContent>
+echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties
+echo MAIN_HELM_CHART_RPM_NAME=$MAIN_HELM_CHART_RPM_NAME &gt;&gt; env.properties</scriptContent>
         <secureGroovyScript plugin="script-security@1.58">
           <script></script>
           <sandbox>false</sandbox>

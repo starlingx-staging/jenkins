@@ -12,7 +12,7 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -570,12 +570,12 @@
     </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
+    <hudson.tasks.Mailer plugin="mailer@1.23">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.63">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -627,7 +627,7 @@
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.10"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
     <EnvInjectBuildWrapper plugin="envinject@2.1.6">
       <info>
         <scriptContent>export BRANCH=master
@@ -635,6 +635,7 @@ export OPENSTACK_RELEASE=pike
 export OS=centos
 export OS_VERSION=7.5.1804
 export PUBLISH_URL=http://mirror.starlingx.cengn.ca
+export MAIN_HELM_CHART_RPM_NAME=stx-openstack-helm-fluxcd
 
 export TIMESTAMP=$BUILD_TIMESTAMP
 export MASTER_BUILD_NUMBER=$BUILD_NUMBER
@@ -730,8 +731,9 @@ echo PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE &gt;&gt; env.properties
 echo PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE &gt;&gt; env.properties
 echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt;&gt; env.properties
 echo BUILD_NM=$JOB_NAME &gt;&gt; env.properties
-echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties</scriptContent>
-        <secureGroovyScript plugin="script-security@1.48">
+echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties
+echo MAIN_HELM_CHART_RPM_NAME=$MAIN_HELM_CHART_RPM_NAME &gt;&gt; env.properties</scriptContent>
+        <secureGroovyScript plugin="script-security@1.58">
           <script></script>
           <sandbox>false</sandbox>
         </secureGroovyScript>

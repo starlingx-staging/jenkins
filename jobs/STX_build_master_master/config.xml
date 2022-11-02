@@ -43,7 +43,7 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <hudson.triggers.TimerTrigger>
-      <spec>30 0 * * *
+      <spec>0 9 * * 6
 # 0 6 * * *
 </spec>
     </hudson.triggers.TimerTrigger>
@@ -838,6 +838,7 @@ export OPENSTACK_RELEASE=master
 export OS=centos
 export OS_VERSION=7.5.1804
 export PUBLISH_URL=http://mirror.starlingx.cengn.ca
+export MAIN_HELM_CHART_RPM_NAME=stx-openstack-helm-fluxcd
 
 export TIMESTAMP=$BUILD_TIMESTAMP
 export MASTER_BUILD_NUMBER=$BUILD_NUMBER
@@ -946,7 +947,8 @@ echo PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE &gt;&gt; env.properties
 echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt;&gt; env.properties
 echo BUILD_NM=$JOB_NAME &gt;&gt; env.properties
 echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties
-echo FORCE_BUILD=$FORCE_BUILD &gt;&gt; env.properties</scriptContent>
+echo FORCE_BUILD=$FORCE_BUILD &gt;&gt; env.properties
+echo MAIN_HELM_CHART_RPM_NAME=$MAIN_HELM_CHART_RPM_NAME &gt;&gt; env.properties</scriptContent>
         <secureGroovyScript plugin="script-security@1.58">
           <script></script>
           <sandbox>false</sandbox>

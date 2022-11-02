@@ -132,6 +132,12 @@
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MAIN_HELM_CHART_RPM_NAME</name>
+          <description></description>
+          <defaultValue>stx-openstack-helm</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -169,6 +175,7 @@ echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
 # echo &quot;BASE_VERSION=$BASE_VERSION&quot;
 # echo &quot;BASE_LATEST_TAG=$BASE_LATEST_TAG&quot;
 # echo &quot;FLOCK_VERSION=$FLOCK_VERSION&quot;
+echo &quot;$MAIN_HELM_CHART_RPM_NAME&quot;
 
 [ -n &quot;$TIMESTAMP&quot; ]
 [ -n &quot;$BRANCH&quot; ]
@@ -195,6 +202,7 @@ echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
 # [ -n &quot;$BASE_VERSION&quot; ]
 # [ -n &quot;$BASE_LATEST_TAG&quot; ]
 # [ -n &quot;$FLOCK_VERSION&quot; ]
+[ -n &quot;$MAIN_HELM_CHART_RPM_NAME&quot; ]
 
 if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
     echo &quot;No new content.  Build not required&quot;
@@ -741,7 +749,8 @@ echo BASE_VERSION=$BASE_VERSION &gt;&gt; env.properties
 echo BASE_LATEST_TAG=$BASE_LATEST_TAG &gt;&gt; env.properties
 echo FLOCK_VERSION=$FLOCK_VERSION &gt;&gt; env.properties
 echo MASTER_BUILD_NUMBER=$MASTER_BUILD_NUMBER &gt;&gt; env.properties
-echo MASTER_JOB_NAME=$MASTER_JOB_NAME &gt;&gt; env.properties</scriptContent>
+echo MASTER_JOB_NAME=$MASTER_JOB_NAME &gt;&gt; env.properties
+echo MAIN_HELM_CHART_RPM_NAME=$MAIN_HELM_CHART_RPM_NAME &gt;&gt; env.properties</scriptContent>
         <secureGroovyScript plugin="script-security@1.58">
           <script></script>
           <sandbox>false</sandbox>

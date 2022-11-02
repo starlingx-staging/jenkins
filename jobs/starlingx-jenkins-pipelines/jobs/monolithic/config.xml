@@ -28,10 +28,12 @@
         <string>PUSH_DOCKER_IMAGES</string>
         <string>CLEAN_DOCKER</string>
         <string>MASTER_JOB_NAME</string>
+        <string>BUILDER_USE_DOCKER_CACHE</string>
         <string>BUILD_HOME</string>
         <string>PUBLISH_TIMESTAMP</string>
         <string>BUILD_RT</string>
         <string>BUILD_PACKAGES</string>
+        <string>PKG_REUSE</string>
         <string>CLEAN_REPOMGR</string>
         <string>JENKINS_SCRIPTS_BRANCH</string>
         <string>REBUILD_BUILDER_IMAGES</string>
@@ -70,6 +72,10 @@
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
+          <name>BUILDER_USE_DOCKER_CACHE</name>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
           <name>REFRESH_SOURCE</name>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
@@ -81,6 +87,10 @@
           <name>BUILD_PACKAGES_LIST</name>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>PKG_REUSE</name>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>BUILD_ISO</name>
           <defaultValue>false</defaultValue>

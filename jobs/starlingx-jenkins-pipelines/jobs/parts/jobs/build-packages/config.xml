@@ -14,6 +14,7 @@
         <string>PUBLISH_TIMESTAMP</string>
         <string>CLEAN_PACKAGES</string>
         <string>BUILD_RT</string>
+        <string>PKG_REUSE</string>
         <string>BUILD_PACKAGES</string>
         <string>TIMESTAMP</string>
         <string>JENKINS_SCRIPTS_BRANCH</string>
@@ -52,6 +53,10 @@
           <name>PUBLISH_TIMESTAMP</name>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>PKG_REUSE</name>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>DRY_RUN</name>
           <defaultValue>false</defaultValue>

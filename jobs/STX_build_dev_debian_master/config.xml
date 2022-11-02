@@ -1,7 +1,8 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description></description>
+  <description>For experimental builds only.&#xd;
+Exports: http://mirror.starlingx.cengn.ca/mirror/starlingx/master/debian/monolithic-dev1/</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -26,6 +27,11 @@
         </hudson.model.StringParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>REBUILD_BUILDER_IMAGES</name>
+          <description></description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>BUILDER_USE_DOCKER_CACHE</name>
           <description></description>
           <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
@@ -103,7 +109,7 @@
         <hudson.model.BooleanParameterDefinition>
           <name>BUILD_DOCKER_IMAGES</name>
           <description></description>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>DOCKER_IMAGE_LIST</name>
@@ -114,7 +120,7 @@
         <hudson.model.BooleanParameterDefinition>
           <name>PUSH_DOCKER_IMAGES</name>
           <description></description>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>USE_DOCKER_CACHE</name>
@@ -123,8 +129,8 @@
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>PKG_REUSE</name>
-          <description>2022-11-01: this option does not work correctly (breaks docker image builds).</description>
-          <defaultValue>false</defaultValue>
+          <description></description>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
@@ -134,11 +140,7 @@
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <triggers>
-    <hudson.triggers.TimerTrigger>
-      <spec>0 2 * * 0,1,2,3,4,5</spec>
-    </hudson.triggers.TimerTrigger>
-  </triggers>
+  <triggers/>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
@@ -151,9 +153,9 @@ EMAIL_LIST=&quot;\
 &quot;
 
 cat &gt;&quot;env.properties&quot; &lt;&lt;_END
-BUILD_HOME=/localdisk/designer/jenkins/debian-master
+BUILD_HOME=/localdisk/designer/jenkins/debian-master-dev1
 TIMESTAMP=$TIMESTAMP
-FORCE_BUILD_WHEELS=false
+FORCE_BUILD_WHEELS=true
 BUILD_HELM_CHARTS=true
 MASTER_JOB_NAME=$JOB_NAME
 MASTER_BUILD_NUMBER=$BUILD_NUMBER

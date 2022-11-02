@@ -13,12 +13,12 @@
         <hudson.model.BooleanParameterDefinition>
           <name>FORCE_BUILD</name>
           <description>Always build, even if there are no changes.</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>BUILD_CONTAINERS</name>
           <description>Build Containers in addition to iso.  Normally only build containers once per week</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
@@ -28,7 +28,11 @@
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <triggers/>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>0 19 * * 6</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
@@ -166,27 +170,27 @@
                 <days>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>2</day>
-                    <selected>false</selected>
+                    <selected>true</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>3</day>
-                    <selected>true</selected>
+                    <selected>false</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>4</day>
-                    <selected>false</selected>
+                    <selected>true</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>5</day>
-                    <selected>true</selected>
-                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                    <day>6</day>
                     <selected>false</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
-                    <day>7</day>
+                    <day>6</day>
                     <selected>true</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>7</day>
+                    <selected>false</selected>
                   </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                   <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
                     <day>1</day>

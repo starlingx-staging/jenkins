@@ -75,6 +75,7 @@ echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
 
 
 export BUILD_REPO_URL=https://opendev.org/starlingx/manifest
+export PATH=/usr/local/bin:$PATH
 
 mkdir -p $MY_REPO_ROOT
 cd $MY_REPO_ROOT

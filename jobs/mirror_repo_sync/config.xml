@@ -50,6 +50,9 @@ e.g. Starlingx-cengn_compiler_std_layer</description>
   <builders>
     <hudson.tasks.Shell>
       <command># ~/bin/repo_update.sh
+
+export PATH=/usr/local/bin:$PATH
+
 ~/bin/repo_update_layered.sh
 
 EXTRA_ARGS=&quot;&quot;

@@ -26,7 +26,7 @@
         <hudson.model.BooleanParameterDefinition>
           <name>BUILD_CONTAINERS</name>
           <description>Build Containers in addition to iso.  Normally only build containers once per week</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
@@ -38,8 +38,8 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <hudson.triggers.TimerTrigger>
-      <spec>30 21 * * 2,3,4,5,6
-0 19 * * 0,1
+      <spec># 30 21 * * 2,3,4,5,6
+0 19 * * 0,1,2,3,4,5
 # 1 0 * * *</spec>
     </hudson.triggers.TimerTrigger>
   </triggers>

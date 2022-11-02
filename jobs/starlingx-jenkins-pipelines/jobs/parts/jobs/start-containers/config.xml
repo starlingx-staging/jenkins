@@ -13,6 +13,7 @@
         <string>JENKINS_SCRIPTS_BRANCH</string>
         <string>MASTER_JOB_NAME</string>
         <string>REBUILD_BUILDER_IMAGES</string>
+        <string>BUILDER_USE_DOCKER_CACHE</string>
         <string>BUILD_HOME</string>
         <string>SHELL_XTRACE</string>
       </parameters>
@@ -54,6 +55,10 @@
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>REBUILD_BUILDER_IMAGES</name>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>BUILDER_USE_DOCKER_CACHE</name>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>

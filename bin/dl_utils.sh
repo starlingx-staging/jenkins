@@ -307,7 +307,7 @@ dl_repo_from_url () {
         return 1
     fi
 
-    # Temporary hack for 'scond reposync fails on yocto issue
+    # Temporary hack for 'second reposync fails on yocto issue
     # https://bugs.chromium.org/p/gerrit/issues/detail?id=14700&q=tyranscooter&can=2
     # CMD="rm -rf .repo/project-objects/linux-yocto.git* .repo/projects/cgcs-root/stx/git/linux-yocto-*"
     # echo "$CMD"

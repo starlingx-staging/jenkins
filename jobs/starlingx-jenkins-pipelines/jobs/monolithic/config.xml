@@ -8,6 +8,7 @@
       <parameters>
         <string>BUILD_PACKAGES_LIST</string>
         <string>CLEAN_DOWNLOADS</string>
+        <string>SUPPRESS_DOCKER_IMAGE_BUILD_ERRORS</string>
         <string>USE_DOCKER_CACHE</string>
         <string>REFRESH_SOURCE</string>
         <string>DRY_RUN</string>
@@ -153,6 +154,10 @@
         </hudson.model.StringParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>PUSH_DOCKER_IMAGES</name>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>SUPPRESS_DOCKER_IMAGE_BUILD_ERRORS</name>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>

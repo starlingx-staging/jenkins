@@ -26,7 +26,7 @@
         <hudson.model.BooleanParameterDefinition>
           <name>FULL_BUILD</name>
           <description>Don&apos;t use docker cache</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>

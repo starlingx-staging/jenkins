@@ -138,7 +138,7 @@ usage () {
     exit 0
 }
 
-TEMP=$(getopt -o h --long help,repo-file-filter:,repo-id-filter: -n 'repo_sync_layered.sh' -- "$@")
+TEMP=$(getopt -o h --long help,no-clean,repo-file-filter:,repo-id-filter: -n 'repo_sync_layered.sh' -- "$@")
 if [ $? -ne 0 ]; then
     echo "getopt error"
     usage
@@ -148,11 +148,13 @@ eval set -- "$TEMP"
 
 REPO_FILE_FILTER=.
 REPO_ID_FILTER=.
+CLEAN=1
 
 while true ; do
     case "$1" in
         --repo-file-filter)   REPO_FILE_FILTER=$2 ; shift 2 ;;
         --repo-id-filter)     REPO_ID_FILTER=$2 ; shift 2 ;;
+        --no-clean)           CLEAN=0 ; shift ;;
         -h|--help)        echo "help"; usage; exit 0 ;;
         --)               shift ; break ;;
         *)                usage; exit 1 ;;
@@ -501,16 +503,18 @@ for REPO_FILE in $(find ${YUM_REPOS_DIR} -type f -name '*.repo' | grep "$REPO_FI
 
 done
 
-if [ ! -z ${YUM_CONF_TMP} ] && [ -f ${YUM_CONF_TMP} ]; then
-    \rm -f ${YUM_CONF_TMP}
-fi
+if [ $CLEAN -eq 1 ]; then
+    if [ ! -z ${YUM_CONF_TMP} ] && [ -f ${YUM_CONF_TMP} ]; then
+        \rm -f ${YUM_CONF_TMP}
+    fi
 
-if [ ! -z ${YUM_REPOS_DIR_TMP} ] && [ -d ${YUM_REPOS_DIR_TMP} ]; then
-    \rm -rf ${YUM_REPOS_DIR_TMP}
-fi
-
-if [ ! -z ${FIND_TMP} ] && [ -f ${FIND_TMP} ]; then
-    \rm -f ${FIND_TMP}
+    if [ ! -z ${YUM_REPOS_DIR_TMP} ] && [ -d ${YUM_REPOS_DIR_TMP} ]; then
+        \rm -rf ${YUM_REPOS_DIR_TMP}
+    fi
+    
+    if [ ! -z ${FIND_TMP} ] && [ -f ${FIND_TMP} ]; then
+        \rm -f ${FIND_TMP}
+    fi
 fi
 
 echo ERR_COUNT=$ERR_COUNT

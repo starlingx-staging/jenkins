@@ -53,8 +53,6 @@ e.g. Starlingx-cengn_compiler_std_layer</description>
 
 export PATH=/usr/local/bin:$PATH
 
-~/bin/repo_update_layered.sh
-
 EXTRA_ARGS=&quot;&quot;
 if [ &quot;$REPO_FILE&quot; != &quot;&quot; ]; then
     EXTRA_ARGS+=&quot; --repo-file-filter $REPO_FILE&quot;
@@ -62,6 +60,8 @@ fi
 if [ &quot;$REPO_ID&quot; != &quot;&quot; ]; then
     EXTRA_ARGS+=&quot; --repo-id-filter $REPO_ID&quot;
 fi
+
+~/bin/repo_update_layered.sh $EXTRA_ARGS
 ~/bin/repo_sync_layered.sh $EXTRA_ARGS
 # ~/bin/repo_sync.sh</command>
     </hudson.tasks.Shell>

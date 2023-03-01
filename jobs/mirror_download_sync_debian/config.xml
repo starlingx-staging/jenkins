@@ -34,7 +34,7 @@
 MY_REPO_DIR=/localdisk/designer/${USER}/${JOB_NAME}/v2/repoes
 MIRROR_DIR=/export/mirror/
 IMAGE_NAME=debian-downloads-downloader-v3-${USER}
-CONTAINER_NAME=debian-downloads-downloader-v3-${USER}
+CONTAINER_NAME=debian-downloads-downloader-v3b-${USER}
 
 mkdir -p ${MY_REPO_DIR}
 
@@ -68,5 +68,7 @@ docker run -t --rm --name ${CONTAINER_NAME} \
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
   </publishers>
-  <buildWrappers/>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+  </buildWrappers>
 </project>

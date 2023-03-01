@@ -13,6 +13,8 @@
 # without recieving a version update.
 #
 
+set -x
+
 LOGFILE="/export/log/repo_update.log"
 BAD_REPOS_FILE="/export/log/bad_repos.log"
 YUM_CONF_DIR="/export/config"
@@ -25,19 +27,26 @@ STX_BRANCH="master"
 STX_REPO_ROOT="$HOME/stx-repo"
 STX_TOOLS_ROOT_DIR="$STX_REPO_ROOT/stx-tools"
 STX_TOOLS_OS_SUBDIR="centos-mirror-tools"
+REPO_FILE_FILTER=.
+REPO_ID_FILTER=.
 
 
 REPO_UPDATE_LAYERED_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
 
-if [ -f "$REPO_UPDATE_LAYERED_DIR/stx_tool_utils_layered.sh" ]; then
-    source "$REPO_UPDATE_LAYERED_DIR/stx_tool_utils_layered.sh"
-elif [ -f "$REPO_UPDATE_LAYERED_DIR/../stx_tool_utils_layered.sh" ]; then
-    source "$REPO_UPDATE_LAYERED_DIR/../stx_tool_utils_layered.sh"
+source_file () {
+    local FILE=$1
+if [ -f "$REPO_UPDATE_LAYERED_DIR/$FILE" ]; then
+    source "$REPO_UPDATE_LAYERED_DIR/$FILE"
+elif [ -f "$REPO_UPDATE_LAYERED_DIR/../$FILE" ]; then
+    source "$REPO_UPDATE_LAYERED_DIR/../$FILE"
 else
-    >&2 echo "Error: Can't find 'stx_tool_utils_layered.sh'"
+    echo "Error: Can't find '$FILE'"
     exit 1
 fi
+}
 
+source_file "ini_utils.sh"
+source_file "stx_tool_utils_layered.sh"
 
 
 
@@ -50,9 +59,19 @@ usage () {
     echo ""
 }
 
-while getopts "b:d:h" opt; do
-    case "${opt}" in
-        b)
+TEMP=$(getopt -o b:d:h --long help,branch:,dl-dir:,repo-file-filter:,repo-id-filter: -n 'repo_update_layered.sh' -- "$@")
+if [ $? -ne 0 ]; then
+    echo "getopt error"
+    usage
+    exit 1
+fi
+eval set -- "$TEMP"
+
+while true ; do
+    case "$1" in
+        --repo-file-filter)   REPO_FILE_FILTER=$2 ; shift 2 ;;
+        --repo-id-filter)     REPO_ID_FILTER=$2 ; shift 2 ;;
+        -b|--branch)
             # branch
             STX_BRANCH="${OPTARG}"
             if [ $"STX_BRANCH" == "" ]; then
@@ -60,7 +79,7 @@ while getopts "b:d:h" opt; do
                 exit 1
             fi
             ;;
-        d)
+        -d|--dl-dir)
             # download directory for stx-tools
             STX_REPO_ROOT="${OPTARG}"
             if [ "$STX_REPO_ROOT" == "" ]; then
@@ -68,15 +87,9 @@ while getopts "b:d:h" opt; do
                 exit 1
             fi
             ;;
-        h)
-            # Help
-            usage
-            exit 0
-            ;;
-        *)
-            usage
-            exit 1
-            ;;
+        -h|--help)        echo "help"; usage; exit 0 ;;
+        --)               shift ; break ;;
+        *)                usage; exit 1 ;;
     esac
 done
 
@@ -195,24 +208,13 @@ get_repo_name () {
 
 archive_repo_id () {
     local REPO_ID="$1"
-    local YUM_CONF="$2"
+    local REPO_NAME="$2"
     local REPO="$3"
-    local REPO_NAME=""
     local TEMP=""
     local EXTRA=""
 
-    if [ ! -f "$YUM_CONF" ]; then
-        >&2 echo "ERROR: invalid file YUM_CONF='$YUM_CONF'"
-        return 1
-    fi
-
     if [ ! -f "$REPO" ]; then
         >&2 echo "ERROR: invalid file REPO='$REPO'"
-        return 1
-    fi
-
-    REPO_NAME=$(get_repo_name "$YUM_CONF" "$REPO_ID")
-    if [ $? != 0 ]; then
         return 1
     fi
 
@@ -226,9 +228,12 @@ archive_repo_id () {
 
     echo "Archive: '$REPO_ID' as '$REPO_ID-$EXTRA' in file '$REPO'"
 
+    REPO_NAME_PATTERN="$REPO_NAME"
+    echo "REPO_NAME_PATTERN=$REPO_NAME_PATTERN"
+
     # Append $EXTRA to repo id and name
     sed -i "s#^[[]$REPO_ID[]]#[$REPO_ID-$EXTRA]#" "$REPO"
-    sed -i "s#^name=$REPO_NAME\$#name=$REPO_NAME-$EXTRA#" "$REPO"
+    sed -i "s#^name=$REPO_NAME_PATTERN\$#name=$REPO_NAME-$EXTRA#" "$REPO"
 
     # Disable the repo.
     # This one is trickey.  
@@ -280,7 +285,7 @@ copy_repo_id () {
     fi
 
     FRAGMENT=$(grep -l "\[$REPO_ID\]" $TEMPDIR/* | head -n 1)
-    if [ "$TEMPDIR" == "" ]; then
+    if [ "$FRAGMENT" == "" ]; then
         >&2 echo "ERROR: grep -l '$REPO_ID' $TEMPDIR/* | head -n 1"
         return 1
     fi
@@ -304,9 +309,11 @@ update_yum_repos_d () {
     local DOWNLOAD_PATH=""
     local TEMPDIR=""
     local UPSTREAM_YUM_REPOS_DIR=""
+    local UPSTREAM_ENABLED=""
+    local ENABLED=""
 
     for UPSTREAM_YUM_REPOS_DIR in $(find "$STX_TOOLS_DL_DIR/$STX_TOOLS_OS_SUBDIR" -type d -name yum.repos.d); do
-        for UPSTREAM_REPO in $(find $UPSTREAM_YUM_REPOS_DIR -name '*.repo' | sort ); do
+        for UPSTREAM_REPO in $(find $UPSTREAM_YUM_REPOS_DIR -name '*.repo' | grep "$REPO_FILE_FILTER" | sort ); do
             REPO=$YUM_REPOS_DIR/$(basename $UPSTREAM_REPO)
             if [ ! -f $REPO ]; then
                 # New repo file
@@ -315,34 +322,55 @@ update_yum_repos_d () {
                 continue
             fi
 
-            for UPSTREAM_REPO_ID in $(grep '^[[]' $UPSTREAM_REPO | sed 's#[][]##g'); do
+            for UPSTREAM_REPO_ID in $(ini_section_list "${UPSTREAM_REPO}" | grep "$REPO_ID_FILTER"); do
 echo "UPSTREAM_YUM_CONF=$UPSTREAM_YUM_CONF"
 echo "UPSTREAM_REPO_ID=$UPSTREAM_REPO_ID"
 echo "UPSTREAM_REPO=$UPSTREAM_REPO"
+                UPSTREAM_ENABLED=0
+                if repo_is_enabled "${UPSTREAM_YUM_CONF}" "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}" ; then
+                    UPSTREAM_ENABLED=1
+                fi
+echo "UPSTREAM_ENABLED=$UPSTREAM_ENABLED"
+
                 UPSTREAM_REPO_URL=$(get_repo_url "${UPSTREAM_YUM_CONF}" "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}" | sed 's#\([^/]\)/$#\1#')
-                if [ $? != 0 ]; then
+                if [ $? != 0 ] || [ "${UPSTREAM_REPO_URL}" == "" ]; then
                     >&2 echo "Error: get_repo_url '${UPSTREAM_YUM_CONF}' '${UPSTREAM_REPO_ID}' '${UPSTREAM_REPO}'"
-                    if repo_is_enabled "${UPSTREAM_YUM_CONF}" "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}" ; then
-                        echo "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}" >> "${BAD_REPOS_FILE}"
+                    UPSTREAM_REPO_URL="$(ini_field "${UPSTREAM_REPO}" "${UPSTREAM_REPO_ID}" baseurl)"
+                    if [ $? != 0 ] || [ "${UPSTREAM_REPO_ID}" == "" ]; then
+                         >&2 echo "Error: ini_field '${UPSTREAM_REPO}' '${UPSTREAM_REPO_ID}' baseurl"
+                        if [ ${UPSTREAM_ENABLED} -eq 1 ]; then
+                            echo "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}" >> "${BAD_REPOS_FILE}"
+                            continue
+                        fi
+                        UPSTREAM_REPO_URL=""
                     fi
-                    continue
                 fi
 echo "UPSTREAM_REPO_URL=$UPSTREAM_REPO_URL"
 
-                UPSTREAM_REPO_NAME="$(get_repo_name "${UPSTREAM_YUM_CONF}" "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}")"
+                # UPSTREAM_REPO_NAME="$(get_repo_name "${UPSTREAM_YUM_CONF}" "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}")"
+                UPSTREAM_REPO_NAME="$(ini_field "${UPSTREAM_REPO}" "${UPSTREAM_REPO_ID}" name)"
                 if [ $? != 0 ]; then
-                    >&2 echo "Error: get_repo_name '${UPSTREAM_YUM_CONF}' '${UPSTREAM_REPO_ID}' '${UPSTREAM_REPO}'"
-                    echo "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}" >> "${BAD_REPOS_FILE}"
-                    continue
+                    # >&2 echo "Error: get_repo_name '${UPSTREAM_YUM_CONF}' '${UPSTREAM_REPO_ID}' '${UPSTREAM_REPO}'"
+                    >&2 echo "Error: ini_field '${UPSTREAM_REPO}' '${UPSTREAM_REPO_ID}' name"
+                    if [ ${UPSTREAM_ENABLED} -eq 1 ]; then
+                        echo "${UPSTREAM_REPO_ID}" "${UPSTREAM_REPO}" >> "${BAD_REPOS_FILE}"
+                        continue
+                    fi
+                    UPSTREAM_REPO_NAME=""
                 fi
 echo "UPSTREAM_REPO_NAME=$UPSTREAM_REPO_NAME"
 
-                UPSTREAM_DOWNLOAD_PATH="$DOWNLOAD_PATH_ROOT/$(repo_url_to_sub_path "$UPSTREAM_REPO_URL")"
+                if [ "$UPSTREAM_REPO_URL" != "" ]; then
+                    UPSTREAM_DOWNLOAD_PATH="$DOWNLOAD_PATH_ROOT/$(repo_url_to_sub_path "$UPSTREAM_REPO_URL")"
+                fi
+echo "UPSTREAM_REPO_PATH=$UPSTREAM_REPO_PATH"
 
-                echo "Processing: REPO=$UPSTREAM_REPO  REPO_ID=$UPSTREAM_REPO_ID  DOWNLOAD_PATH=$UPSTREAM_DOWNLOAD_PATH UPSTREAM_REPO_ID=$UPSTREAM_REPO_ID  UPSTREAM_REPO=$UPSTREAM_REPO"
+                echo "Processing: REPO=$UPSTREAM_REPO  REPO_ID=$UPSTREAM_REPO_ID  DOWNLOAD_PATH=$UPSTREAM_DOWNLOAD_PATH UPSTREAM_REPO_ID=$UPSTREAM_REPO_ID  UPSTREAM_REPO=$UPSTREAM_REPO  ENABLED=$UPSTREAM_ENABLED"
 
                 REPO_ID=$(grep "^[[]$UPSTREAM_REPO_ID[]]" $REPO | sed 's#[][]##g' | head -n 1)
+echo "REPO_ID=$REPO_ID"
 
+#SAL
                 if [ "$REPO_ID" == "" ]; then
                     copy_repo_id "$UPSTREAM_REPO_ID" "$UPSTREAM_REPO" "$REPO"
                     if [ $? != 0 ]; then
@@ -358,22 +386,31 @@ echo "UPSTREAM_REPO_NAME=$UPSTREAM_REPO_NAME"
                     return 1
                 fi
 
+                ENABLED=$(ini_field "${REPO}" "${REPO_ID}" enabled)
+echo "ENABLED=$ENABLED"
+
                 # REPO_URL=$(cd $(dirname $YUM_CONF);
                 #            yum repoinfo --config="$(basename $YUM_CONF)" --disablerepo="*" --enablerepo="$REPO_ID" | \
                 #                grep Repo-baseurl | \
                 #                cut -d ' ' -f 3;
                 #            exit ${PIPESTATUS[0]})
-                REPO_URL=$(get_repo_url "$YUM_CONF" "$REPO_ID" | sed 's#\([^/]\)/$#\1#')
+                # REPO_URL=$(get_repo_url "$YUM_CONF" "$REPO_ID" | sed 's#\([^/]\)/$#\1#')
+                REPO_URL=$(ini_field "$REPO" "$REPO_ID" baseurl)
                 if [ $? != 0 ]; then
                 #     >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
-                    return 1
+                    if [ $ENABLED -eq 1 ] && [ $UPSTREAM_ENABLED -eq 1 ]; then
+                        return 1
+                    fi
                 fi
 echo "REPO_URL=$REPO_URL"
 
-                REPO_NAME="$(get_repo_name "$YUM_CONF" "$REPO_ID")"
+                # REPO_NAME="$(get_repo_name "$YUM_CONF" "$REPO_ID")"
+                REPO_NAME="$(ini_field "$REPO" "$REPO_ID" name)"
                 if [ $? != 0 ]; then
                 #     >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
-                    return 1
+                    if [ $ENABLED -eq 1 ] && [ $UPSTREAM_ENABLED -eq 1 ]; then
+                        return 1
+                    fi
                 fi
 echo "REPO_NAME=$REPO_NAME"
 
@@ -382,25 +419,34 @@ echo "REPO_NAME=$REPO_NAME"
 echo "DOWNLOAD_PATH=$DOWNLOAD_PATH"
 
                 # Check critical content is the same
-                if [ "$UPSTREAM_REPO_URL" == "$REPO_URL" ] && [ "$UPSTREAM_DOWNLOAD_PATH" == "$DOWNLOAD_PATH" ] && [ "$UPSTREAM_REPO_NAME" == "$REPO_NAME" ]; then
+                if [ "$UPSTREAM_REPO_URL" == "$REPO_URL" ] && \
+                   [ "$UPSTREAM_DOWNLOAD_PATH" == "$DOWNLOAD_PATH" ] && \
+                   [ "$UPSTREAM_REPO_NAME" == "$REPO_NAME" ] && \
+                   [ "$UPSTREAM_ENABLED" == "$ENABLED" ]; then
                     echo "Already have '$UPSTREAM_REPO_ID' from '$UPSTREAM_REPO'"
                     continue
                 fi
 
                 # Something has changed, log it
+                ENABLED_ONLY=0
                 if [ "$UPSTREAM_REPO_URL" != "$REPO_URL" ]; then
                     >&2 echo "Warning: Existing repo has changed: file:$UPSTREAM_REPO,  id:$UPSTREAM_REPO_ID,  url:$REPO_URL -> $UPSTREAM_REPO_URL"
                 elif [ "$UPSTREAM_REPO_NAME" != "$REPO_NAME" ]; then
                     >&2 echo "Warning: Existing repo has changed: file:$UPSTREAM_REPO,  id:$UPSTREAM_REPO_ID,  name:$REPO_URL -> $UPSTREAM_REPO_URL"
                 elif [ "$UPSTREAM_DOWNLOAD_PATH" != "$DOWNLOAD_PATH" ]; then
                     >&2 echo "Warning: Existing download path has changed: file:$UPSTREAM_REPO,  id:$UPSTREAM_REPO_ID,  path:$UPSTREAM_DOWNLOAD_PATH -> $DOWNLOAD_PATH"
+                elif [ "$UPSTREAM_ENABLED" != "$ENABLED" ]; then
+                    >&2 echo "Warning: Enabled state has changed: file:$UPSTREAM_REPO,  id:$UPSTREAM_REPO_ID,  enabled:$UPSTREAM_ENABLED -> $ENABLED"
+                    ENABLED_ONLY=1
                 fi
 
-                archive_repo_id "$REPO_ID" "$YUM_CONF" "$REPO"
-                copy_repo_id "$UPSTREAM_REPO_ID" "$UPSTREAM_REPO" "$REPO"
-                if [ $? != 0 ]; then
-                    >&2 echo "Error: copy_repo_id '$UPSTREAM_REPO_ID' '$UPSTREAM_REPO' '$REPO'"
-                    return 1
+                archive_repo_id "$UPSTREAM_REPO_ID" "$UPSTREAM_REPO_NAME" "$REPO"
+                if [ $ENABLED_ONLY -eq 0 ] || [ $UPSTREAM_ENABLED -ne 0 ]; then
+                    copy_repo_id "$UPSTREAM_REPO_ID" "$UPSTREAM_REPO" "$REPO"
+                    if [ $? != 0 ]; then
+                        >&2 echo "Error: copy_repo_id '$UPSTREAM_REPO_ID' '$UPSTREAM_REPO' '$REPO'"
+                        return 1
+                    fi
                 fi
                 # # Create new repo id?  Edit old one?  Unclear what to do.
                 # ERR_COUNT=$((ERR_COUNT + 1))

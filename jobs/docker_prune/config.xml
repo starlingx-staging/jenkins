@@ -32,6 +32,8 @@ docker container prune -f
 sleep 60
 docker image prune -f
 sleep 60
+# docker volume prune -f
+sleep 600
 
 unset newest
 declare -A newest

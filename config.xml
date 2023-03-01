@@ -97,6 +97,7 @@
         <comparator class="hudson.util.CaseInsensitiveComparator"/>
         <string>delete_old_loads_master_feature</string>
         <string>docker_prune</string>
+        <string>resource_check</string>
         <string>STX_sanity_result_from_discuss_mailing_list</string>
       </jobNames>
       <jobFilters/>
@@ -329,6 +330,52 @@
         <string>STX_7.0_build_layer_containers</string>
         <string>STX_7.0_build_layer_distro</string>
         <string>STX_7.0_build_layer_flock</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>~jnorton</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <string>CVE_scan</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>STX 8.0</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <string>STX_8.0_build_debian</string>
+        <string>STX_8.0_build_debian_build_containers</string>
+        <string>STX_8.0_build_pipelines</string>
       </jobNames>
       <jobFilters/>
       <columns>

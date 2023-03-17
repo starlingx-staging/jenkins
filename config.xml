@@ -273,7 +273,7 @@
         <string>STX_build_deb_build_containers</string>
         <string>STX_build_debian_build_containers_master</string>
         <string>STX_build_debian_master</string>
-        <string>STX_build_debian_master.bak</string>
+        <string>STX_build_debian_master_test</string>
         <string>STX_build_dev_debian_master</string>
         <string>STX_delete_deb_build_containers</string>
       </jobNames>

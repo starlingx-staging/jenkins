@@ -37,6 +37,7 @@
         <string>PKG_REUSE</string>
         <string>CLEAN_REPOMGR</string>
         <string>JENKINS_SCRIPTS_BRANCH</string>
+        <string>POST_ISO_SIGNING</string>
         <string>REBUILD_BUILDER_IMAGES</string>
         <string>CLEAN_ISO</string>
       </parameters>
@@ -94,6 +95,10 @@
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>BUILD_ISO</name>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>POST_ISO_SIGNING</name>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>

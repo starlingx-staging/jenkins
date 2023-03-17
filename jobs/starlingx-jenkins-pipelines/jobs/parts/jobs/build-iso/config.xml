@@ -11,6 +11,7 @@
         <string>MASTER_BUILD_NUMBER</string>
         <string>TIMESTAMP</string>
         <string>JENKINS_SCRIPTS_BRANCH</string>
+        <string>POST_ISO_SIGNING</string>
         <string>MASTER_JOB_NAME</string>
         <string>BUILD_HOME</string>
         <string>SHELL_XTRACE</string>
@@ -58,6 +59,10 @@
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>BUILD_ISO</name>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>POST_ISO_SIGNING</name>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>

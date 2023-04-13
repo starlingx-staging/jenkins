@@ -142,6 +142,11 @@
   </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
+    <EnvInjectBuilder plugin="envinject@2.1.6">
+      <info>
+        <propertiesFilePath>env.properties</propertiesFilePath>
+      </info>
+    </EnvInjectBuilder>
     <hudson.tasks.Shell>
       <command>TIMESTAMP=$(date --utc &apos;+%Y%m%dT%H%M%SZ&apos;)
 
@@ -247,5 +252,71 @@ _END
   </publishers>
   <buildWrappers>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+    <EnvInjectBuildWrapper plugin="envinject@2.1.6">
+      <info>
+        <scriptContent>export BRANCH=master
+export LAYER=monolithic
+export DISTRO=debian
+export PUBLISH_URL=http://mirror.starlingx.cengn.ca
+export TIMESTAMP=$BUILD_TIMESTAMP
+
+export PUBLISH_BRANCH=&quot;&quot;
+export PUBLISH_TIMESTAMP=&quot;&quot;
+
+if [ &quot;$BRANCH&quot; == &quot;master&quot; ]; then
+    PUBLISH_BRANCH=$BRANCH
+    PUBLISH_TIMESTAMP=$TIMESTAMP
+elif [[ $BRANCH == f/* ]]; then
+    # feature branch
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^f/#feature/#&apos;)
+    PUBLISH_TIMESTAMP=$TIMESTAMP
+elif [[ $BRANCH == m/[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
+    # milestone tag   m/2018.10.b3
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
+elif [[ $BRANCH == m[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
+    # milestone tag m2018.10.b3
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
+elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9][.][Bb][0-9]* ]]; then
+    # milestone tag 2018.10.b3
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
+elif [[ $BRANCH == r/stx[.]@([0-9])[.]@([0-9]) ]]; then
+    # release candidate branch r/stx.2.0
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/stx[.]\([0-9]*[.][0-9]*\).*$#rc/\1#&apos;)
+    PUBLISH_TIMESTAMP=$TIMESTAMP
+elif [[ $BRANCH == r/[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
+    # release branch r/2018.10.5
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#&apos;)
+elif [[ $BRANCH == r[0-9][0-9][0-9][0-9][.]* ]]; then
+    # release branch r2018.10.5
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#&apos;)
+elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9] ]] || [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9].[0-9]* ]] ; then
+    # Release branch 2018.10.1 
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
+    PUBLISH_TIMESTAMP=$BRANCH
+fi
+
+# Assertions, did we get a BRANCH we understand how to parse
+[ -n &quot;$PUBLISH_BRANCH&quot; ]
+[ -n &quot;$PUBLISH_TIMESTAMP&quot; ]
+
+export PUBLISH_DISTRO_BASE=/export/mirror/starlingx/$PUBLISH_BRANCH/$DISTRO/$LAYER
+export PUBLISH_BUILD_BASE=$PUBLISH_DISTRO_BASE/$PUBLISH_TIMESTAMP
+export PUBLISH_LOGS_BASE=$PUBLISH_BUILD_BASE/logs
+export PUBLISH_LOGS_URL=$PUBLISH_URL/$(echo $PUBLISH_LOGS_BASE | sed &apos;s#^/export/##&apos;)
+
+echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt; env.properties
+echo BRANCH=$BRANCH &gt;&gt; env.properties</scriptContent>
+        <secureGroovyScript plugin="script-security@1.58">
+          <script></script>
+          <sandbox>false</sandbox>
+        </secureGroovyScript>
+        <loadFilesFromMaster>false</loadFilesFromMaster>
+      </info>
+    </EnvInjectBuildWrapper>
   </buildWrappers>
 </project>

@@ -1,0 +1,52 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+  <actions/>
+  <description/>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.34">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>0 0 * * *</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>CENGN=slittle@build.starlingx.cengn.ca
+RSYNC_SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
+rsync -avuzH -e "$RSYNC_SSH" --progress --exclude='*.new/' $CENGN:/export/mirror/centos /export/cengn-mirror/
+
+rsync -avuzH -e "$RSYNC_SSH" --progress --exclude='*.new/' $CENGN:/export/mirror/debian /export/cengn-mirror/
+
+rsync -avuzH -e "$RSYNC_SSH" --progress $CENGN:/export/mirror/starlingx/rc /export/cengn-mirror/starlingx/
+
+rsync -avuzH -e "$RSYNC_SSH" --progress $CENGN:/export/mirror/starlingx/release /export/cengn-mirror/starlingx/
+
+rsync -avuzH  "$CENGN:/var/lib/jenkins/*.xml" "/localdisk/backups/CENGN/var/lib/jenkins/"
+
+rsync -avuzH  "$CENGN:/var/lib/jenkins/bin" "/localdisk/backups/CENGN/var/lib/jenkins/"
+
+rsync -avuzH  "$CENGN:/localdisk/designer/jenkins/*rc-*" "/localdisk/backups/CENGN/localdisk/designer/" || $(case "$?" in 0|23) exit 0 ;; *) exit $?; esac)
+
+rsync -avuzH  "$CENGN:/localdisk/loadbuild/jenkins/*rc-*" "/localdisk/backups/CENGN/localdisk/loadbuild/"
+
+rsync -avuzH  --exclude '/*/*/*/' -f"+ */" -f"+ config.xml" -f"- *" "$CENGN:/var/lib/jenkins/jobs" "/localdisk/backups/CENGN/var/lib/jenkins/"</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.22"/>
+  </buildWrappers>
+</project>

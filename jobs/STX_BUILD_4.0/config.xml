@@ -1,0 +1,904 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Build &apos;r/stx.4.0&apos; branch nightly</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.BooleanParameterDefinition>
+          <name>BUILD_CONTAINERS_DEV</name>
+          <description>Force build of dev stream containers.  Otherwise it&apos;s automatic based on day of week.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>BUILD_CONTAINERS_STABLE</name>
+          <description>Force build of stable stream containers.  Otherwise it&apos;s automatic based on day of week.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>FORCE_BUILD</name>
+          <description>Always build, even if there are no changes.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>true</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <EnvInjectBuilder plugin="envinject@2.1.6">
+      <info>
+        <propertiesFilePath>env.properties</propertiesFilePath>
+      </info>
+    </EnvInjectBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs class="empty-list"/>
+          <projects>mirror_download_sync</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_repo_sync</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_change_log</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_BUILD_container_setup</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_download_mirror</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_build_info_file</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_build_lst_audit</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_build_pre_installer</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_build_installer</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_build_post_installer</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_build_helm_charts</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_last_commits</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.tasks.Shell>
+      <command>## copy helm charts from latest master-container build before publishing
+
+exit 0
+
+# dpanech 2020-05-11: disable until layered containers are working
+
+SRC_LAYER=&quot;master-containers&quot;
+SRC_WORKSPACE=$(readlink -f -v &quot;/localdisk/loadbuild/$USER/$SRC_LAYER/latest_build&quot;)
+SRC_TIMESTAMP=$(basename &quot;$SRC_WORKSPACE&quot;)
+SRC_DIR=$(readlink -f -v &quot;$SRC_WORKSPACE&quot;/helm-charts)
+DST_DIR=&quot;$MY_WORKSPACE/helm-charts-from-$SRC_LAYER-$SRC_TIMESTAMP&quot;/build-helm/stx
+
+mkdir -p &quot;$DST_DIR&quot;
+find &quot;$SRC_DIR&quot; -maxdepth 1 -type f -exec cp -f -v &apos;{}&apos; &quot;$DST_DIR&quot; \;
+</command>
+    </hudson.tasks.Shell>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_publish</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
+      <condition class="org.jenkins_ci.plugins.run_condition.logic.Or" plugin="run-condition@1.2">
+        <conditions>
+          <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+            <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition">
+              <token>$BUILD_CONTAINERS_STABLE</token>
+            </condition>
+          </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+          <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+            <condition class="org.jenkins_ci.plugins.run_condition.core.DayCondition">
+              <useBuildTime>false</useBuildTime>
+              <daySelector class="org.jenkins_ci.plugins.run_condition.core.DayCondition$SelectDays">
+                <days>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>2</day>
+                    <selected>true</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>3</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>4</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>5</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>6</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>7</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>1</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                </days>
+              </daySelector>
+            </condition>
+          </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+        </conditions>
+      </condition>
+      <buildStep class="hudson.plugins.parameterizedtrigger.TriggerBuilder" plugin="parameterized-trigger@2.35.2">
+        <configs>
+          <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+            <configs>
+              <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+                <propertiesFile>env.properties</propertiesFile>
+                <failTriggerOnMissing>false</failTriggerOnMissing>
+                <textParamValueOnNewLine>false</textParamValueOnNewLine>
+                <useMatrixChild>false</useMatrixChild>
+                <onlyExactRuns>false</onlyExactRuns>
+              </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+                <properties>BUILD_STREAM=stable
+OS_VERSION=7.5.1804</properties>
+                <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+            </configs>
+            <projects>STX_build_docker_images</projects>
+            <condition>ALWAYS</condition>
+            <triggerWithNoParameters>false</triggerWithNoParameters>
+            <triggerFromChildProjects>false</triggerFromChildProjects>
+            <block>
+              <buildStepFailureThreshold>
+                <name>FAILURE</name>
+                <ordinal>2</ordinal>
+                <color>RED</color>
+                <completeBuild>true</completeBuild>
+              </buildStepFailureThreshold>
+              <unstableThreshold>
+                <name>UNSTABLE</name>
+                <ordinal>1</ordinal>
+                <color>YELLOW</color>
+                <completeBuild>true</completeBuild>
+              </unstableThreshold>
+              <failureThreshold>
+                <name>FAILURE</name>
+                <ordinal>2</ordinal>
+                <color>RED</color>
+                <completeBuild>true</completeBuild>
+              </failureThreshold>
+            </block>
+            <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+          </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+        </configs>
+      </buildStep>
+      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.2"/>
+    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
+    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
+      <condition class="org.jenkins_ci.plugins.run_condition.logic.Or" plugin="run-condition@1.2">
+        <conditions>
+          <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+            <condition class="org.jenkins_ci.plugins.run_condition.core.BooleanCondition">
+              <token>$BUILD_CONTAINERS_DEV</token>
+            </condition>
+          </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+          <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+            <condition class="org.jenkins_ci.plugins.run_condition.core.DayCondition">
+              <useBuildTime>false</useBuildTime>
+              <daySelector class="org.jenkins_ci.plugins.run_condition.core.DayCondition$SelectDays">
+                <days>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>2</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>3</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>4</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>5</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>6</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>7</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                  <org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                    <day>1</day>
+                    <selected>false</selected>
+                  </org.jenkins__ci.plugins.run__condition.core.DayCondition_-Day>
+                </days>
+              </daySelector>
+            </condition>
+          </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+        </conditions>
+      </condition>
+      <buildStep class="hudson.plugins.parameterizedtrigger.TriggerBuilder" plugin="parameterized-trigger@2.35.2">
+        <configs>
+          <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+            <configs>
+              <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+                <propertiesFile>env.properties</propertiesFile>
+                <failTriggerOnMissing>false</failTriggerOnMissing>
+                <textParamValueOnNewLine>false</textParamValueOnNewLine>
+                <useMatrixChild>false</useMatrixChild>
+                <onlyExactRuns>false</onlyExactRuns>
+              </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+                <properties>BUILD_STREAM=dev</properties>
+                <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+            </configs>
+            <projects>STX_build_docker_images</projects>
+            <condition>ALWAYS</condition>
+            <triggerWithNoParameters>false</triggerWithNoParameters>
+            <triggerFromChildProjects>false</triggerFromChildProjects>
+            <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+          </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+        </configs>
+      </buildStep>
+      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.2"/>
+    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
+  </builders>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.23">
+      <recipients>scott.little@windriver.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
+      <recipientList>$DEFAULT_RECIPIENTS</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders>
+              <hudson.plugins.emailext.plugins.recipients.ListRecipientProvider/>
+            </recipientProviders>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+      </configuredTriggers>
+      <contentType>default</contentType>
+      <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+      <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
+      <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
+      <attachBuildLog>false</attachBuildLog>
+      <compressBuildLog>false</compressBuildLog>
+      <replyTo>$DEFAULT_REPLYTO</replyTo>
+      <from></from>
+      <saveOutput>false</saveOutput>
+      <disabled>false</disabled>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_delete_root_owned,STX_BUILD_container_teardown,copy_logs</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+        </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.BuildTrigger>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+    <EnvInjectBuildWrapper plugin="envinject@2.1.6">
+      <info>
+        <scriptContent>export BRANCH=r/stx.4.0
+export OPENSTACK_RELEASE=master
+export OS=centos
+export OS_VERSION=7.5.1804
+export PUBLISH_URL=http://mirror.starlingx.cengn.ca
+
+export TIMESTAMP=$BUILD_TIMESTAMP
+export MASTER_BUILD_NUMBER=$BUILD_NUMBER
+export MASTER_JOB_NAME=$JOB_NAME
+export DISTRO=$OS
+
+export PUBLISH_BRANCH=&quot;&quot;
+export PUBLISH_TIMESTAMP=&quot;&quot;
+export MUNGED_BRANCH=$(echo $BRANCH | tr &apos;/&apos; &apos;-&apos;)
+export FORCE_BUILD=&quot;$FORCE_BUILD&quot;
+
+if [ &quot;$BRANCH&quot; == &quot;master&quot; ]; then
+    PUBLISH_BRANCH=$BRANCH
+    PUBLISH_TIMESTAMP=$TIMESTAMP
+elif [[ $BRANCH == f/* ]]; then
+    # feature branch
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^f/#feature/#&apos;)
+    PUBLISH_TIMESTAMP=$TIMESTAMP
+elif [[ $BRANCH == m/[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
+    # milestone tag   m/2018.10.b3
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
+elif [[ $BRANCH == m[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
+    # milestone tag m2018.10.b3
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
+    MUNGED_BRANCH=$(echo $BRANCH | sed &apos;s#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#m-\1\2#&apos;)
+elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9][.][Bb][0-9]* ]]; then
+    # milestone tag 2018.10.b3
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
+    MUNGED_BRANCH=&quot;m-$BRANCH&quot;
+elif [[ $BRANCH == r/stx[.]@([0-9])[.]@([0-9]) ]]; then
+    # release candidate branch r/stx.2.0
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/stx[.]\([0-9]*[.][0-9]*\).*$#rc/\1#&apos;)
+    PUBLISH_TIMESTAMP=$TIMESTAMP
+    MUNGED_BRANCH=$(echo $BRANCH | sed &apos;s#^r/stx[.]#rc-#&apos;)
+elif [[ $BRANCH == r/[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
+    # release branch r/2018.10.5
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#&apos;)
+elif [[ $BRANCH == r[0-9][0-9][0-9][0-9][.]* ]]; then
+    # release branch r2018.10.5
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#&apos;)
+    MUNGED_BRANCH=$(echo $BRANCH | sed &apos;s#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#r-\1\2#&apos;)
+elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9] ]] || [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9].[0-9]* ]] ; then
+    # Release branch 2018.10.1 
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
+    PUBLISH_TIMESTAMP=$BRANCH
+    MUNGED_BRANCH=&quot;r-$BRANCH&quot;
+fi
+
+# Assertions, did we get a BRANCH we understand how to parse
+[ -n &quot;$PUBLISH_BRANCH&quot; ]
+[ -n &quot;$PUBLISH_TIMESTAMP&quot; ]
+
+export PROJECT=$MUNGED_BRANCH
+
+export MY_REPO_ROOT=/localdisk/designer/$USER/$PROJECT
+export MY_REPO=$MY_REPO_ROOT/cgcs-root
+export MY_WORKSPACE=/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP
+
+# if [ &quot;$OS&quot; == &quot;centos&quot; ] &amp;&amp; [ -f $MY_REPO_ROOT/stx-tools/centos-mirror-tools/yum.conf.sample ] ; then
+#    export OS_VERSION=$( cd $MY_REPO_ROOT/stx-tools/centos-mirror-tools/; 
+#                        yum --config=./yum.conf.sample --showduplicates list centos-release | \
+#                          grep &apos;^centos-release&apos; | awk &apos;{print $2}&apos; | sort --unique | \
+#                          tail -n 1 | tr &apos;-&apos; &apos;.&apos; | cut -d &apos;.&apos; -f -3 )
+# fi
+
+export DOCKER_BUILD_ID=$USER-$PROJECT-$TIMESTAMP-builder
+export DOCKER_BUILD_TAG=$PROJECT-$TIMESTAMP-builder-image
+
+export PUBLISH_DISTRO_BASE=/export/mirror/starlingx/$PUBLISH_BRANCH/$DISTRO/monolithic
+export PUBLISH_BUILD_BASE=$PUBLISH_DISTRO_BASE/$PUBLISH_TIMESTAMP
+export PUBLISH_INPUTS_BASE=$PUBLISH_BUILD_BASE/inputs
+export PUBLISH_OUTPUTS_BASE=$PUBLISH_BUILD_BASE/outputs
+export PUBLISH_LOGS_BASE=$PUBLISH_BUILD_BASE/logs
+export PUBLISH_LOGS_URL=$PUBLISH_URL/$(echo $PUBLISH_LOGS_BASE | sed &apos;s#^/export/##&apos;)
+
+echo BUILD_CONTAINERS_DEV=$BUILD_CONTAINERS_DEV
+echo BUILD_CONTAINERS_STABLE=$BUILD_CONTAINERS_STABLE
+echo FORCE_BUILD=&quot;$FORCE_BUILD&quot;
+
+echo TIMESTAMP=$TIMESTAMP &gt; env.properties
+echo PUBLISH_TIMESTAMP=$PUBLISH_TIMESTAMP &gt;&gt; env.properties
+echo BRANCH=$BRANCH &gt;&gt; env.properties
+echo PROJECT=$PROJECT &gt;&gt; env.properties
+echo MUNGED_BRANCH=$MUNGED_BRANCH &gt;&gt; env.properties
+echo OPENSTACK_RELEASE=$OPENSTACK_RELEASE &gt;&gt; env.properties
+echo DISTRO=$DISTRO &gt;&gt; env.properties
+echo OS=$OS &gt;&gt; env.properties
+echo OS_VERSION=$OS_VERSION &gt;&gt; env.properties
+echo MASTER_BUILD_NUMBER=$MASTER_BUILD_NUMBER &gt;&gt; env.properties
+echo MASTER_JOB_NAME=$MASTER_JOB_NAME &gt;&gt; env.properties
+echo MY_REPO_ROOT=$MY_REPO_ROOT &gt;&gt; env.properties
+echo MY_REPO=$MY_REPO &gt;&gt; env.properties
+echo MY_WORKSPACE=$MY_WORKSPACE &gt;&gt; env.properties
+echo DOCKER_BUILD_ID=$DOCKER_BUILD_ID &gt;&gt; env.properties
+echo DOCKER_BUILD_TAG=$DOCKER_BUILD_TAG &gt;&gt; env.properties
+echo PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE &gt;&gt; env.properties
+echo PUBLISH_BUILD_BASE=$PUBLISH_BUILD_BASE &gt;&gt; env.properties
+echo PUBLISH_INPUTS_BASE=$PUBLISH_INPUTS_BASE &gt;&gt; env.properties
+echo PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE &gt;&gt; env.properties
+echo PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE &gt;&gt; env.properties
+echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt;&gt; env.properties
+echo BUILD_NM=$JOB_NAME &gt;&gt; env.properties
+echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties
+echo FORCE_BUILD=$FORCE_BUILD &gt;&gt; env.properties</scriptContent>
+        <secureGroovyScript plugin="script-security@1.58">
+          <script></script>
+          <sandbox>false</sandbox>
+        </secureGroovyScript>
+        <loadFilesFromMaster>false</loadFilesFromMaster>
+      </info>
+    </EnvInjectBuildWrapper>
+  </buildWrappers>
+</project>

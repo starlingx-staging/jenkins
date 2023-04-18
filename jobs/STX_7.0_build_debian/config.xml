@@ -1,0 +1,131 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.32">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.3.8"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.3.8">
+      <jobProperties/>
+      <triggers/>
+      <parameters>
+        <string>STX_PLATFORM</string>
+        <string>BUILD_PKGS_ITERATIONS</string>
+        <string>SEND_NOTIFICATION</string>
+        <string>CLEAN_REPOMGR</string>
+        <string>DELETE_MINIKUBE_CLUSTER</string>
+        <string>PACKAGE_NAME</string>
+        <string>REBUILD_CONTAINERS</string>
+        <string>FORCE_BUILD</string>
+        <string>TYPE</string>
+      </parameters>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description>[DEBIAN]&#xd;
+Build packages and image - StarlingX r/stx.7.0</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>TYPE</name>
+          <description>Select the type of Build 
+ALL: end to end build 
+PACKAGE: build-pkgs -p &lt;package&gt;
+ALL-PACKAGES: build-pkgs -a 
+IMAGE: build-image
+</description>
+          <choices>
+            <string>all</string>
+            <string>package</string>
+            <string>all-packages</string>
+            <string>image</string>
+            <string>publish</string>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>STX_PLATFORM</name>
+          <description>STX platform, minikube or kubernetes</description>
+          <defaultValue>minikube</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PACKAGE_NAME</name>
+          <description>Input the package name if using type=package</description>
+          <defaultValue></defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>SEND_NOTIFICATION</name>
+          <description>Send email notification with build status</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DELETE_MINIKUBE_CLUSTER</name>
+          <description>Delete and re-create minikube cluster before building. This will re-build all docker containers</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>REBUILD_CONTAINERS</name>
+          <description>Rebuild STX Containers, default is to pull from docker registry</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>FORCE_BUILD</name>
+          <description>Build even if there are no changes since last successful build</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>CLEAN_REPOMGR</name>
+          <description>Delete all cached packages from repo manager</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BUILD_PKGS_ITERATIONS</name>
+          <description>How many times to attempt build-pkgs</description>
+          <defaultValue>3</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PROJECT</name>
+          <description></description>
+          <defaultValue>rc-stx-7-0-debian</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>15</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty/>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.67">
+    <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.4">
+      <configVersion>2</configVersion>
+      <userRemoteConfigs>
+        <hudson.plugins.git.UserRemoteConfig>
+          <url>file:///localdisk/designer/slittle/deb-build-scripts</url>
+        </hudson.plugins.git.UserRemoteConfig>
+      </userRemoteConfigs>
+      <branches>
+        <hudson.plugins.git.BranchSpec>
+          <name>*/r/stx.7.0</name>
+        </hudson.plugins.git.BranchSpec>
+      </branches>
+      <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+      <submoduleCfg class="list"/>
+      <extensions/>
+    </scm>
+    <scriptPath>stx-debian/Jenkinsfile</scriptPath>
+    <lightweight>true</lightweight>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

@@ -101,4 +101,3 @@ io.jenkins.plugins.*.xml
 jobConfigHistory.xml
 org.jenkins.plugins.*.xml
 xterm/
-

@@ -1,0 +1,485 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Publish build products to http://mirror.starlingx.cengn.ca</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>30</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_DISTRO_BASE</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_OUTPUTS_BASE</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_INPUTS_BASE</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_REPO_ROOT</name>
+          <description>/localdisk/designer/$USER/$PROJECT</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_WORKSPACE</name>
+          <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OS</name>
+          <description></description>
+          <defaultValue>centos</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TIMESTAMP</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_LOGS_BASE</name>
+          <description></description>
+          <defaultValue>/tmp/logs</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_LOGS_URL</name>
+          <description></description>
+          <defaultValue>https://127.0.0.1/</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MASTER_JOB_NAME</name>
+          <description>Top of tree build job name</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LAYER</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RETRIES</name>
+          <description></description>
+          <defaultValue>13</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RETRY_INTERVAL_SEC</name>
+          <description></description>
+          <defaultValue>300</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>
+echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
+echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
+echo &quot;OS=$OS&quot;
+echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
+echo &quot;PUBLISH_INPUTS_BASE=$PUBLISH_INPUTS_BASE&quot;
+echo &quot;PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE&quot;
+echo &quot;TIMESTAMP=$TIMESTAMP&quot;
+echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
+echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
+echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
+echo &quot;LAYER=$LAYER&quot;
+echo &quot;RETRIES=$RETRIES&quot;
+echo &quot;RETRY_INTERVAL_SEC=$RETRY_INTERVAL_SEC&quot;
+
+
+[ -n &quot;$MY_REPO_ROOT&quot; ]
+[ -n &quot;$MY_WORKSPACE&quot; ]
+[ -n &quot;$OS&quot; ]
+[ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
+[ -n &quot;$PUBLISH_INPUTS_BASE&quot; ]
+[ -n &quot;$PUBLISH_OUTPUTS_BASE&quot; ]
+[ -n &quot;$TIMESTAMP&quot; ]
+[ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
+[ -n &quot;$PUBLISH_LOGS_URL&quot; ]
+[ -n &quot;$MASTER_JOB_NAME&quot; ]
+
+source ~/bin/retries.sh
+function with_default_retries {
+    local cmd=$1
+    shift 1
+    with_retries ${RETRIES:-1} ${RETRY_INTERVAL_SEC:-1} &quot;${cmd}&quot; &quot;$@&quot;
+}
+
+if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; -a &quot;${FORCE_BUILD}&quot; != &quot;true&quot; ]; then
+    echo &quot;No new content.  Build not required&quot;
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE
+    with_default_retries bash -c &quot;echo &apos;No new content.  Build not required&apos; &gt; $PUBLISH_OUTPUTS_BASE/No_New_Content&quot;
+    exit 0
+fi
+
+export DISTRO=&quot;$OS&quot;
+
+export TMPDIR=&quot;$MY_WORKSPACE/tmp&quot;
+mkdir -p &quot;$TMPDIR&quot;
+
+LAYER_PREFIX=${LAYER^^}
+if [ &quot;$LAYER&quot; == &quot;&quot; ] || [ &quot;$LAYER&quot; == &quot;all&quot; ]; then
+    LAYER_PREFIX=&quot;&quot;
+fi
+
+with_default_retries mkdir -p $PUBLISH_DISTRO_BASE
+LN=&quot;$MY_WORKSPACE/../publish_dir&quot;
+if [ ! -L $LN ]; then
+    ln -s $PUBLISH_DISTRO_BASE $LN
+fi
+
+# Note: should probably discover this, rather than hard code it
+BUILD_TYPES=( &quot;std&quot; &quot;rt&quot; &quot;installer&quot; &quot;containers&quot;)
+
+
+for BUILD_TYPE in &quot;${BUILD_TYPES[@]}&quot;; do
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE/RPMS/$BUILD_TYPE
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE/SRPMS/$BUILD_TYPE
+done
+with_default_retries mkdir -p $PUBLISH_LOGS_BASE
+
+ENV_FILE=&quot;~/workspace/$MASTER_JOB_NAME/env.properties&quot;
+if [ -f &quot;$ENV_FILE&quot; ]; then
+    with_default_retries \cp -v $ENV_FILE $PUBLISH_LOGS_BASE/
+fi
+
+# Publish iso
+if [ -d $MY_WORKSPACE/export ]; then
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE/iso
+    for ISO_FILE in $(find $MY_WORKSPACE/export -maxdepth 1 -type f -name &apos;bootimage.*&apos;); do
+        with_default_retries \cp -L -v $ISO_FILE $PUBLISH_OUTPUTS_BASE/iso/
+    done
+fi
+
+# Publish output rpms and src.rpms
+for BUILD_TYPE in $(find $MY_WORKSPACE -maxdepth 2 -type d -name rpmbuild -exec dirname {} \; | xargs --max-lines=1 --no-run-if-empty basename); do
+    with_default_retries \cp -r -L -v $MY_WORKSPACE/$BUILD_TYPE/rpmbuild/RPMS/./ $PUBLISH_OUTPUTS_BASE/RPMS/$BUILD_TYPE/
+    (
+    cd $PUBLISH_OUTPUTS_BASE/RPMS/$BUILD_TYPE
+    with_default_retries \rm -f *.src.rpm
+    if [ -f srpm.lst ]; then
+        with_default_retries \rm -f srpm.lst
+    fi
+    with_default_retries createrepo_c --update .
+    )
+    
+    with_default_retries \cp -r -L -v $MY_WORKSPACE/$BUILD_TYPE/rpmbuild/SRPMS/./ $PUBLISH_OUTPUTS_BASE/SRPMS/$BUILD_TYPE/
+    (
+    cd $PUBLISH_OUTPUTS_BASE/SRPMS/$BUILD_TYPE
+    if [ -f rpm.lst ]; then
+        with_default_retries \rm -f rpm.lst
+    fi
+    with_default_retries createrepo_c --update .
+    )
+done
+
+# Publish image inc files
+for IMAGE_INC in $(find $MY_WORKSPACE/std -maxdepth 1 -type f -name &apos;image*.inc&apos;); do
+    with_default_retries \cp -r -L -v $IMAGE_INC $PUBLISH_OUTPUTS_BASE/
+done
+
+# Publish installer
+if [ -d $MY_REPO_ROOT/stx-tools/centos-mirror-tools/output/stx-installer ]; then
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE/installer
+    with_default_retries \cp -L -v $MY_REPO_ROOT/stx-tools/centos-mirror-tools/output/stx-installer/* $PUBLISH_OUTPUTS_BASE/installer/
+fi
+
+# Publish helm charts
+for d in $(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm); do
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE/helm-charts
+    with_default_retries \cp -v $d/stx/*.tgz $PUBLISH_OUTPUTS_BASE/helm-charts
+done
+
+# Publish context
+if [ -f $MY_WORKSPACE/CONTEXT ]; then
+   with_default_retries \cp -v $MY_WORKSPACE/CONTEXT $PUBLISH_OUTPUTS_BASE/CONTEXT.sh
+fi
+
+# Publish change log
+if [ -f $MY_WORKSPACE/CHANGELOG ]; then
+   with_default_retries \cp -v $MY_WORKSPACE/CHANGELOG $PUBLISH_OUTPUTS_BASE/CHANGELOG.txt
+fi
+
+# Publish build info
+if [ &quot;$LAYER&quot; == &quot;&quot; ] || [ &quot;$LAYER&quot; == &quot;flock&quot; ]; then
+    if [ -f $MY_WORKSPACE/BUILD ]; then
+       with_default_retries \cp -v $MY_WORKSPACE/BUILD $PUBLISH_OUTPUTS_BASE/ISO_BUILD_INFO.txt
+    fi
+fi
+
+if [ &quot;$LAYER&quot; == &quot;&quot; ] ; then
+    if [ -f &quot;$MY_WORKSPACE/BUILD&quot;  ]; then
+        with_default_retries \cp -v &quot;$MY_WORKSPACE/BUILD&quot; $PUBLISH_OUTPUTS_BASE/BUILD_INFO
+        with_default_retries \cp -v $PUBLISH_OUTPUTS_BASE/BUILD_INFO $PUBLISH_OUTPUTS_BASE/BUILD_INFO.txt
+    fi
+else
+    if [ -f &quot;$MY_WORKSPACE/BUILD&quot;  ]; then
+        with_default_retries bash -c &quot;grep &apos;^${LAYER_PREFIX}_&apos; &apos;$MY_WORKSPACE/BUILD&apos; &gt; $PUBLISH_OUTPUTS_BASE/BUILD_INFO&quot;
+        with_default_retries \cp -v $PUBLISH_OUTPUTS_BASE/BUILD_INFO $PUBLISH_OUTPUTS_BASE/BUILD_INFO.txt
+    fi
+fi
+
+# Copy build-pkg logs
+for BUILD_TYPE in $(find $MY_WORKSPACE -maxdepth 2 -type d -name rpmbuild -exec dirname {} \; | xargs --max-lines=1 --no-run-if-empty basename); do
+    for f in $(find $MY_WORKSPACE/$BUILD_TYPE -maxdepth 1 -type f -name &apos;*.log&apos;); do
+        with_default_retries mkdir -p $PUBLISH_LOGS_BASE/std/
+        with_default_retries \cp -v $f $PUBLISH_LOGS_BASE/std/
+    done
+    
+    if [ -f $MY_WORKSPACE/build-$BUILD_TYPE.log ]; then
+        with_default_retries \cp -v $MY_WORKSPACE/build-$BUILD_TYPE.log $PUBLISH_LOGS_BASE/
+    fi
+    
+    # Add failure logs of individual packages
+    for d in $(find $MY_WORKSPACE/$BUILD_TYPE/results/ -type f -name &apos;fail&apos; -exec dirname {} \; ); do
+        b=$(basename $d)
+        with_default_retries mkdir -p $PUBLISH_LOGS_BASE/std/failed-packages/$b
+        with_default_retries \cp -v $d/*log $PUBLISH_LOGS_BASE/std/failed-packages/$b/
+    done
+done
+
+# Copy downloads directory
+if [ -d $MY_REPO_ROOT/cgcs-root/stx/downloads ]; then
+    with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/downloads
+    cd $MY_REPO_ROOT/cgcs-root/stx/downloads
+    for d in $(find . -type d); do
+        with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/downloads/$d
+    done
+    for f in $(find . -type f); do
+        with_default_retries \cp -v $f $PUBLISH_INPUTS_BASE/downloads/$f
+    done
+    pwd
+    for l in $(find . -type l); do
+        d=$(dirname $l)
+        f=$(readlink $l | sed &quot;s#^/import/mirrors/CentOS/#${MY_REPO_ROOT}/stx-tools/centos-mirror-tools/output/#&quot;)
+
+        if [ -f &quot;${f}&quot; ]; then
+            with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/downloads/$d
+            with_default_retries \cp -v $f $PUBLISH_INPUTS_BASE/downloads/$d
+        fi
+    done
+    pwd
+fi
+
+# New or old distro repo path?
+DISTRO_REPO=$MY_REPO_ROOT/cgcs-root/centos-repo
+if [ ! -d $DISTRO_REPO ]; then
+   DISTRO_REPO=$MY_REPO_ROOT/cgcs-root/cgcs-centos-repo
+   if [ ! -d $DISTRO_REPO ]; then
+      DISTRO_REPO=$MY_REPO_ROOT/cgcs-root/centos-repo
+   fi
+fi
+
+# Publish input rpms
+if [ -d $DISTRO_REPO/Binary ]; then
+    with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/RPMS
+    cd $DISTRO_REPO/Binary
+    for d in $(find . -type d); do
+        with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/RPMS/$d
+    done
+    for f in $(find . -type f); do
+        with_default_retries \cp -v $f $PUBLISH_INPUTS_BASE/RPMS/$f
+    done
+    for l in $(find . -type l); do
+        d=$(dirname $l)
+        f=$(readlink $l | sed &quot;s#^/import/mirrors/CentOS/#${MY_REPO_ROOT}/stx-tools/centos-mirror-tools/output/#&quot;)
+
+        if [ -f &quot;${f}&quot; ]; then
+            with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/RPMS/$d
+            with_default_retries \cp -v $f $PUBLISH_INPUTS_BASE/RPMS/$d
+        fi
+    done
+fi
+
+# Publish input src.rpms
+if [ -d $DISTRO_REPO/Source ]; then
+    with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/SRPMS
+    cd $DISTRO_REPO/Source
+    for d in $(find . -type d); do
+        with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/SRPMS/$d
+    done
+    for f in $(find . -type f); do
+        with_default_retries \cp -v $f $PUBLISH_INPUTS_BASE/SRPMS/$f
+    done
+    for l in $(find . -type l); do
+        d=$(dirname $l)
+        f=$(readlink $l | sed &quot;s#^/import/mirrors/CentOS/#${MY_REPO_ROOT}/stx-tools/centos-mirror-tools/output/#&quot;)
+
+        if [ -f &quot;${f}&quot; ]; then
+            with_default_retries mkdir -p $PUBLISH_INPUTS_BASE/SRPMS/$d
+            with_default_retries \cp -v $f $PUBLISH_INPUTS_BASE/SRPMS/$d
+        fi
+    done
+fi
+
+
+get_latest_tag_on_branch () {
+    local branch=${1}
+    git log --simplify-by-decoration --decorate --pretty=oneline ${branch} | grep &apos;tag: &apos; | sed &apos;s/.*tag: \([^,)]*\).*/\1/&apos; | grep &apos;[0-9][.][0-9]&apos; | head -n 1
+    # git describe --tags --abbrev=0 ${branch}
+}
+
+get_latest_simple_tag_on_branch () {
+    local branch=${1}
+    git log --simplify-by-decoration --decorate --pretty=oneline ${branch} | grep &apos;tag: &apos; | sed &apos;s/.*tag: \([^,)]*\).*/\1/&apos; | grep &apos;[0-9][.][0-9]&apos; | grep -v &apos;/&apos; | head -n 1
+}
+
+get_commits_since_tag () {
+    local tag=${1}
+    local branch=${2}
+
+    local desc=&quot;&quot;
+    local commit_count=0
+
+    desc=$(git describe --tags --match=${tag} ${branch})
+    if [ &quot;${desc}&quot; != &quot;${tag}&quot; ]; then
+        commit_count=$(echo ${desc} | sed &quot;s/^${tag}-\([^-]*\)-.*/\1/&quot; )
+    fi
+    echo &quot;${commit_count}&quot;
+}
+
+# Tarballs of stx repos
+if [ -d $MY_REPO_ROOT/cgcs-root/stx ]; then
+    with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE/tarballs
+    excludes=&apos;--exclude=*.git --exclude=*.gitignore --exclude=*.gitreview --exclude=*.zuul.yaml&apos;
+
+    for d in $(find $MY_REPO_ROOT/cgcs-root/stx -maxdepth 1 -mindepth 1 -type d -not -name git -not -name downloads); do
+        (
+        cd $d
+        dir=$(basename ${d})
+        tar_name=${dir}
+        tag=$(get_latest_simple_tag_on_branch )
+        if [ ! -z &quot;${tag}&quot; ]; then
+            tar_name+=&quot;-${tag}&quot;
+            commit_count=$(get_commits_since_tag ${tag})
+            if [ ! -z &quot;${commit_count}&quot; ]; then
+                tar_name+=&quot;-${commit_count}&quot;
+            fi
+        fi
+        with_default_retries tar ${excludes} --transform=&quot;s/^[.]/${tar_name}/&quot; -czvf $PUBLISH_OUTPUTS_BASE/tarballs/${tar_name}.tgz .
+        )
+    done
+fi
+
+# wheels.inc
+for f in $(find $MY_WORKSPACE/std -maxdepth 1 -name &apos;*wheels.inc&apos;); do
+    with_default_retries \cp $f $PUBLISH_OUTPUTS_BASE/
+done
+
+# set latest_build&apos; symlink
+if [ -L $PUBLISH_DISTRO_BASE/latest_build ]; then
+    with_default_retries \rm -f $PUBLISH_DISTRO_BASE/latest_build 
+fi
+
+with_default_retries ln -s $TIMESTAMP $PUBLISH_DISTRO_BASE/latest_build
+
+if [ &quot;${LAYER}&quot; != &quot;&quot; ]; then
+    ~/bin/repo_sync_layered.sh --repo-file-filter StarlingX_cengn_${LAYER}_layer
+fi
+
+if [ &quot;${REPO_FILE}&quot; != &quot;&quot; ]; then
+    ~/bin/repo_sync_layered.sh --repo-file-filter ${REPO_FILE}
+fi
+
+
+
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.23">
+      <recipients>scott.little@windriver.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
+      <recipientList>$DEFAULT_RECIPIENTS</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders>
+              <hudson.plugins.emailext.plugins.recipients.ListRecipientProvider/>
+            </recipientProviders>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+      </configuredTriggers>
+      <contentType>default</contentType>
+      <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+      <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
+      <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
+      <attachBuildLog>false</attachBuildLog>
+      <compressBuildLog>false</compressBuildLog>
+      <replyTo>$DEFAULT_REPLYTO</replyTo>
+      <from></from>
+      <saveOutput>false</saveOutput>
+      <disabled>false</disabled>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+              <properties>BUILD_NM=$JOB_NAME
+BUILD_NUM=$BUILD_NUMBER
+PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+            </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+          </configs>
+          <projects>copy_logs</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+        </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.BuildTrigger>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+  </buildWrappers>
+</project>

@@ -1,0 +1,126 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Publish build products to http://mirror.starlingx.cengn.ca</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>BUILD_STREAM</name>
+          <description>dev or stable</description>
+          <defaultValue>dev</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_WORKSPACE</name>
+          <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OS</name>
+          <description></description>
+          <defaultValue>centos</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_LOGS_BASE</name>
+          <description></description>
+          <defaultValue>/tmp/logs</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MASTER_JOB_NAME</name>
+          <description>Top of tree build job name</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RETRIES</name>
+          <description></description>
+          <defaultValue>13</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RETRY_INTERVAL_SEC</name>
+          <description></description>
+          <defaultValue>300</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>
+echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
+echo &quot;OS=$OS&quot;
+echo &quot;BUILD_STREAM=$BUILD_STREAM&quot;
+echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
+echo &quot;MASTER_JOB_NAME=$MASTER_JOB_NAME&quot;
+echo &quot;RETRIES=$RETRIES&quot;
+echo &quot;RETRY_INTERVAL_SEC=$RETRY_INTERVAL_SEC&quot;
+
+[ -n &quot;$MY_WORKSPACE&quot; ]
+[ -n &quot;$OS&quot; ]
+[ -n &quot;$BUILD_STREAM&quot; ]
+[ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
+[ -n &quot;$MASTER_JOB_NAME&quot; ]
+
+source ~/bin/retries.sh
+function with_default_retries {
+    local cmd=$1
+    shift 1
+    with_retries ${RETRIES:-1} ${RETRY_INTERVAL_SEC:-1} &quot;${cmd}&quot; &quot;$@&quot;
+}
+
+PUBLISH_IMAGE_LOGS_BASE=$PUBLISH_LOGS_BASE/docker-images
+SRC_IMAGES_DIR=$MY_WORKSPACE/std/build-images
+
+with_default_retries mkdir -p $PUBLISH_IMAGE_LOGS_BASE
+
+if [ -d ${SRC_IMAGES_DIR} ]; then
+    for f in $(find &quot;${SRC_IMAGES_DIR}&quot; -name &quot;*${OS}-${BUILD_STREAM}.log&quot;); do
+        with_default_retries cp -v &quot;${f}&quot; &quot;${PUBLISH_IMAGE_LOGS_BASE}/&quot;
+    done
+fi
+
+
+
+
+
+
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.23">
+      <recipients>scott.little@windriver.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+  </buildWrappers>
+</project>

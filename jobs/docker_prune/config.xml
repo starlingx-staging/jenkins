@@ -1,0 +1,95 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>prune unused docker containers and images</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+echo $SHELL
+docker container prune -f
+sleep 60
+docker image prune -f
+sleep 60
+# docker volume prune -f
+sleep 600
+
+unset newest
+declare -A newest
+while read line ; do
+    image=$(echo &quot;$line&quot; | awk &apos;{ print $1 }&apos; | sed &apos;s#^starlingx/##&apos;)
+    tag=$(echo &quot;$line&quot; | awk &apos;{ print $2 }&apos; )
+    a=( $(echo $tag | tr &apos;-&apos; &apos; &apos;) )
+    current=0
+    os=&quot;&quot;
+    stability=&quot;&quot;
+    timestamp=&quot;&quot;
+    if [ &quot;${a[$current]}&quot; = &quot;rc&quot; ]; then
+        branch=&quot;${a[$current]}-${a[$next]}&quot;
+        current=$(( current+2 ))
+    else
+        branch=&quot;${a[$current]}&quot;
+        current=$((current +1))
+    fi
+    if [ &quot;${a[$current]}&quot; = &quot;debian&quot; ] || [ &quot;${a[$current]}&quot; = &quot;centos&quot; ]; then
+        os=&quot;${a[$current]}&quot;
+        current=$((current +1))
+    fi
+    if [ &quot;${a[$current]}&quot; = &quot;dev&quot; ] || [ &quot;${a[$current]}&quot; = &quot;stable&quot; ]; then
+        stability=&quot;${a[$current]}&quot;
+        current=$((current +1))
+    fi
+    timestamp=&quot;${a[$current]}&quot;
+    if [ &quot;$timestamp&quot; == &quot;latest&quot; ]; then
+        continue
+    fi
+    
+    key=&quot;$image:$branch&quot;
+    if [ &quot;$os&quot; != &quot;&quot; ]; then key+=&quot;-$os&quot;; fi
+    if [ &quot;$stability&quot; != &quot;&quot; ]; then key+=&quot;-$stability&quot;; fi
+    if [ &quot;${newest[&quot;$key&quot;]}&quot; == &quot;&quot; ]; then
+        echo &quot;key &apos;$key&apos; is new&quot;
+        newest[&quot;$key&quot;]=$timestamp
+    elif [ &quot;${newest[&quot;$key&quot;]}&quot; &gt; &quot;$timestamp&quot; ]; then
+        echo &quot;timestamp $timestamp is older than ${newest[&quot;$key&quot;]}&quot;
+        echo &quot;docker image rm &apos;starlingx/$key-$timestamp&apos;&quot;
+        docker image rm &quot;starlingx/$key-$timestamp&quot;
+    else 
+        echo &quot;timestamp $timestamp is newer than ${newest[&quot;$key&quot;]}&quot;
+        echo &quot;docker image rm &apos;starlingx/$key-${newest[&quot;$key&quot;]}&apos;&quot;
+        docker image rm &quot;starlingx/$key-${newest[&quot;$key&quot;]}&quot;
+        newest[$key]=$timestamp
+    fi
+done &lt; &lt;(docker image ls | grep starlingx/stx-)</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.23">
+      <recipients>scott.little@windriver.com, don.penney@windriver.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
+  <buildWrappers/>
+</project>

@@ -1,0 +1,200 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>set up a container for download and build</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <org.jenkins.plugins.lockableresources.RequiredResourcesProperty plugin="lockable-resources@2.5">
+      <resourceNames>docker-image-lock</resourceNames>
+    </org.jenkins.plugins.lockableresources.RequiredResourcesProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>DOCKER_DL_TAG</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DOCKER_DL_ID</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_REPO_ROOT</name>
+          <description>/localdisk/designer/$USER/$PROJECT</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_WORKSPACE</name>
+          <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_LOGS_BASE</name>
+          <description></description>
+          <defaultValue>/tmp/logs</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_LOGS_URL</name>
+          <description></description>
+          <defaultValue>https://127.0.0.1/</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>DOCKER_BUILD_RETRIES=3
+
+echo &quot;DOCKER_DL_ID=$DOCKER_DL_ID&quot;
+echo &quot;DOCKER_DL_TAG=$DOCKER_DL_TAG&quot;
+echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
+echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
+echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
+echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
+echo &quot;DOCKER_BUILD_RETRIES=$DOCKER_BUILD_RETRIES&quot;
+
+[ -n &quot;$DOCKER_DL_ID&quot; ]
+[ -n &quot;$DOCKER_DL_TAG&quot; ]
+[ -n &quot;$MY_REPO_ROOT&quot; ]
+[ -n &quot;$MY_WORKSPACE&quot; ]
+[ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
+[ -n &quot;$PUBLISH_LOGS_URL&quot; ]
+[ -n &quot;$DOCKER_BUILD_RETRIES&quot; ]
+
+export DOCKER_DL_IMAGE=$USER:$DOCKER_DL_TAG
+export DOCKER_DL_WORKDIR=$MY_REPO_ROOT/stx-tools/
+
+#
+# Function to call a command, with support for retries
+#
+function with_retries {
+    local max_attempts=$1
+    local cmd=$2
+
+    # Pop the first two arguments off the list,
+    # so we can pass additional args to the command safely
+    shift 2
+
+    local -i attempt=0
+
+    while :; do
+        # let -i attempt++
+        attempt=$((attempt+1))
+
+        echo &quot;Running: ${cmd} $@&quot;
+        local rc=0
+        ${cmd} &quot;$@&quot; || rc=1
+        if [ $rc -eq 0 ]; then
+            return 0
+        fi
+
+        echo &quot;Command (${cmd}) failed, attempt ${attempt} of ${max_attempts}.&quot;
+        if [ ${attempt} -lt ${max_attempts} ]; then
+            local delay=5
+            echo &quot;Waiting ${delay} seconds before retrying...&quot;
+            sleep ${delay}
+            continue
+        else
+            echo &quot;Max command attempts reached. Aborting...&quot;
+            return 1
+        fi
+    done
+}
+
+cd $DOCKER_DL_WORKDIR
+
+# docker build --tag $DOCKER_DL_IMAGE --file Dockerfile .
+DOCKERFILE_ORIG=Dockerfile
+DOCKERFILE=../Dockerfile
+cat ${DOCKERFILE_ORIG} | sed &apos;/ENV container=docker/aRUN echo retries=20 &gt;&gt; /etc/yum.conf\nRUN echo timeout=60 &gt;&gt; /etc/yum.conf\nRUN echo http_caching=packages &gt;&gt; /etc/yum.conf&apos; &gt; ${DOCKERFILE}
+with_retries $DOCKER_BUILD_RETRIES docker build --tag $DOCKER_DL_IMAGE --file ${DOCKERFILE} .
+
+docker run -itd --rm --name $DOCKER_DL_ID --volume $(readlink -f /localdisk):/localdisk $DOCKER_DL_IMAGE</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.23">
+      <recipients>scott.little@windriver.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
+      <recipientList>$DEFAULT_RECIPIENTS</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders>
+              <hudson.plugins.emailext.plugins.recipients.ListRecipientProvider/>
+            </recipientProviders>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+      </configuredTriggers>
+      <contentType>default</contentType>
+      <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+      <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
+      <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
+      <attachBuildLog>false</attachBuildLog>
+      <compressBuildLog>false</compressBuildLog>
+      <replyTo>$DEFAULT_REPLYTO</replyTo>
+      <from></from>
+      <saveOutput>false</saveOutput>
+      <disabled>false</disabled>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+              <properties>BUILD_NM=$JOB_NAME
+BUILD_NUM=$BUILD_NUMBER
+PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+            </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+          </configs>
+          <projects>copy_logs</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+        </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.BuildTrigger>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+  </buildWrappers>
+</project>

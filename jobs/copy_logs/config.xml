@@ -1,0 +1,198 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>copy logs to website</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>14</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TIMESTAMP</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BUILD_NUM</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BUILD_NM</name>
+          <description>build name</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DISTRO</name>
+          <description></description>
+          <defaultValue>centos</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_LOGS_BASE</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_WORKSPACE</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_OUTPUTS_BASE</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LAYER</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RETRIES</name>
+          <description></description>
+          <defaultValue>13</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>RETRY_INTERVAL_SEC</name>
+          <description></description>
+          <defaultValue>500</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_REPO</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>echo &quot;BUILD_NM=$BUILD_NM&quot;
+echo &quot;BUILD_NUM=$BUILD_NUM&quot;
+echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
+echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
+echo &quot;MY_REPO=$MY_REPO&quot;
+echo &quot;PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE&quot;
+echo &quot;RETRIES=$RETRIES&quot;
+echo &quot;RETRY_INTERVAL_SEC=$RETRY_INTERVAL_SEC&quot;
+
+[ -n &quot;$BUILD_NM&quot; ]
+[ -n &quot;$BUILD_NUM&quot; ]
+[ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
+
+source ~/bin/retries.sh
+function with_default_retries {
+    local cmd=$1
+    shift 1
+    with_retries ${RETRIES:-1} ${RETRY_INTERVAL_SEC:-1} &quot;${cmd}&quot; &quot;$@&quot;
+}
+
+FROM=&quot;/var/lib/jenkins/jobs/${BUILD_NM}/builds/${BUILD_NUM}/log&quot;
+[ -f &quot;$FROM&quot; ]
+
+
+if [ -f &quot;${MY_WORKSPACE}/NO_BUILD_REQUIRED&quot; ]; then
+    echo &quot;NO_BUILD_REQUIRED&quot;
+    exit 0
+fi
+
+with_default_retries mkdir -p $PUBLISH_LOGS_BASE
+with_default_retries \cp $FROM $PUBLISH_LOGS_BASE/jenkins-${BUILD_NM}-${BUILD_NUM}.log
+with_default_retries ~/bin/log2html  $PUBLISH_LOGS_BASE/jenkins-${BUILD_NM}-${BUILD_NUM}.log
+
+LAYER_PREFIX=${LAYER^^}
+if [ &quot;$LAYER&quot; == &quot;&quot; ] || [ &quot;$LAYER&quot; == &quot;all&quot; ]; then
+    LAYER_PREFIX=&quot;&quot;
+fi
+
+if [ -n &quot;$MY_REPO&quot; ] &amp;&amp; [ -n &quot;$PUBLISH_LOGS_BASE&quot; ]; then
+   with_default_retries mkdir -p $PUBLISH_LOGS_BASE
+   if [ -d $MY_REPO/../stx-tools/centos-mirror-tools/logs ]; then
+       (
+       cd $MY_REPO/../stx-tools/centos-mirror-tools/logs
+       grep -v &apos;^$&apos; *missing* | grep -v &apos;MISSING KEYS&apos; &gt; $PUBLISH_LOGS_BASE/missing_downloads.log
+       with_default_retries ~/bin/log2html  $PUBLISH_LOGS_BASE/missing_downloads.log
+       )
+   fi
+fi
+
+if [ -n &quot;$MY_WORKSPACE&quot; ] &amp;&amp; [ -n &quot;$PUBLISH_OUTPUTS_BASE&quot; ]; then
+    # Publish change log
+    if [ -f $MY_WORKSPACE/CHANGELOG ]; then
+        with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE
+        with_default_retries \cp -v $MY_WORKSPACE/CHANGELOG $PUBLISH_OUTPUTS_BASE/CHANGELOG.txt
+    fi
+
+
+    # Publish build info
+    if [ &quot;x$LAYER&quot; == &quot;x&quot; ] || [ &quot;$LAYER&quot; == &quot;flock&quot; ]; then
+        if [ -f $MY_WORKSPACE/BUILD ]; then
+           with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE
+           with_default_retries \cp -v $MY_WORKSPACE/BUILD $PUBLISH_OUTPUTS_BASE/ISO_BUILD_INFO.txt
+       fi
+    fi
+
+    if [ &quot;x$LAYER&quot; == &quot;x&quot; ] ; then
+        if [ -f &quot;$MY_WORKSPACE/BUILD&quot;  ]; then
+            with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE
+            with_default_retries cp -v &quot;$MY_WORKSPACE/BUILD&quot; $PUBLISH_OUTPUTS_BASE/BUILD_INFO
+            with_default_retries cp -v $PUBLISH_OUTPUTS_BASE/BUILD_INFO $PUBLISH_OUTPUTS_BASE/BUILD_INFO.txt
+        fi
+    else
+        if [ -f &quot;$MY_WORKSPACE/BUILD&quot;  ]; then
+            with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE
+            with_default_retries bash -c &quot;grep &apos;^${LAYER_PREFIX}_&apos; &apos;$MY_WORKSPACE/BUILD&apos; &gt; $PUBLISH_OUTPUTS_BASE/BUILD_INFO&quot;
+            with_default_retries cp -v $PUBLISH_OUTPUTS_BASE/BUILD_INFO $PUBLISH_OUTPUTS_BASE/BUILD_INFO.txt
+        fi
+    fi
+
+    # Publish context
+    if [ -f $MY_WORKSPACE/CONTEXT ]; then
+       with_default_retries mkdir -p $PUBLISH_OUTPUTS_BASE
+       with_default_retries \cp -v $MY_WORKSPACE/CONTEXT $PUBLISH_OUTPUTS_BASE/CONTEXT.sh
+    fi
+fi
+
+
+    
+    </command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

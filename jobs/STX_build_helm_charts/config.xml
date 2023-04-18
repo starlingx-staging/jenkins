@@ -1,0 +1,230 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Build the helm charts</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>OS</name>
+          <description></description>
+          <defaultValue>centos</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DOCKER_BUILD_ID</name>
+          <description></description>
+          <defaultValue>builder</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_REPO</name>
+          <description>/localdisk/designer/$USER/$PROJECT/cgcs-root</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_WORKSPACE</name>
+          <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_LOGS_BASE</name>
+          <description></description>
+          <defaultValue>/tmp/logs</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_LOGS_URL</name>
+          <description></description>
+          <defaultValue>https://127.0.0.1/</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_DISTRO_BASE</name>
+          <description>/export/mirror/starlingx/$BRANCH/$OS</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MAIN_HELM_CHART_RPM_NAME</name>
+          <description></description>
+          <defaultValue>stx-openstack-helm</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>echo &quot;DOCKER_BUILD_ID=$DOCKER_BUILD_ID&quot;
+echo &quot;MY_REPO=$MY_REPO&quot;
+echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
+echo &quot;OS=$OS&quot;
+echo &quot;PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE&quot;
+echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
+echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
+
+[ -n &quot;$DOCKER_BUILD_ID&quot; ]
+[ -n &quot;$MY_REPO&quot; ]
+[ -n &quot;$MY_WORKSPACE&quot; ]
+[ -n &quot;$OS&quot; ]
+[ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
+[ -n &quot;$PUBLISH_LOGS_URL&quot; ]
+[ -n &quot;$PUBLISH_DISTRO_BASE&quot; ]
+[ -n &quot;$MAIN_HELM_CHART_RPM_NAME&quot; ]
+
+if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
+    echo &quot;No new content.  Build not required&quot;
+    exit 0
+fi
+
+MYUNAME=$(id -un)
+
+DOCKER_CMD=&quot;docker exec --interactive --user=${MYUNAME} -e MYUNAME=${MYUNAME} ${DOCKER_BUILD_ID} /bin/bash -i -&quot;
+
+echo &apos;echo MY_REPO=$MY_REPO&apos; | $DOCKER_CMD
+
+# echo &quot;build-helm-charts.sh --os ${OS} --image-file ${IMAGE_FILE} --label ${LABEL} --verbose&quot; | $DOCKER_CMD
+
+IMAGE_DIR=$(find $MY_WORKSPACE -maxdepth 2 -type d -name build-images)
+ALT_IMAGE_SRC_DIR=${PUBLISH_DISTRO_BASE/flock/containers}
+HELM_SAVE_DIR=$MY_WORKSPACE/helm-charts
+mkdir -p $HELM_SAVE_DIR
+ALT_IMAGE_DIR=$MY_WORKSPACE/alt_image_lists
+
+for f in $(find $ALT_IMAGE_SRC_DIR -maxdepth 1 -type f -name &quot;images-${OS}*.lst&quot;); do
+    # only create directory if there is something to copy
+    mkdir -p ${ALT_IMAGE_DIR}
+    cp -v $f $ALT_IMAGE_DIR/
+done
+
+if [ &quot;${IMAGE_DIR}&quot; == &quot;&quot; ]; then
+    IMAGE_DIR=$ALT_IMAGE_DIR
+fi
+
+BUILD_STREAMS=&quot;stable dev&quot;
+BUILD_TAGS=&quot;latest versioned&quot;
+
+if [ -d &quot;${IMAGE_DIR}&quot; ]; then
+  for BUILD_STREAM in $BUILD_STREAMS; do
+    for BUILD_TAG in $BUILD_TAGS; do
+      IMAGE_ARG=&quot;&quot;
+      LABEL=&quot;${OS}-${BUILD_STREAM}-${BUILD_TAG}&quot;
+
+      for IMAGE_FILE in $(find ${IMAGE_DIR} -maxdepth 1 -name &quot;images-${LABEL}.lst&quot;); do
+        IMAGE_ARG+=&quot;,$IMAGE_FILE&quot;
+      done
+      
+      if [  &quot;$IMAGE_ARG&quot; == &quot;&quot; ]; then
+        for IMAGE_FILE in $(find ${ALT_IMAGE_DIR} -maxdepth 1 -name &quot;images-${LABEL}.lst&quot;); do
+          IMAGE_ARG+=&quot;,$IMAGE_FILE&quot;
+        done
+      fi
+      
+      if [ &quot;$IMAGE_ARG&quot; != &quot;&quot; ]; then
+        IMAGE_ARG=&quot;$(echo $IMAGE_ARG | sed &apos;s/^,//&apos;)&quot;
+
+        echo &quot;Building chart for image file: ${IMAGE_ARG}&quot;
+        echo &quot;build-helm-charts.sh --os ${OS} --image-record ${IMAGE_ARG} --label ${LABEL} --app stx-openstack --rpm $MAIN_HELM_CHART_RPM_NAME --verbose&quot; | $DOCKER_CMD
+        HELM_OUT_DIR=$(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm)
+        cp -v $HELM_OUT_DIR/stx/*.tgz $HELM_SAVE_DIR
+        rm -f $HELM_OUT_DIR/stx/*.tgz
+      fi
+    done
+  done
+fi
+
+for f in $(grep --no-filename &apos;^stx-.*helm$&apos; $(find $MY_REPO -name centos_helm.inc) | grep -v &apos;^#&apos; | grep -v $MAIN_HELM_CHART_RPM_NAME  | sed &apos;s/-helm$//&apos;); do
+    echo &quot;build-helm-charts.sh --os ${OS} --app $f --verbose&quot; | $DOCKER_CMD
+    HELM_OUT_DIR=$(find $MY_WORKSPACE -maxdepth 2 -type d -name build-helm)
+    cp -v $HELM_OUT_DIR/stx/*.tgz $HELM_SAVE_DIR
+    rm -f $HELM_OUT_DIR/stx/*.tgz
+done
+
+for f in $(find $HELM_SAVE_DIR -maxdepth 1 -type f -name &apos;*.tgz&apos;); do
+    cp -v $f $HELM_OUT_DIR/stx/
+done</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.23">
+      <recipients>scott.little@windriver.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
+      <recipientList>$DEFAULT_RECIPIENTS</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders>
+              <hudson.plugins.emailext.plugins.recipients.ListRecipientProvider/>
+            </recipientProviders>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+      </configuredTriggers>
+      <contentType>default</contentType>
+      <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+      <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
+      <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
+      <attachBuildLog>false</attachBuildLog>
+      <compressBuildLog>false</compressBuildLog>
+      <replyTo>$DEFAULT_REPLYTO</replyTo>
+      <from></from>
+      <saveOutput>false</saveOutput>
+      <disabled>false</disabled>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+              <properties>BUILD_NM=$JOB_NAME
+BUILD_NUM=$BUILD_NUMBER
+PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+            </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+          </configs>
+          <projects>copy_logs</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+        </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.BuildTrigger>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+  </buildWrappers>
+</project>

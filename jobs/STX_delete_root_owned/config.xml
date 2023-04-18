@@ -1,0 +1,146 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Delete subdirectories we expect to be owned by root</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_REPO_ROOT</name>
+          <description>/localdisk/designer/$USER/$PROJECT</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_WORKSPACE</name>
+          <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OS</name>
+          <description></description>
+          <defaultValue>centos</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>
+echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
+echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
+echo &quot;OS=$OS&quot;
+
+[ -n &quot;$MY_REPO_ROOT&quot; ]
+[ -n &quot;$MY_WORKSPACE&quot; ]
+[ -n &quot;$OS&quot; ]
+
+# export MY_REPO_ROOT=/localdisk/designer/$USER/$PROJECT
+# export MY_WORKSPACE=/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP
+MYUNAME=$(id -un)
+
+
+# DOCKER_CMD=&quot;docker exec --interactive --user=${MYUNAME} -e MYUNAME=${MYUNAME} ${DOCKER_BUILD_ID} /bin/bash -i -&quot;
+
+# echo &apos;echo MY_REPO=$MY_REPO&apos; | $DOCKER_CMD
+
+BUILD_TYPES=&quot;rt std installer containers&quot;
+BUILD_TYPES=&quot;$(find ${MY_WORKSPACE} -maxdepth 3 -type d -name mock -o -name cache -o -name result -o -name results -exec dirname &apos;{}&apos; \; | sort --unique | xargs --max-lines=1 --no-run-if-empty basename)&quot;
+for BUILD_TYPE in $BUILD_TYPES; do
+   if [ -d &quot;$MY_WORKSPACE/$BUILD_TYPE/mock&quot; ]; then
+       # echo &quot;sudo rm -rf $MY_WORKSPACE/$BUILD_TYPE/mock&quot; | $DOCKER_CMD
+       sudo /bin/rm -rf $MY_WORKSPACE/$BUILD_TYPE/mock
+   fi
+   if [ -d &quot;$MY_WORKSPACE/$BUILD_TYPE/cache&quot; ]; then
+       # echo &quot;sudo rm -rf $MY_WORKSPACE/$BUILD_TYPE/cache&quot; | $DOCKER_CMD
+       sudo /bin/rm -rf $MY_WORKSPACE/$BUILD_TYPE/cache
+   fi
+   if [ -d &quot;$MY_WORKSPACE/$BUILD_TYPE/result&quot; ]; then
+       # echo &quot;sudo chown -R $USER $MY_WORKSPACE/$BUILD_TYPE/result&quot; | $DOCKER_CMD
+       sudo chown -R $USER $MY_WORKSPACE/$BUILD_TYPE/result
+   fi
+      if [ -d &quot;$MY_WORKSPACE/$BUILD_TYPE/results&quot; ]; then
+       # echo &quot;sudo chown -R $USER $MY_WORKSPACE/$BUILD_TYPE/results&quot; | $DOCKER_CMD
+       sudo chown -R $USER $MY_WORKSPACE/$BUILD_TYPE/results
+   fi
+done
+
+PXE_SUBDIRS=&quot;initrd.work LiveOS squashfs.mnt squashfs.work&quot;
+for SUBDIR in $PXE_SUBDIRS; do
+   if [ -d &quot;$MY_WORKSPACE/pxe-network-installer/$SUBDIR&quot; ]; then
+       # echo &quot;sudo rm -rf $MY_WORKSPACE/pxe-network-installer/$SUBDIR&quot; | $DOCKER_CMD
+       sudo /bin/rm -rf $MY_WORKSPACE/pxe-network-installer/$SUBDIR
+   fi
+done
+
+if [ -d &quot;$MY_WORKSPACE/mock-cache&quot; ]; then
+    # echo &quot;sudo rm -rf $MY_WORKSPACE/mock-cache&quot; | $DOCKER_CMD
+    sudo /bin/rm -rf $MY_WORKSPACE/mock-cache
+fi
+
+if [ -d &quot;$MY_WORKSPACE/tmp/yum/cache&quot; ]; then
+    # echo &quot;sudo rm -rf $MY_WORKSPACE/tmp/yum/cache&quot; | $DOCKER_CMD
+    sudo /bin/rm -rf $MY_WORKSPACE/tmp/yum/cache
+fi
+
+if [ -f &quot;$MY_WORKSPACE/tmp/yum/yum.log&quot; ]; then
+    # echo &quot;sudo chown -R $USER $MY_WORKSPACE/tmp/yum/yum.log&quot; | $DOCKER_CMD
+    sudo chown -R $USER $MY_WORKSPACE/tmp/yum/yum.log
+fi
+
+PXE_INSTALLER_OUT_DIR=&quot;$MY_WORKSPACE/pxe-network-installer/output&quot;
+if [ -d $PXE_INSTALLER_OUT_DIR ]; then
+   sudo chown -R $USER $PXE_INSTALLER_OUT_DIR
+fi
+
+for WHEEL_DIR in $(find $MY_WORKSPACE -maxdepth 2 -type d -name &apos;build-wheels-*&apos;); do
+    sudo chown -R $USER $WHEEL_DIR
+done
+
+for LOG in $(find $MY_WORKSPACE/std/result/ -name &apos;*.log&apos;); do
+    sudo chown -R $USER $LOG
+done
+
+REMAINDER=$(if [ -d $MY_WORKSPACE ]; then find $MY_WORKSPACE  -user root; fi)
+if [ ! -z &quot;${REMAINDER}&quot; ]; then
+    echo &quot;Remaining items owned by root: $REMAINDER&quot;
+fi
+
+# An assertion that will fail the build if any root owned files remain
+[ -z &quot;${REMAINDER}&quot; ]
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.23">
+      <recipients>scott.little@windriver.com, don.penney@windriver.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+  </buildWrappers>
+</project>

@@ -1,0 +1,314 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Build docker images for the &apos;flock&apos;</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>TIMESTAMP</name>
+          <description></description>
+          <defaultValue>19000101T010101Z</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OS</name>
+          <description></description>
+          <defaultValue>centos</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BUILD_STREAM</name>
+          <description>dev or stable</description>
+          <defaultValue>dev</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REGISTRY</name>
+          <description></description>
+          <defaultValue>docker.io</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REGISTRY_ORG</name>
+          <description></description>
+          <defaultValue>starlingx</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REGISTRY_USERID</name>
+          <description></description>
+          <defaultValue>starlingxbuild</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>WEB_HOST</name>
+          <description></description>
+          <defaultValue>mirror.starlingx.cengn.ca</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>WEB_HOST_PORT</name>
+          <description></description>
+          <defaultValue>80</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_REPO</name>
+          <description>/localdisk/designer/$USER/$PROJECT/cgcs-root</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MY_WORKSPACE</name>
+          <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_OUTPUTS_BASE</name>
+          <description>/export/mirror/starlingx/$BRANCH/$OS/$TIMESTAMP/outputs</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PREFIX</name>
+          <description></description>
+          <defaultValue>dev</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LATEST_PREFIX</name>
+          <description></description>
+          <defaultValue>dev</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>BASE_VERSION</name>
+          <description>dev-$TIMESTAMP</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>FLOCK_VERSION</name>
+          <description>${PREFIX}-${OS}-${BUILD_STREAM}-${TIMESTAMP}
+dev-centos-stable-${TIMESTAMP}</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_LOGS_BASE</name>
+          <description></description>
+          <defaultValue>/tmp/logs</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_LOGS_URL</name>
+          <description>https://127.0.0.1/</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PUBLISH_TIMESTAMP</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.CurrentBuildParameters/>
+          </configs>
+          <projects>docker_login</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.tasks.Shell>
+      <command>
+echo &quot;TIMESTAMP=$TIMESTAMP&quot;
+echo &quot;PUBLISH_TIMESTAMP=$PUBLISH_TIMESTAMP&quot;
+echo &quot;OS=$OS&quot;
+echo &quot;BUILD_STREAM=$BUILD_STREAM&quot;
+echo &quot;REGISTRY=$REGISTRY&quot;
+echo &quot;REGISTRY_ORG=$REGISTRY_ORG&quot;
+echo &quot;REGISTRY_USERID=$REGISTRY_USERID&quot;
+echo &quot;WEB_HOST=$WEB_HOST&quot;
+echo &quot;WEB_HOST_PORT=$WEB_HOST_PORT&quot;
+echo &quot;MY_REPO=$MY_REPO&quot;
+echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
+echo &quot;PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE&quot;
+echo &quot;PREFIX=$PREFIX&quot;
+echo &quot;LATEST_PREFIX=$LATEST_PREFIX&quot;
+echo &quot;BASE_VERSION=$BASE_VERSION&quot;
+echo &quot;FLOCK_VERSION=$FLOCK_VERSION&quot;
+echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
+echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
+
+[ -n &quot;$TIMESTAMP&quot; ]
+[ -n &quot;$PUBLISH_TIMESTAMP&quot; ]
+[ -n &quot;$OS&quot; ]
+[ -n &quot;$BUILD_STREAM&quot; ]
+[ -n &quot;$REGISTRY&quot; ]
+[ -n &quot;$REGISTRY_ORG&quot; ]
+[ -n &quot;$REGISTRY_USERID&quot; ]
+[ -n &quot;$WEB_HOST&quot; ]
+[ -n &quot;$WEB_HOST_PORT&quot; ]
+[ -n &quot;$MY_REPO&quot; ]
+[ -n &quot;$MY_WORKSPACE&quot; ]
+[ -n &quot;$PUBLISH_OUTPUTS_BASE&quot; ]
+[ -n &quot;$PREFIX&quot; ]
+[ -n &quot;$LATEST_PREFIX&quot; ]
+[ -n &quot;$BASE_VERSION&quot; ]
+[ -n &quot;$FLOCK_VERSION&quot; ]
+[ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
+[ -n &quot;$PUBLISH_LOGS_URL&quot; ]
+
+if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
+    echo &quot;No new content.  Build not required&quot;
+    exit 0
+fi
+
+WEB_OUTPUTS_BASE=${PUBLISH_OUTPUTS_BASE#/export}
+
+$MY_REPO/build-tools/build-docker-images/build-stx-images.sh \
+    --prefix ${PREFIX} \
+    --latest-prefix ${LATEST_PREFIX} \
+    --os ${OS} \
+    --stream ${BUILD_STREAM} \
+    --version ${PUBLISH_TIMESTAMP} \
+    --base ${REGISTRY}/${REGISTRY_ORG}/stx-${OS}:${BASE_VERSION} \
+    --wheels http://${WEB_HOST}:${WEB_HOST_PORT}/${WEB_OUTPUTS_BASE}/wheels/stx-${OS}-${BUILD_STREAM}-wheels.tar \
+    --user ${REGISTRY_ORG} --registry ${REGISTRY} \
+    --attempts 5 \
+    --push --latest \
+    --clean
+    
+if [ &quot;${OS}&quot; == &quot;centos&quot; ]; then
+    # Use centos build as a proxy for building distroless images
+    DISTROLESS_OS=&quot;distroless&quot;
+    DISTROLESS_BASE=&quot;gcr.io/distroless/base&quot;
+    $MY_REPO/build-tools/build-docker-images/build-stx-images.sh \
+    --prefix ${PREFIX} \
+    --latest-prefix ${LATEST_PREFIX} \
+    --os ${DISTROLESS_OS} \
+    --stream ${BUILD_STREAM} \
+    --version ${PUBLISH_TIMESTAMP} \
+    --base ${DISTROLESS_BASE} \
+    --wheels http://${WEB_HOST}:${WEB_HOST_PORT}/${WEB_OUTPUTS_BASE}/wheels/stx-${OS}-${BUILD_STREAM}-wheels.tar \
+    --user ${REGISTRY_ORG} --registry ${REGISTRY} \
+    --attempts 5 \
+    --push --latest \
+    --clean
+fi
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.23">
+      <recipients>scott.little@windriver.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
+      <recipientList>$DEFAULT_RECIPIENTS</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders>
+              <hudson.plugins.emailext.plugins.recipients.ListRecipientProvider/>
+            </recipientProviders>
+            <attachmentsPattern></attachmentsPattern>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+      </configuredTriggers>
+      <contentType>default</contentType>
+      <defaultSubject>[$BUILD_STREAM] $DEFAULT_SUBJECT</defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+      <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
+      <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
+      <attachBuildLog>false</attachBuildLog>
+      <compressBuildLog>false</compressBuildLog>
+      <replyTo>$DEFAULT_REPLYTO</replyTo>
+      <from></from>
+      <saveOutput>false</saveOutput>
+      <disabled>false</disabled>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+              <properties>BUILD_NM=$JOB_NAME
+BUILD_NUM=$BUILD_NUMBER
+PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE</properties>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+            </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+          </configs>
+          <projects>docker_logout,copy_logs</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+        </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.BuildTrigger>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+  </buildWrappers>
+</project>

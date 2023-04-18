@@ -1,0 +1,95 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>docker login </description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>REGISTRY</name>
+          <description></description>
+          <defaultValue>docker.io</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REGISTRY_USERID</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>LOCK_FILE=&quot;$HOME/.docker-login-lock&quot;
+COUNT_FILE=&quot;$HOME/.docker-login-count&quot;
+
+echo &quot;REGISTRY=$REGISTRY&quot;
+echo &quot;REGISTRY_USERID=$REGISTRY_USERID&quot;
+
+function up {
+    lockfile -1 -l 60 $LOCK_FILE
+    if [ $? -ne 0 ]
+    then
+        &gt;&amp;2 echo &quot;up: failed to lock&quot;
+        return 1
+    fi
+    # &gt;&amp;2 echo &quot;up: locked&quot;
+
+    if [ -f &quot;$COUNT_FILE&quot; ]
+    then
+        source &quot;$COUNT_FILE&quot;
+        COUNT=$(($COUNT+1))
+    else
+        COUNT=1
+        touch &quot;$COUNT_FILE&quot;
+        chmod 644 &quot;$COUNT_FILE&quot;
+    fi
+
+    &gt;&amp;2 echo &quot;COUNT=$COUNT&quot; &gt; &quot;$COUNT_FILE&quot;
+    # &gt;&amp;2 echo &quot;up: count=$COUNT&quot;
+
+    rm -f $LOCK_FILE
+    if [ $? -ne 0 ]
+    then
+        &gt;&amp;2 echo &quot;up: failed to unlock&quot;
+        return 2
+    fi
+    # &gt;&amp;2 echo &quot;up: unlocked&quot;
+    echo $COUNT
+    return 0
+}
+
+RC=$(up)
+
+# assert $RC &gt; 0
+[ $RC -gt 0 ]
+
+MUNGED_REGISTRY=$(echo ${REGISTRY} | tr &apos;.&apos; &apos;_&apos; )
+cat ~/${MUNGED_REGISTRY}_${REGISTRY_USERID}.cred | docker login --password-stdin --username=${REGISTRY_USERID}</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

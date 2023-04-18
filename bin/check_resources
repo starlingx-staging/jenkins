@@ -1,0 +1,124 @@
+#!/bin/bash
+
+declare -A disk_threshholds
+disk_threshholds['/']=90
+disk_threshholds['/tmp']=90
+disk_threshholds['/var/log']=90
+disk_threshholds['/var/lib/jenkins']=90
+disk_threshholds['/var/lib/docker']=80
+disk_threshholds['/localdisk/designer']=90
+disk_threshholds['/localdisk/loadbuild']=90
+disk_threshholds['/export/mirror/']=90
+
+declare -A mem_threshholds_low
+mem_threshholds_low['MemAvailable']=25
+
+declare -A swap_threshholds_low
+swap_threshholds_low['SwapFree']=75
+
+declare -A docker_count_thresholds
+docker_count_thresholds['container']=10
+docker_count_thresholds['image']=100
+docker_count_thresholds['volume']=20
+
+RC=0
+
+du_percent () {
+    df $1/ | tail -n 1 | awk '{ print $5 }' | sed 's#%##'
+}
+
+mem_percent () {
+    local field=$1
+    local line=""
+    local key=""
+    local value=0
+    local memTotal=0
+    local memTarget=0
+    local percent=0
+    while IFS="" read -r line || [ -n "$line" ]; do
+        key=$(echo "$line" | awk '{ print $1 }' | sed 's#:##')
+        val=$(echo "$line" | awk '{ print $2 }')
+        # echo "$key: $val"
+        case "$key" in
+            MemTotal) memTotal=$val;;
+            $field) memTarget=$val;;
+        esac
+    done < /proc/meminfo
+
+    percent=$(( 100 * memTarget / memTotal ))
+    # echo "MemTotal: $memTotal"
+    # echo "$field: $memTarget $percent"
+    echo $percent
+}
+
+swap_percent () {
+    local field=$1
+    local line=""
+    local key=""
+    local value=0
+    local swapTotal=0
+    local swapTarget=0
+    local percent=0
+    while IFS="" read -r line || [ -n "$line" ]; do
+        key=$(echo "$line" | awk '{ print $1 }' | sed 's#:##')
+        val=$(echo "$line" | awk '{ print $2 }')
+        # echo "$key: $val"
+        case "$key" in
+            SwapTotal) swapTotal=$val;;
+            $field) swapTarget=$val;;
+        esac
+    done < /proc/meminfo
+
+    percent=$(( 100 * swapTarget / swapTotal ))
+    # echo "SwapTotal: $swapTotal"
+    # echo "$field: $swapTarget $percent"
+    echo $percent
+}
+
+
+for d in "${!disk_threshholds[@]}"; do
+    usage=$(du_percent $d)
+    threshhold=${disk_threshholds[$d]}
+    echo "Checking '${d}' < ${threshhold}"
+    if [ ${usage} -ge ${threshhold} ]; then
+        RC=1
+        echo "WARNING: disk: filesystem at path '${d}' is at ${usage}%"
+    fi
+done
+
+for t in "${!mem_threshholds_low[@]}"; do
+    usage=$(mem_percent $t)
+    threshhold=${mem_threshholds_low[$t]}
+    echo "Checking '${t}' > ${threshhold}"
+    if [ ${usage} -le ${threshhold} ]; then
+        RC=1
+        echo "WARNING: memory: ${t} is at ${usage}%"
+    fi
+done
+
+for t in "${!swap_threshholds_low[@]}"; do
+    usage=$(swap_percent $t)
+    threshhold=${swap_threshholds_low[$t]}
+    echo "Checking '${t}' > ${threshhold}"
+    if [ ${usage} -le ${threshhold} ]; then
+        RC=1
+        echo "WARNING: swap ${t} is at ${usage}%"
+    fi
+done
+
+for t in "${!docker_count_thresholds[@]}"; do
+    count=$(docker $t ls | wc -l)
+    threshhold=${docker_count_thresholds[$t]}
+    echo "Checking docker '${t}' count < ${threshhold}"
+    if [ ${count} -ge ${threshhold} ]; then
+        RC=1
+        echo "WARNING: docker ${t} count is ${count}"
+        echo "Full list follows"
+        echo "=================================================="
+        docker $t ls
+        echo "=================================================="
+    fi
+done
+
+
+exit $RC;

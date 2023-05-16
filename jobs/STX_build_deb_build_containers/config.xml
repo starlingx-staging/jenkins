@@ -1,5 +1,4 @@
-<?xml version='1.1' encoding='UTF-8'?>
-<project>
+<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
   <actions/>
   <description>First pass build.  This build will not include the updated pxe-installer.</description>
   <keepDependencies>false</keepDependencies>
@@ -12,7 +11,7 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.34">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -21,49 +20,39 @@
         <hudson.model.StringParameterDefinition>
           <name>MY_REPO_ROOT</name>
           <description>/localdisk/designer/$USER/$PROJECT</description>
-          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>MY_WORKSPACE</name>
           <description>/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP</description>
-          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>MY_REPO</name>
           <description>$MY_REPO_ROOT/cgcs-root</description>
-          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>PUBLISH_LOGS_BASE</name>
-          <description></description>
           <defaultValue>/tmp/logs</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>PUBLISH_LOGS_URL</name>
-          <description></description>
           <defaultValue>https://127.0.0.1/</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>OS</name>
-          <description></description>
           <defaultValue>debian</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>MASTER_JOB_NAME</name>
-          <description></description>
-          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>LAYER</name>
-          <description></description>
-          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
@@ -72,43 +61,27 @@
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>REGISTRY</name>
-          <description></description>
-          <defaultValue>docker.io</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>REGISTRY_USERID</name>
-          <description></description>
-          <defaultValue></defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
           <name>DOCKER_BUILD_TAG</name>
-          <description></description>
-          <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>REGISTRY</name>
-          <description></description>
           <defaultValue>docker.io</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>REGISTRY_ORG</name>
-          <description></description>
           <defaultValue>starlingx</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>REGISTRY_USERID</name>
-          <description></description>
           <defaultValue>slittlewrs</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
+    
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
@@ -118,7 +91,7 @@
   <triggers/>
   <concurrentBuild>false</concurrentBuild>
   <builders>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -156,30 +129,30 @@
       <command>#!/bin/bash -ex
 
 DOCKER_BUILD_RETRIES=3
-#LAT_BINARY_RESOURCE_PATH=&quot;http://mirror.starlingx.cengn.ca/mirror/lat-sdk/lat-sdk-20210820&quot;
+#LAT_BINARY_RESOURCE_PATH="http://mirror.starlingx.cengn.ca/mirror/lat-sdk/lat-sdk-20210820"
 
-echo &quot;DOCKER_BUILD_TAG=$DOCKER_BUILD_TAG&quot;
-echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
-echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
-echo &quot;PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE&quot;
-echo &quot;PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL&quot;
-echo &quot;DOCKER_BUILD_RETRIES=$DOCKER_BUILD_RETRIES&quot;
-echo &quot;LAYER=$LAYER&quot;
-echo &quot;REGISTRY=$REGISTRY&quot;
-echo &quot;REGISTRY_ORG=$REGISTRY_ORG&quot;
-echo &quot;REGISTRY_USERID=$REGISTRY_USERID&quot;
+echo "DOCKER_BUILD_TAG=$DOCKER_BUILD_TAG"
+echo "MY_REPO_ROOT=$MY_REPO_ROOT"
+echo "MY_WORKSPACE=$MY_WORKSPACE"
+echo "PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE"
+echo "PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL"
+echo "DOCKER_BUILD_RETRIES=$DOCKER_BUILD_RETRIES"
+echo "LAYER=$LAYER"
+echo "REGISTRY=$REGISTRY"
+echo "REGISTRY_ORG=$REGISTRY_ORG"
+echo "REGISTRY_USERID=$REGISTRY_USERID"
 
-[ -n &quot;$DOCKER_BUILD_TAG&quot; ]
-[ -n &quot;$MY_REPO_ROOT&quot; ]
-[ -n &quot;$MY_WORKSPACE&quot; ]
-[ -n &quot;$PUBLISH_LOGS_BASE&quot; ]
-[ -n &quot;$PUBLISH_LOGS_URL&quot; ]
-[ -n &quot;$DOCKER_BUILD_RETRIES&quot; ]
-[ -n &quot;$LAYER&quot; ]
-[ -n &quot;$REGISTRY_ORG&quot; ]
+[ -n "$DOCKER_BUILD_TAG" ]
+[ -n "$MY_REPO_ROOT" ]
+[ -n "$MY_WORKSPACE" ]
+[ -n "$PUBLISH_LOGS_BASE" ]
+[ -n "$PUBLISH_LOGS_URL" ]
+[ -n "$DOCKER_BUILD_RETRIES" ]
+[ -n "$LAYER" ]
+[ -n "$REGISTRY_ORG" ]
 
-if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
-    echo &quot;No new content.  Build not required&quot;
+if [ ! -f "${MY_WORKSPACE}/NEED_BUILD" ]; then
+    echo "No new content.  Build not required"
     exit 0
 fi
 
@@ -208,57 +181,57 @@ function with_retries {
         # let -i attempt++
         attempt=$((attempt+1))
 
-        echo &quot;Running: ${cmd} $@&quot;
+        echo "Running: ${cmd} $@"
         local rc=0
-        ${cmd} &quot;$@&quot; || rc=1
+        ${cmd} "$@" || rc=1
         if [ $rc -eq 0 ]; then
             return 0
         fi
 
-        echo &quot;Command (${cmd}) failed, attempt ${attempt} of ${max_attempts}.&quot;
+        echo "Command (${cmd}) failed, attempt ${attempt} of ${max_attempts}."
         if [ ${attempt} -lt ${max_attempts} ]; then
             local delay=5
-            echo &quot;Waiting ${delay} seconds before retrying...&quot;
+            echo "Waiting ${delay} seconds before retrying..."
             sleep ${delay}
             continue
         else
-            echo &quot;Max command attempts reached. Aborting...&quot;
+            echo "Max command attempts reached. Aborting..."
             return 1
         fi
     done
 }
 
-if [[ -z &quot;$REGISTRY&quot; || &quot;$REGISTRY&quot; == &quot;docker.io&quot; ]] ; then
+if [[ -z "$REGISTRY" || "$REGISTRY" == "docker.io" ]] ; then
     DOCKER_BUILD_IMAGE_PREFIX=
 else
-   DOCKER_BUILD_IMAGE_PREFIX=&quot;$REGISTRY/&quot;
+   DOCKER_BUILD_IMAGE_PREFIX="$REGISTRY/"
 fi
-DOCKER_BUILD_IMAGE_PREFIX+=&quot;$REGISTRY_ORG/&quot;
-VERSIONED_LST_FILE=&quot;$MY_WORKSPACE/outputs/docker-images/builder-images-debian-versioned.lst&quot;
-LATEST_LST_FILE=&quot;$MY_WORKSPACE/outputs/docker-images/builder-images-debian-latest.lst&quot;
+DOCKER_BUILD_IMAGE_PREFIX+="$REGISTRY_ORG/"
+VERSIONED_LST_FILE="$MY_WORKSPACE/outputs/docker-images/builder-images-debian-versioned.lst"
+LATEST_LST_FILE="$MY_WORKSPACE/outputs/docker-images/builder-images-debian-latest.lst"
 
-mkdir -p &quot;$MY_WORKSPACE/outputs/docker-images&quot;
+mkdir -p "$MY_WORKSPACE/outputs/docker-images"
 
 cd $DOCKER_BUILD_WORKDIR
-DOCKERFILE_LIST=&quot;$(find stx/dockerfiles -name &apos;*.Dockerfile&apos;)&quot;
+DOCKERFILE_LIST="$(find stx/dockerfiles -name '*.Dockerfile')"
 ALL_IMAGES=()
 
 if $FULL_BUILD ; then
-    DOCKER_BUILD_ARGS+=&quot; --no-cache&quot;
+    DOCKER_BUILD_ARGS+=" --no-cache"
 fi
 
 # versioned images
-rm -f &quot;$VERSIONED_LST_FILE&quot;
+rm -f "$VERSIONED_LST_FILE"
 for DOCKERFILE in $DOCKERFILE_LIST ; do
     DOCKERFILE_NAME=${DOCKERFILE#stx/dockerfiles/}
     DOCKERFILE_NAME=${DOCKERFILE_NAME%.Dockerfile}
     DOCKER_BUILD_IMAGE=${DOCKER_BUILD_IMAGE_PREFIX}${DOCKERFILE_NAME}:${DOCKER_BUILD_TAG}
 
-    echo &quot;building ${DOCKER_BUILD_IMAGE}&quot;
-    echo $DOCKER_BUILD_IMAGE &gt;&gt;&quot;$VERSIONED_LST_FILE&quot;
+    echo "building ${DOCKER_BUILD_IMAGE}"
+    echo $DOCKER_BUILD_IMAGE &gt;&gt;"$VERSIONED_LST_FILE"
     
 #    if [[ $DOCKERFILE_NAME == stx-lat-tool ]] ; then
-#      sed  &quot;s!\${LAT_BINARY_RESOURCE_PATH}!${LAT_BINARY_RESOURCE_PATH}!&quot; $DOCKERFILE &gt;$DOCKERFILE.new
+#      sed  "s!\${LAT_BINARY_RESOURCE_PATH}!${LAT_BINARY_RESOURCE_PATH}!" $DOCKERFILE &gt;$DOCKERFILE.new
 #      DOCKERFILE=$DOCKERFILE.new
 #    fi
 
@@ -275,15 +248,15 @@ for DOCKERFILE in $DOCKERFILE_LIST ; do
 done
 
 # latest tags
-rm -f  &quot;$LATEST_LST_FILE&quot;
+rm -f  "$LATEST_LST_FILE"
 for DOCKERFILE in $DOCKERFILE_LIST ; do
     DOCKERFILE_NAME=${DOCKERFILE#stx/dockerfiles/}
     DOCKERFILE_NAME=${DOCKERFILE_NAME%.Dockerfile}
     DOCKER_BUILD_IMAGE=${DOCKER_BUILD_IMAGE_PREFIX}${DOCKERFILE_NAME}:${DOCKER_BUILD_TAG}
     DOCKER_BUILD_IMAGE_LATEST=${DOCKER_BUILD_IMAGE%-*}-latest
     
-    echo &quot;creating tag ${DOCKER_BUILD_IMAGE_LATEST}&quot;
-    echo $DOCKER_BUILD_IMAGE_LATEST &gt;&gt;&quot;$LATEST_LST_FILE&quot;
+    echo "creating tag ${DOCKER_BUILD_IMAGE_LATEST}"
+    echo $DOCKER_BUILD_IMAGE_LATEST &gt;&gt;"$LATEST_LST_FILE"
     docker tag $DOCKER_BUILD_IMAGE $DOCKER_BUILD_IMAGE_LATEST
     ALL_IMAGES+=($DOCKER_BUILD_IMAGE_LATEST)
 done
@@ -293,15 +266,16 @@ for img in ${ALL_IMAGES[@]} ; do
     docker push $img
 done
 </command>
+      <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.23">
+    <hudson.tasks.Mailer plugin="mailer@448.v5b_97805e3767">
       <recipients>davlet.panech@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.95">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -311,7 +285,7 @@ done
             <recipientProviders>
               <hudson.plugins.emailext.plugins.recipients.ListRecipientProvider/>
             </recipientProviders>
-            <attachmentsPattern></attachmentsPattern>
+            <attachmentsPattern/>
             <attachBuildLog>false</attachBuildLog>
             <compressBuildLog>false</compressBuildLog>
             <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
@@ -322,17 +296,17 @@ done
       <contentType>default</contentType>
       <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
       <defaultContent>$DEFAULT_CONTENT</defaultContent>
-      <attachmentsPattern></attachmentsPattern>
+      <attachmentsPattern/>
       <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
       <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
       <attachBuildLog>false</attachBuildLog>
       <compressBuildLog>false</compressBuildLog>
       <replyTo>$DEFAULT_REPLYTO</replyTo>
-      <from></from>
+      <from/>
       <saveOutput>false</saveOutput>
       <disabled>false</disabled>
     </hudson.plugins.emailext.ExtendedEmailPublisher>
-    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
           <configs>
@@ -343,8 +317,7 @@ PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE
 MY_REPO_ROOT=$MY_REPO_ROOT
 MY_WORKSPACE=$MY_WORKSPACE
 OS=$OS
-MASTER_JOB_NAME=$MASTER_JOB_NAME
-</properties>
+MASTER_JOB_NAME=$MASTER_JOB_NAME</properties>
               <textParamValueOnNewLine>false</textParamValueOnNewLine>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
@@ -354,9 +327,7 @@ MASTER_JOB_NAME=$MASTER_JOB_NAME
           <triggerFromChildProjects>false</triggerFromChildProjects>
         </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
         <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
-          <configs>
-            <hudson.plugins.parameterizedtrigger.CurrentBuildParameters/>
-          </configs>
+          <configs class="empty-list"/>
           <projects>STX_delete_deb_build_containers</projects>
           <condition>SUCCESS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
@@ -366,6 +337,6 @@ MASTER_JOB_NAME=$MASTER_JOB_NAME
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.22"/>
   </buildWrappers>
 </project>

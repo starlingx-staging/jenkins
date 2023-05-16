@@ -46,7 +46,8 @@ __get_project_tags() {
     local json
 
     echo ">>> $url" >&2
-    json="$(wget -q -O - "$url")"
+    # json="$(wget -q -O - "$url")"
+    json="$(curl "$url")"
 
     # success
     if [[ $? -eq 0 && -n "$json" ]] ; then
@@ -93,9 +94,36 @@ extract_published_images_from_logs () {
             return 1
         fi
 
-        cat "${LOG}" | sed -ne  '/^The following tags were pushed/{ :a; n; p; ba; }' | tac | sed -ne  '/^Sending e-mails to:/{ :a; n; p; ba; }' | tac
-        cat "${LOG}" | sed -ne  '/^The following tags were pushed/{ :a; n; p; ba; }' | tac | sed -ne  '/^No emails were triggered./{ :a; n; p; ba; }' | tac | grep -v 'Sending e-mails'
-        grep --no-filename -e '^Pushing image: ' -e '^[[][0-9A-Z .:-]\+[]] Pushing image: ' "${LOG}" | sed 's/^.* Pushing image: //'
+        local start_pushed=0
+        while IFS= read -r line; do
+            if [ $start_pushed -eq 0 ]; then
+                if [ "$line" = "" ]; then
+                    continue
+                fi
+                if echo "$line" | grep -q '^The following tags were pushed'; then
+                    start_pushed=1
+                    continue
+                fi
+            else
+                if [ "$line" = "" ]; then
+                    start_pushed=0
+                    continue
+                fi
+                if echo "$line" | grep -q '^Sending e-mails to:'; then
+                    start_pushed=0
+                    continue
+                fi
+                if echo "$line" | grep -q '^No emails were triggered'; then
+                    start_pushed=0
+                    continue
+                fi
+                echo $line
+            fi
+        done < <(cat "${LOG}" | sed 's#^[[][0-9TZ.:-]*[]] ##')
+
+        # cat "${LOG}" | sed 's#^[[][0-9TZ.:-]*[]] ##' | sed -ne  '/^The following tags were pushed/{ :a; n; p; ba; }' | tac | sed -ne  '/^Sending e-mails to:/{ :a; n; p; ba; }' | tac
+        # cat "${LOG}" | sed 's#^[[][0-9TZ.:-]*[]] ##' | sed -ne  '/^The following tags were pushed/{ :a; n; p; ba; }' | tac | sed -ne  '/^No emails were triggered./{ :a; n; p; ba; }' | sed -ne  '/centos == centos/{ :a; n; p; ba; }' | tac | grep -v 'Sending e-mails' | grep -v 'centos == centos'
+        grep --no-filename -e '^Pushing image: ' -e '^[[][0-9A-Z .:-]\+[]] Pushing image: ' "${LOG}" | sed 's/^.* Pushing image: //' | sed 's/^Pushing image: //'
     done | sort --unique
     return 0
 }
@@ -221,7 +249,7 @@ get_project_list_from_build_dir () {
 
     local timestamp dir subdir
     for timestamp in $TIMESTAMP $latest_timestamp ; do
-        local -a lst_dirs=("outputs/docker-images" "workspace/std/build-images" "std/build-images")
+        local -a lst_dirs=("logs" "outputs/docker-images" "workspace/std/build-images" "std/build-images")
         for subdir in "${lst_dirs[@]}" ; do
             dir="$BASE_DIR/$timestamp/$subdir"
             if [[ -d "$dir" ]] ; then

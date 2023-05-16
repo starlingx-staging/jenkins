@@ -23,18 +23,23 @@ LOGFILE="/export/log/daily_repo_sync.log"
 YUM_CONF_DIR="/export/config"
 YUM_REPOS_DIR="$YUM_CONF_DIR/yum.repos.d"
 DOWNLOAD_PATH_ROOT="/export/mirror/centos"
-URL_UTILS="url_utils.sh"
 
 DAILY_REPO_SYNC_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
 
-if [ -f "$DAILY_REPO_SYNC_DIR/$URL_UTILS" ]; then
-    source "$DAILY_REPO_SYNC_DIR/$URL_UTILS"
-elif [ -f "$DAILY_REPO_SYNC_DIR/../$URL_UTILS" ]; then
-    source "$DAILY_REPO_SYNC_DIR/../$URL_UTILS"
-else
-    echo "Error: Can't find '$URL_UTILS'"
-    exit 1
-fi
+source_file () {
+    local FILE=$1
+    if [ -f "$DAILY_REPO_SYNC_DIR/$FILE" ]; then
+        source "$DAILY_REPO_SYNC_DIR/$FILE"
+    elif [ -f "$DAILY_REPO_SYNC_DIR/../$FILE" ]; then
+        source "$DAILY_REPO_SYNC_DIR/../$FILE"
+    else
+        echo "Error: Can't find '$FILE'"
+        exit 1
+    fi
+}
+
+source_file "url_utils.sh"
+source_file "yum_utils.sh"
 
 CREATEREPO=$(which createrepo_c)
 if [ $? -ne 0 ]; then
@@ -60,7 +65,7 @@ fi
 #     for REPO_ID in $(grep '^[[]' $REPO | sed 's#[][]##g'); do
 for REPO_ID in $(yum repolist --config=$YUM_CONF --quiet | tail -n +2 | cut -d ' ' -f 1); do
 
-        REPO_URL=$(yum repoinfo --config="$YUM_CONF"  --disablerepo="*" --enablerepo="$REPO_ID" | grep Repo-baseurl | cut -d ' ' -f 3)
+	REPO_URL=$(get_repo_url "$YUM_CONF" "$REPO_ID")
         DOWNLOAD_PATH="$DOWNLOAD_PATH_ROOT/$(repo_url_to_sub_path "$REPO_URL")"
 
 #        echo "Processing: REPO=$REPO  REPO_ID=$REPO_ID  REPO_URL=$REPO_URL  DOWNLOAD_PATH=$DOWNLOAD_PATH"

@@ -23,17 +23,23 @@ STX_TOOLS_BRANCH_ROOT_DIR="$HOME/stx-tools"
 STX_TOOLS_OS_SUBDIR="centos-mirror-tools"
 
 
-DAILY_REPO_DIR_SYNC_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
+REPO_UPDATE_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
 
-if [ -f "$DAILY_REPO_DIR_SYNC_DIR/stx_tool_utils.sh" ]; then
-    source "$DAILY_REPO_DIR_SYNC_DIR/stx_tool_utils.sh"
-elif [ -f "$DAILY_REPO_DIR_SYNC_DIR/../stx_tool_utils.sh" ]; then
-    source "$DAILY_REPO_DIR_SYNC_DIR/../stx_tool_utils.sh"
+source_file () {
+    local FILE=$1
+if [ -f "$REPO_UPDATE_DIR/$FILE" ]; then
+    source "$REPO_UPDATE_DIR/$FILE"
+elif [ -f "$REPO_UPDATE_DIR/../$FILE" ]; then
+    source "$REPO_UPDATE_DIR/../$FILE"
 else
-    >&2 echo "Error: Can't find 'stx_tool_utils.sh'"
+    echo "Error: Can't find '$FILE'"
     exit 1
 fi
+}
 
+
+source_file "stx_tool_utils_layered.sh"
+source_file "yum_utils.sh"
 
 
 
@@ -113,45 +119,6 @@ update_gpg_keys () {
     return 0
 }
 
-get_repo_url () {
-    local YUM_CONF="$1"
-    local REPO_ID="$2"
-    local URL=""
-   
-    URL=$(cd $(dirname $YUM_CONF); 
-          yum repoinfo --config="$(basename $YUM_CONF)" --disablerepo="*" --enablerepo="$REPO_ID" | \
-              grep Repo-baseurl | \
-              cut -d ' ' -f 3; 
-          exit ${PIPESTATUS[0]}
-         )
-    if [ $? != 0 ]; then
-        >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
-        return 1
-    fi
-
-    echo "$URL"
-    return 0
-}
-
-get_repo_name () {
-    local YUM_CONF="$1"
-    local REPO_ID="$2"
-    local NAME=""
-
-    NAME="$(cd $(dirname $YUM_CONF); 
-          yum repoinfo --config="$(basename $YUM_CONF)" --disablerepo="*" --enablerepo="$REPO_ID" | \
-              grep Repo-name | \
-              sed 's#^[^:]*: ##';
-          exit ${PIPESTATUS[0]}
-         )"
-    if [ $? != 0 ]; then
-        >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
-        return 1
-    fi
-
-    echo "$NAME"
-    return 0
-}
 
 archive_repo_id () {
     local REPO_ID="$1"
@@ -304,24 +271,16 @@ update_yum_repos_d () {
                 return 1
             fi
 
-            # REPO_URL=$(cd $(dirname $YUM_CONF); 
-            #            yum repoinfo --config="$(basename $YUM_CONF)" --disablerepo="*" --enablerepo="$REPO_ID" | \
-            #                grep Repo-baseurl | \
-            #                cut -d ' ' -f 3; 
-            #            exit ${PIPESTATUS[0]})
             REPO_URL=$(get_repo_url "$YUM_CONF" "$REPO_ID")
             if [ $? != 0 ]; then
-            #     >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
                 return 1
             fi
 
             REPO_NAME="$(get_repo_name "$YUM_CONF" "$REPO_ID")"
             if [ $? != 0 ]; then
-            #     >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
                 return 1
             fi
 
-            REPO_URL=$(yum repoinfo --config="$YUM_CONF"  --disablerepo="*" --enablerepo="$REPO_ID" | grep Repo-baseurl | cut -d ' ' -f 3)
             DOWNLOAD_PATH="$DOWNLOAD_PATH_ROOT/$(repo_url_to_sub_path "$REPO_URL")"
 
             # Check critical content is the same

@@ -47,6 +47,7 @@ fi
 
 source_file "ini_utils.sh"
 source_file "stx_tool_utils_layered.sh"
+source_file "yum_utils.sh"
 
 
 
@@ -146,65 +147,6 @@ repo_is_enabled () {
      )
 }
 
-get_repo_url () {
-    local YUM_CONF="$1"
-    local REPO_ID="$2"
-    local REPO_FILE="$3"
-    local URL=""
-    local EXTRA_ARGS=""
-
-    if [ "${REPO_FILE}" != "" ]; then
-        EXTRA_ARGS="--setopt reposdir=$(dirname $REPO_FILE)"
-    fi
-    URL=$(cd $(dirname $YUM_CONF);
-          yum repoinfo --config="$YUM_CONF" ${EXTRA_ARGS} --disablerepo="*" --enablerepo="$REPO_ID" | \
-              grep Repo-baseurl | \
-              awk '{ print $3 }';
-          exit ${PIPESTATUS[0]}
-         )
-    if [ $? != 0 ]; then
-        # Second chance after cleaning the cached metadata
-        URL=$(cd $(dirname $YUM_CONF);
-              yum --config="$YUM_CONF" ${EXTRA_ARGS} --disablerepo="*" --enablerepo="$REPO_ID" clean metadata > /dev/null;
-              yum repoinfo --config="$YUM_CONF" ${EXTRA_ARGS} --disablerepo="*" --enablerepo="$REPO_ID" | \
-              grep Repo-baseurl | \
-              awk '{ print $3 }';
-              exit ${PIPESTATUS[0]}
-             )
-        if [ $? != 0 ]; then
-            >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
-            return 1
-        fi
-    fi
-
-    echo "$URL"
-    return 0
-}
-
-get_repo_name () {
-    local YUM_CONF="$1"
-    local REPO_ID="$2"
-    local REPO_FILE="$3"
-    local NAME=""
-    local EXTRA_ARGS=""
-
-    if [ "${REPO_FILE}" != "" ]; then
-        EXTRA_ARGS="--setopt reposdir=$(dirname $REPO_FILE)"
-    fi
-    NAME="$(cd $(dirname $YUM_CONF);
-          yum repoinfo --config="$YUM_CONF" ${EXTRA_ARGS} --disablerepo="*" --enablerepo="$REPO_ID" | \
-              grep Repo-name | \
-              sed 's#^[^:]*: ##';
-          exit ${PIPESTATUS[0]}
-         )"
-    if [ $? != 0 ]; then
-        >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
-        return 1
-    fi
-
-    echo "$NAME"
-    return 0
-}
 
 archive_repo_id () {
     local REPO_ID="$1"
@@ -389,32 +331,22 @@ echo "REPO_ID=$REPO_ID"
                 ENABLED=$(ini_field "${REPO}" "${REPO_ID}" enabled)
 echo "ENABLED=$ENABLED"
 
-                # REPO_URL=$(cd $(dirname $YUM_CONF);
-                #            yum repoinfo --config="$(basename $YUM_CONF)" --disablerepo="*" --enablerepo="$REPO_ID" | \
-                #                grep Repo-baseurl | \
-                #                cut -d ' ' -f 3;
-                #            exit ${PIPESTATUS[0]})
-                # REPO_URL=$(get_repo_url "$YUM_CONF" "$REPO_ID" | sed 's#\([^/]\)/$#\1#')
                 REPO_URL=$(ini_field "$REPO" "$REPO_ID" baseurl)
                 if [ $? != 0 ]; then
-                #     >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
                     if [ $ENABLED -eq 1 ] && [ $UPSTREAM_ENABLED -eq 1 ]; then
                         return 1
                     fi
                 fi
 echo "REPO_URL=$REPO_URL"
 
-                # REPO_NAME="$(get_repo_name "$YUM_CONF" "$REPO_ID")"
                 REPO_NAME="$(ini_field "$REPO" "$REPO_ID" name)"
                 if [ $? != 0 ]; then
-                #     >&2 echo "ERROR: yum repoinfo --config='$YUM_CONF' --disablerepo='*' --enablerepo='$REPO_ID'"
                     if [ $ENABLED -eq 1 ] && [ $UPSTREAM_ENABLED -eq 1 ]; then
                         return 1
                     fi
                 fi
 echo "REPO_NAME=$REPO_NAME"
 
-                # REPO_URL=$(yum repoinfo --config="$YUM_CONF"  --disablerepo="*" --enablerepo="$REPO_ID" | grep Repo-baseurl | cut -d ' ' -f 3)
                 DOWNLOAD_PATH="$DOWNLOAD_PATH_ROOT/$(repo_url_to_sub_path "$REPO_URL")"
 echo "DOWNLOAD_PATH=$DOWNLOAD_PATH"
 

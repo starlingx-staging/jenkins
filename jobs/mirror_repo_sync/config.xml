@@ -101,7 +101,7 @@ fi
       <replyTo>$DEFAULT_REPLYTO</replyTo>
       <from></from>
       <saveOutput>false</saveOutput>
-      <disabled>false</disabled>
+      <disabled>true</disabled>
     </hudson.plugins.emailext.ExtendedEmailPublisher>
   </publishers>
   <buildWrappers>

@@ -12,7 +12,7 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.34">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -124,16 +124,17 @@ for LAYER in $(find $MY_WORKSPACE -maxdepth 2 -type d -name rpmbuild -exec dirna
 done
 
 </command>
+      <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.23">
+    <hudson.tasks.Mailer plugin="mailer@448.v5b_97805e3767">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.22"/>
   </buildWrappers>
 </project>

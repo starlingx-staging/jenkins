@@ -12,7 +12,7 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.34">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -88,6 +88,7 @@ RC=$(up)
 
 MUNGED_REGISTRY=$(echo ${REGISTRY} | tr &apos;.&apos; &apos;_&apos; )
 cat ~/${MUNGED_REGISTRY}_${REGISTRY_USERID}.cred | docker login --password-stdin --username=${REGISTRY_USERID}</command>
+      <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

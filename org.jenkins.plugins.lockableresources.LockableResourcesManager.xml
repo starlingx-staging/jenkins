@@ -1,10 +1,15 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<org.jenkins.plugins.lockableresources.LockableResourcesManager plugin="lockable-resources@2.5">
+<org.jenkins.plugins.lockableresources.LockableResourcesManager plugin="lockable-resources@1131.vb_7c3d377e723">
   <resources>
     <org.jenkins.plugins.lockableresources.LockableResource>
       <name>docker-image-lock</name>
       <description>docker image build/delete</description>
-      <labels>docker_image_lock</labels>
+      <labelsAsList>
+        <string>docker_image_lock</string>
+      </labelsAsList>
+      <note></note>
+      <stolen>false</stolen>
+      <ephemeral>false</ephemeral>
       <queueItemId>0</queueItemId>
       <queuingStarted>0</queuingStarted>
       <queuedContexts/>

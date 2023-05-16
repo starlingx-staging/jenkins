@@ -67,7 +67,7 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
-        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
         <string>mirror_download_sync</string>
         <string>mirror_download_sync_debian</string>
         <string>mirror_repo_sync</string>
@@ -92,7 +92,7 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
-        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
         <string>delete_old_loads_master_feature</string>
         <string>docker_prune</string>
         <string>resource_check</string>
@@ -117,7 +117,7 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
-        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
         <string>STX_4.0_build_layer_all</string>
         <string>STX_4.0_build_layer_compiler</string>
         <string>STX_4.0_build_layer_containers</string>
@@ -144,7 +144,7 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
-        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView[4]/jobNames/comparator"/>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
         <string>STX_BUILD_3.0</string>
       </jobNames>
       <jobFilters/>
@@ -166,7 +166,7 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
-        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView[4]/jobNames/comparator"/>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
         <string>STX_BUILD_2.0</string>
       </jobNames>
       <jobFilters/>
@@ -188,7 +188,7 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
-        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView[4]/jobNames/comparator"/>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
         <string>dpanech-stx-debian-master</string>
         <string>starlingx-jenkins-pipelines</string>
         <string>STX_build_dev_debian_master</string>
@@ -212,7 +212,7 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
-        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
         <string>STX_build_centos8_master</string>
         <string>STX_build_layer_all_centos8_master</string>
         <string>STX_build_layer_compiler_centos8_master</string>
@@ -239,7 +239,7 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
-        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
         <string>STX_5.0_build_layer_all</string>
         <string>STX_5.0_build_layer_compiler</string>
         <string>STX_5.0_build_layer_containers</string>
@@ -266,7 +266,7 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
-        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
         <string>starlingx-jenkins-pipelines</string>
         <string>STX_build_deb_build_containers</string>
         <string>STX_build_debian_build_containers_master</string>
@@ -294,7 +294,7 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
-        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
         <string>STX_6.0_build_layer_all</string>
         <string>STX_6.0_build_layer_compiler</string>
         <string>STX_6.0_build_layer_containers</string>
@@ -320,7 +320,7 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
-        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
         <string>STX_7.0_build_debian</string>
         <string>STX_7.0_build_debian_build_containers</string>
         <string>STX_7.0_build_layer_all</string>
@@ -348,7 +348,7 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
-        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
         <string>CVE_scan</string>
       </jobNames>
       <jobFilters/>
@@ -370,7 +370,7 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
-        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
         <string>STX_8.0_build_debian</string>
         <string>STX_8.0_build_debian_build_containers</string>
         <string>STX_8.0_build_pipelines</string>
@@ -384,6 +384,30 @@
         <hudson.views.LastFailureColumn/>
         <hudson.views.LastDurationColumn/>
         <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>Transition</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator"/>
+        <string>cengn_mirroe_2</string>
+        <string>cengn_mirror</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.4.1"/>
       </columns>
       <recurse>false</recurse>
     </listView>
@@ -401,7 +425,7 @@
         <unserializable-parents/>
         <tree-map>
           <default>
-            <comparator class="java.lang.String$CaseInsensitiveComparator"/>
+            <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../../../../views/listView[15]/jobNames/comparator"/>
           </default>
           <int>3</int>
           <string>EMAIL_LIST_GLOBAL</string>

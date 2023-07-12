@@ -18,7 +18,7 @@
         <hudson.model.BooleanParameterDefinition>
           <name>BUILD_CONTAINERS</name>
           <description>Build Containers in addition to iso.  Normally only build containers once per week</description>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>

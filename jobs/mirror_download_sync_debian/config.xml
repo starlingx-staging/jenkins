@@ -1,7 +1,6 @@
-<?xml version='1.1' encoding='UTF-8'?>
-<project>
+<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
   <actions/>
-  <description></description>
+  <description/>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -12,14 +11,15 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.34">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
+    
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>true</disabled>
+  <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
@@ -35,15 +35,32 @@ MY_REPO_DIR=/localdisk/designer/${USER}/${JOB_NAME}/v2/repoes
 MIRROR_DIR=/export/mirror/
 IMAGE_NAME=debian-downloads-downloader-v3-${USER}
 CONTAINER_NAME=debian-downloads-downloader-v3b-${USER}
+GIT_ROOT=$HOME/cengn-debian-dl/debian-cengn
+GIT_NAME=debian-dl
+GIT_URL=https://github.com/starlingx-staging/$GIT_NAME
 
 mkdir -p ${MY_REPO_DIR}
 
-cd $HOME/cengn-debian-dl/debian-cengn/cengn-dl/debian-cengn
+if [ ! -d $GIT_ROOT ]; then
+    mkdir -p $GIT_ROOT
+fi
+
+cd $GIT_ROOT
+
+if [ ! -d $GIT_ROOT/$GIT_NAME ]; then
+    git clone $GIT_URL
+fi
+
+cd $GIT_ROOT/$GIT_NAME
+
+git pull
+
+cd $GIT_ROOT/$GIT_NAME/debian-cengn
 
 if docker image ls | grep -q ${IMAGE_NAME}; then
-    echo &quot;found pre-existing docker image &apos;${IMAGE_NAME}&apos;&quot;
+    echo "found pre-existing docker image '${IMAGE_NAME}'"
 else
-    echo &quot;build docker image &apos;${IMAGE_NAME}&apos;&quot;
+    echo "build docker image '${IMAGE_NAME}'"
    pushd docker/
    docker build --build-arg MYUID=$(id -u) --build-arg MYUNAME=${USER} -t ${IMAGE_NAME} -f Dockerfile .
    popd
@@ -59,16 +76,17 @@ docker run -t --rm --name ${CONTAINER_NAME} \
 
 
 </command>
+      <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.23">
+    <hudson.tasks.Mailer plugin="mailer@448.v5b_97805e3767">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.22"/>
   </buildWrappers>
 </project>

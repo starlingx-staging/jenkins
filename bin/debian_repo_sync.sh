@@ -51,6 +51,22 @@ while true ; do
 done
 
 
+key_update () {
+    for i in {10..20}; do
+        echo "DL keys for Debian $i"
+        if wget https://ftp-master.debian.org/keys/archive-key-${i}.asc; then
+            gpg --no-default-keyring --keyring trustedkeys.gpg --import archive-key-${i}.asc
+        else
+           break
+        fi
+        if wget https://ftp-master.debian.org/keys/archive-key-${i}-security.asc; then
+            gpg --no-default-keyring --keyring trustedkeys.gpg --import archive-key-${i}-security.asc
+        fi
+    done
+}
+
+key_update
+
 for source_file in $SOURCE_LIST; do
     echo "Processing file: $source_file"
 

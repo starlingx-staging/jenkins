@@ -528,6 +528,11 @@ function workspace_cleanup_by_age {
               done
            fi
 
+           if [ -d $d/aptly ]; then
+              echo "deleting $d/aptly"
+              jenkins_rm root $d/aptly
+           fi
+
            if [ -d $d/docker ]; then
               echo "deleting $d/docker"
               jenkins_rm root $d/docker

@@ -101,7 +101,7 @@
         <hudson.model.BooleanParameterDefinition>
           <name>PKG_REUSE</name>
           <description>2022-11-01: this option does not work correctly (breaks docker image builds).</description>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>

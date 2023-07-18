@@ -1,10 +1,9 @@
-<?xml version='1.1' encoding='UTF-8'?>
-<project>
+<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
   <actions/>
-  <description>Build &apos;r/stx.7.0&apos; branch nightly</description>
+  <description>Build 'r/stx.7.0' branch nightly</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.34">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -22,21 +21,22 @@
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
+    
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>true</disabled>
+  <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers/>
   <concurrentBuild>false</concurrentBuild>
   <builders>
-    <EnvInjectBuilder plugin="envinject@2.1.6">
+    <EnvInjectBuilder plugin="envinject@2.901.v0038b_6471582">
       <info>
         <propertiesFilePath>env.properties</propertiesFilePath>
       </info>
     </EnvInjectBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs class="empty-list"/>
@@ -68,7 +68,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -108,7 +108,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -148,7 +148,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -188,7 +188,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -228,7 +228,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -268,7 +268,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -308,7 +308,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -328,7 +328,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -368,7 +368,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -408,7 +408,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -448,7 +448,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -490,12 +490,12 @@
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.23">
+    <hudson.tasks.Mailer plugin="mailer@448.v5b_97805e3767">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.66">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.95">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -505,7 +505,7 @@
             <recipientProviders>
               <hudson.plugins.emailext.plugins.recipients.ListRecipientProvider/>
             </recipientProviders>
-            <attachmentsPattern></attachmentsPattern>
+            <attachmentsPattern/>
             <attachBuildLog>false</attachBuildLog>
             <compressBuildLog>false</compressBuildLog>
             <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
@@ -516,17 +516,17 @@
       <contentType>default</contentType>
       <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
       <defaultContent>$DEFAULT_CONTENT</defaultContent>
-      <attachmentsPattern></attachmentsPattern>
+      <attachmentsPattern/>
       <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
       <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
       <attachBuildLog>false</attachBuildLog>
       <compressBuildLog>false</compressBuildLog>
       <replyTo>$DEFAULT_REPLYTO</replyTo>
-      <from></from>
+      <from/>
       <saveOutput>false</saveOutput>
       <disabled>false</disabled>
     </hudson.plugins.emailext.ExtendedEmailPublisher>
-    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.35.2">
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.45">
       <configs>
         <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
           <configs>
@@ -547,8 +547,8 @@
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.9"/>
-    <EnvInjectBuildWrapper plugin="envinject@2.1.6">
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.22"/>
+    <EnvInjectBuildWrapper plugin="envinject@2.901.v0038b_6471582">
       <info>
         <scriptContent>export BRANCH=r/stx.7.0
 export OPENSTACK_RELEASE=master
@@ -564,74 +564,76 @@ export MASTER_BUILD_NUMBER=$BUILD_NUMBER
 export MASTER_JOB_NAME=$JOB_NAME
 export DISTRO=$OS
 
-export PUBLISH_BRANCH=&quot;&quot;
-export PUBLISH_TIMESTAMP=&quot;&quot;
-export MUNGED_BRANCH=$(echo $BRANCH | tr &apos;/&apos; &apos;-&apos;)
-export REPO_FILE=&quot;&quot;
+export PUBLISH_BRANCH=""
+export PUBLISH_TIMESTAMP=""
+export MUNGED_BRANCH=$(echo $BRANCH | tr '/' '-')
+export REPO_FILE=""
 
-if [ &quot;$BRANCH&quot; == &quot;master&quot; ]; then
+if [ "$BRANCH" == "master" ]; then
     PUBLISH_BRANCH=$BRANCH
     PUBLISH_TIMESTAMP=$TIMESTAMP
 elif [[ $BRANCH == f/* ]]; then
     # feature branch
-    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^f/#feature/#&apos;)
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^f/#feature/#')
     PUBLISH_TIMESTAMP=$TIMESTAMP
 elif [[ $BRANCH == m/[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
     # milestone tag   m/2018.10.b3
-    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
-    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#')
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#')
 elif [[ $BRANCH == m[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
     # milestone tag m2018.10.b3
-    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
-    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
-    MUNGED_BRANCH=$(echo $BRANCH | sed &apos;s#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#m-\1\2#&apos;)
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#')
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#')
+    MUNGED_BRANCH=$(echo $BRANCH | sed 's#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#m-\1\2#')
 elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9][.][Bb][0-9]* ]]; then
     # milestone tag 2018.10.b3
-    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
-    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
-    MUNGED_BRANCH=&quot;m-$BRANCH&quot;
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#')
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#')
+    MUNGED_BRANCH="m-$BRANCH"
 elif [[ $BRANCH == r/stx[.]@([0-9])[.]@([0-9]) ]]; then
     # release candidate branch r/stx.2.0
-    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/stx[.]\([0-9]*[.][0-9]*\).*$#rc/\1#&apos;)
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^r/stx[.]\([0-9]*[.][0-9]*\).*$#rc/\1#')
     PUBLISH_TIMESTAMP=$TIMESTAMP
-    MUNGED_BRANCH=$(echo $BRANCH | sed &apos;s#^r/stx[.]#rc-#&apos;)
+    MUNGED_BRANCH=$(echo $BRANCH | sed 's#^r/stx[.]#rc-#')
 elif [[ $BRANCH == r/[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
     # release branch r/2018.10.5
-    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
-    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#&apos;)
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#')
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#')
 elif [[ $BRANCH == r[0-9][0-9][0-9][0-9][.]* ]]; then
     # release branch r2018.10.5
-    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
-    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#&apos;)
-    MUNGED_BRANCH=$(echo $BRANCH | sed &apos;s#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#r-\1\2#&apos;)
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#')
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#')
+    MUNGED_BRANCH=$(echo $BRANCH | sed 's#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#r-\1\2#')
 elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9] ]] || [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9].[0-9]* ]] ; then
     # Release branch 2018.10.1 
-    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#')
     PUBLISH_TIMESTAMP=$BRANCH
-    MUNGED_BRANCH=&quot;r-$BRANCH&quot;
+    MUNGED_BRANCH="r-$BRANCH"
 fi
 
-if [ &quot;$BRANCH&quot; == &quot;master&quot; ]; then
-    REPO_FILE=&quot;StarlingX_cengn_${LAYER}_layer.repo&quot;
+if [ "$BRANCH" == "master" ]; then
+    REPO_FILE="StarlingX_cengn_${LAYER}_layer.repo"
 else
-    REPO_FILE=&quot;StarlingX_cengn_${MUNGED_BRANCH}_${LAYER}_layer.repo&quot;
+    REPO_FILE="StarlingX_cengn_${MUNGED_BRANCH}_${LAYER}_layer.repo"
 fi
 
 # Assertions, did we get a BRANCH we understand how to parse
-[ -n &quot;$PUBLISH_BRANCH&quot; ]
-[ -n &quot;$PUBLISH_TIMESTAMP&quot; ]
+[ -n "$PUBLISH_BRANCH" ]
+[ -n "$PUBLISH_TIMESTAMP" ]
 
 export PROJECT=$MUNGED_BRANCH-$LAYER
 
-export MY_REPO_ROOT=/localdisk/designer/$USER/$PROJECT
+export MY_LOCAL_DISK=/localdisk/designer/$USER
+export MY_REPO_ROOT=$MY_LOCAL_DISK/$PROJECT
 export MY_REPO=$MY_REPO_ROOT/cgcs-root
-export MY_WORKSPACE=/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP
+export MY_WORKSPACE_ROOT=/localdisk/loadbuild/$USER/$PROJECT
+export MY_WORKSPACE=$MY_WORKSPACE_ROOT/$TIMESTAMP
 
-# if [ &quot;$OS&quot; == &quot;centos&quot; ] &amp;&amp; [ -f $MY_REPO_ROOT/stx-tools/centos-mirror-tools/yum.conf.sample ] ; then
+# if [ "$OS" == "centos" ] &amp;&amp; [ -f $MY_REPO_ROOT/stx-tools/centos-mirror-tools/yum.conf.sample ] ; then
 #    export OS_VERSION=$( cd $MY_REPO_ROOT/stx-tools/centos-mirror-tools/; 
 #                        yum --config=./yum.conf.sample --showduplicates list centos-release | \
-#                          grep &apos;^centos-release&apos; | awk &apos;{print $2}&apos; | sort --unique | \
-#                          tail -n 1 | tr &apos;-&apos; &apos;.&apos; | cut -d &apos;.&apos; -f -3 )
+#                          grep '^centos-release' | awk '{print $2}' | sort --unique | \
+#                          tail -n 1 | tr '-' '.' | cut -d '.' -f -3 )
 # fi
 
 export DOCKER_BUILD_ID=$USER-$PROJECT-$TIMESTAMP-builder
@@ -642,7 +644,7 @@ export PUBLISH_BUILD_BASE=$PUBLISH_DISTRO_BASE/$PUBLISH_TIMESTAMP
 export PUBLISH_INPUTS_BASE=$PUBLISH_BUILD_BASE/inputs
 export PUBLISH_OUTPUTS_BASE=$PUBLISH_BUILD_BASE/outputs
 export PUBLISH_LOGS_BASE=$PUBLISH_BUILD_BASE/logs
-export PUBLISH_LOGS_URL=$PUBLISH_URL/$(echo $PUBLISH_LOGS_BASE | sed &apos;s#^/export/##&apos;)
+export PUBLISH_LOGS_URL=$PUBLISH_URL/$(echo $PUBLISH_LOGS_BASE | sed 's#^/export/##')
 
 echo BUILD_CONTAINERS_DEV=$BUILD_CONTAINERS_DEV
 echo BUILD_CONTAINERS_STABLE=$BUILD_CONTAINERS_STABLE
@@ -663,8 +665,10 @@ echo OS_VERSION=$OS_VERSION &gt;&gt; env.properties
 echo BUILD_ISO=$BUILD_ISO &gt;&gt; env.properties
 echo MASTER_BUILD_NUMBER=$MASTER_BUILD_NUMBER &gt;&gt; env.properties
 echo MASTER_JOB_NAME=$MASTER_JOB_NAME &gt;&gt; env.properties
+echo MY_LOCAL_DISK=$MY_LOCAL_DISK &gt;&gt; env.properties
 echo MY_REPO_ROOT=$MY_REPO_ROOT &gt;&gt; env.properties
 echo MY_REPO=$MY_REPO &gt;&gt; env.properties
+echo MY_WORKSPACE_ROOT=$MY_WORKSPACE_ROOT &gt;&gt; env.properties
 echo MY_WORKSPACE=$MY_WORKSPACE &gt;&gt; env.properties
 echo DOCKER_BUILD_ID=$DOCKER_BUILD_ID &gt;&gt; env.properties
 echo DOCKER_BUILD_TAG=$DOCKER_BUILD_TAG &gt;&gt; env.properties
@@ -677,8 +681,8 @@ echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt;&gt; env.properties
 echo BUILD_NM=$JOB_NAME &gt;&gt; env.properties
 echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties
 echo REPO_FILE=$REPO_FILE &gt;&gt; env.properties</scriptContent>
-        <secureGroovyScript plugin="script-security@1.58">
-          <script></script>
+        <secureGroovyScript plugin="script-security@1229.v4880b_b_e905a_6">
+          <script/>
           <sandbox>false</sandbox>
         </secureGroovyScript>
         <loadFilesFromMaster>false</loadFilesFromMaster>

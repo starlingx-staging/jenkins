@@ -21,6 +21,12 @@ docker_count_thresholds['container']=10
 docker_count_thresholds['image']=100
 docker_count_thresholds['volume']=20
 
+# if K8s is running, add 31 for the current number of K8s containers
+if systemctl status kubelet; then
+	docker_count_thresholds['container']=$(( ${docker_count_thresholds['container']} + 31 ))
+fi
+echo "docker_count_thresholds['container']=${docker_count_thresholds['container']}"
+
 RC=0
 
 du_percent () {

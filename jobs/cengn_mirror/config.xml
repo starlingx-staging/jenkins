@@ -1,17 +1,17 @@
-<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
   <actions/>
-  <description/>
+  <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.34">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
-    
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>false</disabled>
+  <disabled>true</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
@@ -23,50 +23,50 @@
   <builders>
     <hudson.tasks.Shell>
       <command>CENGN=slittle@build.starlingx.cengn.ca
-RSYNC_SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i $HOME/.ssh/cengn"
-RSYNC_SUDO="--rsync-path=sudo /usr/bin/rsync"
+RSYNC_SSH=&quot;ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i $HOME/.ssh/cengn&quot;
+RSYNC_SUDO=&quot;--rsync-path=sudo /usr/bin/rsync&quot;
 
-rsync -avuzH -e "$RSYNC_SSH" --progress --exclude='*.new/' $CENGN:/export/mirror/lat-sdk /localdisk/backups/CENGN/export/mirror/
+rsync -avuzH -e &quot;$RSYNC_SSH&quot; --progress --exclude=&apos;*.new/&apos; $CENGN:/export/mirror/lat-sdk /localdisk/backups/CENGN/export/mirror/
 
-rsync -avuzH -e "$RSYNC_SSH" --progress --exclude='*.new/' $CENGN:/export/mirror/centos /localdisk/backups/CENGN/export/mirror/
+rsync -avuzH -e &quot;$RSYNC_SSH&quot; --progress --exclude=&apos;*.new/&apos; $CENGN:/export/mirror/centos /localdisk/backups/CENGN/export/mirror/
 
-rsync -avuzH -e "$RSYNC_SSH" --progress --exclude='*.new/' $CENGN:/export/mirror/debian /localdisk/backups/CENGN/export/mirror/
+rsync -avuzH -e &quot;$RSYNC_SSH&quot; --progress --exclude=&apos;*.new/&apos; $CENGN:/export/mirror/debian /localdisk/backups/CENGN/export/mirror/
 
-rsync -avuzH -e "$RSYNC_SSH" --progress $CENGN:/export/mirror/starlingx/rc /localdisk/backups/CENGN/export/mirror/starlingx/
+rsync -avuzH -e &quot;$RSYNC_SSH&quot; --progress $CENGN:/export/mirror/starlingx/rc /localdisk/backups/CENGN/export/mirror/starlingx/
 
-rsync -avuzH -e "$RSYNC_SSH" --progress $CENGN:/export/mirror/starlingx/release /localdisk/backups/CENGN/export/mirror/starlingx/
+rsync -avuzH -e &quot;$RSYNC_SSH&quot; --progress $CENGN:/export/mirror/starlingx/release /localdisk/backups/CENGN/export/mirror/starlingx/
 
-rsync -avuzH -e "$RSYNC_SSH" "$CENGN:/var/lib/jenkins/*.xml" "/localdisk/backups/CENGN/var/lib/jenkins/"
+rsync -avuzH -e &quot;$RSYNC_SSH&quot; &quot;$CENGN:/var/lib/jenkins/*.xml&quot; &quot;/localdisk/backups/CENGN/var/lib/jenkins/&quot;
 
-rsync -avuzH -e "$RSYNC_SSH" "$CENGN:/var/lib/jenkins/bin" "/localdisk/backups/CENGN/var/lib/jenkins/"
+rsync -avuzH -e &quot;$RSYNC_SSH&quot; &quot;$CENGN:/var/lib/jenkins/bin&quot; &quot;/localdisk/backups/CENGN/var/lib/jenkins/&quot;
 
-sudo /usr/bin/rsync -avuzH -e "$RSYNC_SSH" "$RSYNC_SUDO" "$CENGN:/localdisk/designer/jenkins/*rc-*" "/localdisk/backups/CENGN/localdisk/designer/jenkins/" || $(case "$?" in 0|23) exit 0 ;; *) exit $?; esac)
+sudo /usr/bin/rsync -avuzH -e &quot;$RSYNC_SSH&quot; &quot;$RSYNC_SUDO&quot; &quot;$CENGN:/localdisk/designer/jenkins/*rc-*&quot; &quot;/localdisk/backups/CENGN/localdisk/designer/jenkins/&quot; || $(case &quot;$?&quot; in 0|23) exit 0 ;; *) exit $?; esac)
 
-sudo /usr/bin/rsync -avuzH -e "$RSYNC_SSH" "$RSYNC_SUDO" "$CENGN:/localdisk/loadbuild/jenkins/*rc-*" "/localdisk/backups/CENGN/localdisk/loadbuild/jenkins/"
+sudo /usr/bin/rsync -avuzH -e &quot;$RSYNC_SSH&quot; &quot;$RSYNC_SUDO&quot; &quot;$CENGN:/localdisk/loadbuild/jenkins/*rc-*&quot; &quot;/localdisk/backups/CENGN/localdisk/loadbuild/jenkins/&quot;
 
-sudo /usr/bin/rsync -avuzH -e "$RSYNC_SSH" "$RSYNC_SUDO" "$CENGN:/localdisk/designer/jenkins/debian-master*" "/localdisk/backups/CENGN/localdisk/designer/jenkins/" || $(case "$?" in 0|23) exit 0 ;; *) exit $?; esac)
+sudo /usr/bin/rsync -avuzH -e &quot;$RSYNC_SSH&quot; &quot;$RSYNC_SUDO&quot; &quot;$CENGN:/localdisk/designer/jenkins/debian-master*&quot; &quot;/localdisk/backups/CENGN/localdisk/designer/jenkins/&quot; || $(case &quot;$?&quot; in 0|23) exit 0 ;; *) exit $?; esac)
 
-sudo /usr/bin/rsync -avuzH -e "$RSYNC_SSH" "$RSYNC_SUDO" "$CENGN:/localdisk/loadbuild/jenkins/debian-master*" "/localdisk/backups/CENGN/localdisk/loadbuild/jenkins/"
+sudo /usr/bin/rsync -avuzH -e &quot;$RSYNC_SSH&quot; &quot;$RSYNC_SUDO&quot; &quot;$CENGN:/localdisk/loadbuild/jenkins/debian-master*&quot; &quot;/localdisk/backups/CENGN/localdisk/loadbuild/jenkins/&quot;
 
-sudo /usr/bin/rsync -avuzH -e "$RSYNC_SSH" "$RSYNC_SUDO" "$CENGN:/localdisk/designer/jenkins/master*" "/localdisk/backups/CENGN/localdisk/designer/jenkins/" || $(case "$?" in 0|23) exit 0 ;; *) exit $?; esac)
+sudo /usr/bin/rsync -avuzH -e &quot;$RSYNC_SSH&quot; &quot;$RSYNC_SUDO&quot; &quot;$CENGN:/localdisk/designer/jenkins/master*&quot; &quot;/localdisk/backups/CENGN/localdisk/designer/jenkins/&quot; || $(case &quot;$?&quot; in 0|23) exit 0 ;; *) exit $?; esac)
 
-sudo /usr/bin/rsync -avuzH -e "$RSYNC_SSH" "$RSYNC_SUDO" "$CENGN:/localdisk/loadbuild/jenkins/master*" "/localdisk/backups/CENGN/localdisk/loadbuild/jenkins/"
+sudo /usr/bin/rsync -avuzH -e &quot;$RSYNC_SSH&quot; &quot;$RSYNC_SUDO&quot; &quot;$CENGN:/localdisk/loadbuild/jenkins/master*&quot; &quot;/localdisk/backups/CENGN/localdisk/loadbuild/jenkins/&quot;
 
-sudo /usr/bin/rsync -avuzH -e "$RSYNC_SSH" "$RSYNC_SUDO" "$CENGN:/localdisk/designer/jenkins/f-centos8*" "/localdisk/backups/CENGN/localdisk/designer/jenkins/" || $(case "$?" in 0|23) exit 0 ;; *) exit $?; esac)
+sudo /usr/bin/rsync -avuzH -e &quot;$RSYNC_SSH&quot; &quot;$RSYNC_SUDO&quot; &quot;$CENGN:/localdisk/designer/jenkins/f-centos8*&quot; &quot;/localdisk/backups/CENGN/localdisk/designer/jenkins/&quot; || $(case &quot;$?&quot; in 0|23) exit 0 ;; *) exit $?; esac)
 
-# sudo /usr/bin/rsync -avuzH -e "$RSYNC_SSH" "$RSYNC_SUDO" "$CENGN:/localdisk/loadbuild/jenkins/f-centos8*" "/localdisk/backups/CENGN/localdisk/loadbuild/jenkins/"
+# sudo /usr/bin/rsync -avuzH -e &quot;$RSYNC_SSH&quot; &quot;$RSYNC_SUDO&quot; &quot;$CENGN:/localdisk/loadbuild/jenkins/f-centos8*&quot; &quot;/localdisk/backups/CENGN/localdisk/loadbuild/jenkins/&quot;
 
-sudo /usr/bin/rsync -avuzH -e "$RSYNC_SSH" "$RSYNC_SUDO" "$CENGN:/localdisk/designer/jenkins/docker*" "/localdisk/backups/CENGN/localdisk/designer/jenkins/" || $(case "$?" in 0|23) exit 0 ;; *) exit $?; esac)
-sudo /usr/bin/rsync -avuzH -e "$RSYNC_SSH" "$RSYNC_SUDO" "$CENGN:/localdisk/designer/jenkins/piped*" "/localdisk/backups/CENGN/localdisk/designer/jenkins/" || $(case "$?" in 0|23) exit 0 ;; *) exit $?; esac)
-sudo /usr/bin/rsync -avuzH -e "$RSYNC_SSH" "$RSYNC_SUDO" "$CENGN:/localdisk/designer/jenkins/cgcs_file_utils" "/localdisk/backups/CENGN/localdisk/designer/jenkins/" || $(case "$?" in 0|23) exit 0 ;; *) exit $?; esac)
+sudo /usr/bin/rsync -avuzH -e &quot;$RSYNC_SSH&quot; &quot;$RSYNC_SUDO&quot; &quot;$CENGN:/localdisk/designer/jenkins/docker*&quot; &quot;/localdisk/backups/CENGN/localdisk/designer/jenkins/&quot; || $(case &quot;$?&quot; in 0|23) exit 0 ;; *) exit $?; esac)
+sudo /usr/bin/rsync -avuzH -e &quot;$RSYNC_SSH&quot; &quot;$RSYNC_SUDO&quot; &quot;$CENGN:/localdisk/designer/jenkins/piped*&quot; &quot;/localdisk/backups/CENGN/localdisk/designer/jenkins/&quot; || $(case &quot;$?&quot; in 0|23) exit 0 ;; *) exit $?; esac)
+sudo /usr/bin/rsync -avuzH -e &quot;$RSYNC_SSH&quot; &quot;$RSYNC_SUDO&quot; &quot;$CENGN:/localdisk/designer/jenkins/cgcs_file_utils&quot; &quot;/localdisk/backups/CENGN/localdisk/designer/jenkins/&quot; || $(case &quot;$?&quot; in 0|23) exit 0 ;; *) exit $?; esac)
 
-sudo /usr/bin/rsync -avuzH -e "$RSYNC_SSH" "$RSYNC_SUDO" "$CENGN:/etc" "/localdisk/backups/CENGN/"
+sudo /usr/bin/rsync -avuzH -e &quot;$RSYNC_SSH&quot; &quot;$RSYNC_SUDO&quot; &quot;$CENGN:/etc&quot; &quot;/localdisk/backups/CENGN/&quot;
 
 
 
-rsync -avuzH -e "$RSYNC_SSH" --exclude '/*/*/*/*/*/*/*/' -f"+ */" -f"+ config.xml" -f"- *" "$CENGN:/var/lib/jenkins/jobs" "/localdisk/backups/CENGN/var/lib/jenkins/"
+rsync -avuzH -e &quot;$RSYNC_SSH&quot; --exclude &apos;/*/*/*/*/*/*/*/&apos; -f&quot;+ */&quot; -f&quot;+ config.xml&quot; -f&quot;- *&quot; &quot;$CENGN:/var/lib/jenkins/jobs&quot; &quot;/localdisk/backups/CENGN/var/lib/jenkins/&quot;
 
-rsync -avuzH -e "$RSYNC_SSH" "$CENGN:/var/lib/jenkins" "/localdisk/backups/CENGN/var/lib/jenkins-all/"</command>
+# rsync -avuzH -e &quot;$RSYNC_SSH&quot; --exclude /secrets/ &quot;$CENGN:/var/lib/jenkins&quot; &quot;/localdisk/backups/CENGN/var/lib/jenkins-all/&quot;</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>

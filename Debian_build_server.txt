@@ -1,0 +1,561 @@
+# The following instructions assume you have a minimal Debian 11 server 
+# installed and you want to transform it into a StarlingX build machine.
+# The kubernetes setup likely still contains a few errors.
+#
+# Our server specs
+# 72 Cores
+# 128 Gb Ram
+# Disk space
+#    / 1 TB 
+#    /localdisk 40 TB    (Build space.  Assumes retention of last two weeks of builds on multiple development, feature, release builds)
+#    /starlingx 8 TB     (Storage of debian mirrors, as well as published StarlingX builds
+ 
+
+
+
+#Fix cut-n-paste
+sudo bash -c "echo '#Fix cut-n-paste missing final CR' >> /etc/inputrc"
+sudo bash -c "echo 'set enable-bracketed-paste off' >> /etc/inputrc"
+
+-----------------------------
+# tools
+
+apt-get install -y vim vim-gtk
+apt-get install -y dpkg-dev
+apt-get install -y bc
+apt-get install -y rsync
+apt-get install -y curl
+apt-get install -y git 
+apt-get install -y git-review 
+apt-get install -y parallel
+apt-get install -y gnupg gnupg2 ca-certificates software-properties-common lsb-release
+apt-get install -y apt-file
+apt-get install -y createrepo-c
+apt-get install -y python3-libxml2 python3-rpm 
+
+sudo dpkg-reconfigure locales
+
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/libx/libxml2/python3-libxml2_2.9.10+dfsg-6.7+deb11u3_amd64.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/libx/libxml2/python-libxml2_2.9.4+dfsg1-7+deb10u4_amd64.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/p/python-lzma/python-lzma_0.5.3-4_amd64.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/s/sqlite/libsqlite0_2.8.17-15_amd64.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/p/python-sqlite/python-sqlite_1.0.1-12_amd64.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/y/yum-metadata-parser/python-sqlitecachec_1.1.4-1_amd64.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/p/pycurl/python3-pycurl_7.43.0.6-5_amd64.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/p/pycurl/python-pycurl_7.43.0.2-0.1_amd64.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/u/urlgrabber/python-urlgrabber_3.10.2-1_all.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/p/python-iniparse/python3-iniparse_0.4-3_all.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/p/python-iniparse/python-iniparse_0.4-2.2_all.deb
+
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/r/rpm/librpmio8_4.14.2.1+dfsg1-1_amd64.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/r/rpm/librpm8_4.14.2.1+dfsg1-1_amd64.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/r/rpm/librpmbuild8_4.14.2.1+dfsg1-1_amd64.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/r/rpm/librpmsign8_4.14.2.1+dfsg1-1_amd64.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/r/rpm/rpm-common_4.14.2.1+dfsg1-1_amd64.deb
+# sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/r/rpm/rpm-common_4.16.1.2+dfsg1-3_amd64.deb
+
+
+
+
+# sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/r/rpm/python3-rpm_4.16.1.2+dfsg1-3_amd64.deb
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/r/rpm/python-rpm_4.14.2.1+dfsg1-1_amd64.deb
+
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/r/rpm/rpm2cpio_4.14.2.1+dfsg1-1_amd64.deb
+
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/r/rpm/debugedit_4.14.2.1+dfsg1-1_amd64.deb
+
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/r/rpm/rpm_4.14.2.1+dfsg1-1_amd64.deb
+
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/y/yum/yum_3.4.3-3_all.deb
+
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/y/yum-utils/yum-utils_1.1.31-4_all.deb
+
+mkdir /tmp/verifytree
+cd /tmp/verifytree
+wget http://mirror.starlingx.cengn.ca//mirror/centos/centos/mirror.centos.org/7.9.2009/os/x86_64/Packages/yum-utils-1.1.31-54.el7_8.noarch.rpm
+rpm2cpio yum-utils-1.1.31-54.el7_8.noarch.rpm | cpio -idmv
+cp usr/bin/verifytree /usr/bin/verifytree
+
+apt-get install -y libhtml-fromtext-perl
+apt-get install -y cpanminus
+sudo perl -MCPAN -e shell
+   install HTML::FromText
+sudo cpanm HTML::FromText
+
+apt-get install -y procmail
+sudo apt-file update
+
+-----------------------------
+# web server
+apt-get install -y nginx
+systemctl stop nginx
+
+# set port to 8088 and directory listings
+vi /etc/nginx/sites-available/default
+...
+server {
+        listen 8088 default_server;
+        listen [::]:8088 default_server;
+...
+        location /localdisk/ {
+            autoindex on;
+            autoindex_exact_size off;
+            autoindex_format html;
+            autoindex_localtime on;
+        }
+}
+
+ln -s /localdisk /var/www/html/localdisk
+
+systemctl start nginx
+systemctl enable nginx
+
+-----------------
+groupadd --gid=751 --non-unique mock
+groupadd --gid=751 --non-unique docker
+groupadd --gid=1001 mockbuild
+-----------------
+# docker
+mkdir /localdisk/var_lib_docker
+chmod 711 /localdisk/var_lib_docker
+chown root:docker /localdisk/var_lib_docker
+ln -s /localdisk/var_lib_docker /var/lib/docker
+
+apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
+
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+sudo apt update
+apt-cache policy docker-ce
+
+apt-get install -y docker-ce
+
+sudo systemctl status docker
+docker run hello-world
+sudo systemctl enable docker
+-----------------
+
+# jenkins
+
+# useradd --uid=18876 --gid=751 --home-dir=/var/lib/jenkins --shell=/bin/bash  --no-create-home --non-unique jenkins2
+vipw
+jenkins:x:18876:751::/var/lib/jenkins:/bin/bash
+
+mkdir -p /var/lib/jenkins
+chmod 755 /var/lib/jenkins
+chown jenkins:cgts /var/lib/jenkins
+usermod -a -G  cgts jenkins
+usermod -a -G  nogroup jenkins
+usermod -a -G  root jenkins
+
+# chmod g+r /etc/shadow
+
+su jenkins
+  mkdir ~/.ssh
+  chmod 700 ~/.ssh
+  cd ~/.ssh
+  ssh-keygen -t rsa
+  cat id_rsa.pub >> authorized_keys
+
+sudo passwd jenkins
+
+# Check ssh jenkins@127.0.0.1 
+
+sudo apt install openjdk-11-jdk default-jre gnupg2 apt-transport-https wget -y
+
+curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo tee \
+  /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt-get update
+sudo apt-get install -y jenkins
+
+sudo systemctl start jenkins
+sudo systemctl status jenkins
+sudo systemctl enable jenkins
+
+vi /etc/sysconfig/jenkins
+   ...
+   JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true -Dorg.apache.commons.jelly.tags.fmt.timeZone=America/Toronto -Duser.timezone=America/Toronto"
+   ...
+
+------
+sudo apt-get install -y meld gitk repo
+
+-------
+sudo mkdir -p /localdisk/designer
+sudo mkdir -p /localdisk/loadbuild
+sudo chmod 3770 /localdisk/designer /localdisk/loadbuild
+sudo chown root:cgts /localdisk/designer /localdisk/loadbuild
+-------
+
+# KVM  (required by Minikube)
+# https://wiki.debian.org/KVM
+sudo apt -y install qemu-system qemu-kvm libvirt-daemon  bridge-utils virtinst libvirt-daemon-system virt-viewer
+sudo apt -y install dnsmasq-base bridge-utils firewalld
+adduser jenkins libvirt
+adduser jenkins libvirt-qemu
+
+virsh --connect=qemu:///system net-start default
+virsh --connect=qemu:///system net-autostart default
+
+virsh --connect=qemu:///system net-edit default 
+...
+  <mac address='52:54:00:37:a1:51'/>
++ <domain name='libvirt' localOnly='yes'/>
+  <ip address='192.168.122.1' netmask='255.255.255.0'>
+...
+
+sudo modprobe vhost_net 
+echo vhost_net | sudo tee -a /etc/modules 
+sudo apt -y install libguestfs-tools libosinfo-bin  qemu-system virt-manager
+sudo apt-get install -f /export/cengn-mirror/debian/debian/ftp.ca.debian.org/debian/pool/main/v/virt-top/virt-top_1.0.8-2_amd64.deb
+
+# add bridge network
+sudo vi /etc/network/interfaces
+   # Primary network interface
+   auto eno1
+   iface eno1 inet manual
+
+   # Bridge definitions
+   auto br1
+   iface br1 inet static
+   bridge_ports eno1
+   bridge_stp off
+   address 172.16.54.149
+   network 172.16.54.0
+   netmask 255.255.255.0
+   broadcast 172.16.54.255
+   gateway 172.16.54.2
+   dns-nameservers 172.16.54.2
+
+-----------------
+# Disable Swap
+sudo swapoff -a
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+-----------------
+# Configure Firewall Rules for Kubernetes Cluster
+sudo apt install -y ufw
+sudo ufw allow 6443/tcp
+sudo ufw allow 2379/tcp
+sudo ufw allow 2380/tcp
+sudo ufw allow 10250/tcp
+sudo ufw allow 10251/tcp
+sudo ufw allow 10252/tcp
+sudo ufw allow 10255/tcp
+sudo ufw reload
+
+-----------------
+# Install Containerd
+
+cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
+overlay
+br_netfilter
+EOF
+
+sudo modprobe overlay
+sudo modprobe br_netfilter
+
+cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-k8s.conf
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+EOF
+
+sudo sysctl --system
+
+sudo apt  update
+# sudo apt -y install containerd
+sudo apt -y install containerd.io
+
+containerd config default | sudo tee /etc/containerd/config.toml >/dev/null 2>&1
+$ sudo vi /etc/containerd/config.toml
+...
+        [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+...
+            SystemdCgroup = true    <-------------- Add/Change this line
+
+# Restart and enable containerd service on all the nodes
+sudo systemctl restart containerd
+sudo systemctl enable containerd
+
+-----------------
+# Kubernetes
+
+# Kubernetes Apt Repository
+sudo apt install gnupg gnupg2 curl software-properties-common -y
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/cgoogle.gpg
+sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+
+sudo apt update
+sudo apt install kubelet kubeadm kubectl -y
+sudo apt-mark hold kubelet kubeadm kubectl
+
+# Create Kubernetes Cluster with Kubeadm
+# Now, we are all set to create Kubernetes cluster, run following command only from master node
+# sudo kubeadm reset
+sudo kubeadm init --control-plane-endpoint=$(hostname) --pod-network-cidr=172.16.0.0/16
+
+mkdir -p /localdisk/designer/$USER/.kube
+ln -s /localdisk/designer/$USER/.kube  $HOME/.kube
+
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+# kubectl taint nodes --all node-role.kubernetes.io/master-node/$(hostname) untainted
+
+kubectl get nodes -o wide
+  NAME            STATUS     ROLES           AGE     VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE                         KERNEL-VERSION    CONTAINER-RUNTIME
+  %hostname%      NotReady   control-plane   5m41s   v1.27.1   128.224.48.4   <none>        Debian GNU/Linux 11 (bullseye)   5.10.0-21-amd64   containerd://1.6.20
+
+
+kubectl cluster-info
+  Kubernetes control plane is running at https://%hostname%:6443
+  CoreDNS is running at https://%hostname%:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+kubectl cluster-info dump | grep -m 1 cluster-cidr
+
+
+-----------------
+# Helm
+cd /tmp/
+wget https://get.helm.sh/helm-v3.11.3-linux-amd64.tar.gz
+tar -zxvf helm-*gz
+sudo install linux-amd64/helm /usr/local/bin/helm
+
+-----------------
+# Calico , aka CNI Setup
+# https://docs.tigera.io/calico/latest/getting-started/kubernetes/self-managed-onprem/onpremises
+$ cd /tmp/luis
+
+# Install the Tigera Calico operator and custom resource definitions
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/tigera-operator.yaml
+curl https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/custom-resources.yaml -O
+# update cidr block to match ours
+sed -i "s/192.168.0.0/172.16.0.0/g" custom-resources.yaml
+# apply the configuration
+kubectl create -f custom-resources.yaml
+
+-----------------
+# Remove master node taint so we can schedule pods
+kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule-
+
+
+-----------------
+# Docker CRI - required if we want to deploy local images
+# https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
+
+# Cgroup driver must match (docker and kubelet)
+# https://kubernetes.io/docs/setup/production-environment/container-runtimes/#cgroup-drivers
+# docker:
+docker info | grep  'Cgroup Driver:'
+   Cgroup Driver: systemd
+
+# kubelet:
+sudo grep cgroup /var/lib/kubelet/config.yaml
+  cgroupDriver: systemd
+
+# Install docker-cri
+# CRI Install steps:
+
+mkdir -p /tmp/cri
+cd /tmp/cri
+
+wget https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.1/cri-dockerd-0.3.1.amd64.tgz
+tar xvf cri-dockerd-0.3.1.amd64.tgz
+cd cri-dockerd
+sudo mv ./cri-dockerd /usr/local/bin/
+
+cri-dockerd --help
+
+# Install the linux service
+wget https://raw.githubusercontent.com/Mirantis/cri-dockerd/master/packaging/systemd/cri-docker.service
+wget https://raw.githubusercontent.com/Mirantis/cri-dockerd/master/packaging/systemd/cri-docker.socket
+sudo mv cri-docker.socket cri-docker.service /etc/systemd/system/
+sudo sed -i -e 's,/usr/bin/cri-dockerd,/usr/local/bin/cri-dockerd,' /etc/systemd/system/cri-docker.service
+
+# Reload the deamon
+sudo systemctl daemon-reload
+sudo systemctl enable cri-docker.service
+sudo systemctl enable --now cri-docker.socket
+
+# check status
+sudo systemctl status cri-docker.socket
+
+  ● cri-docker.socket - CRI Docker Socket for the API
+       Loaded: loaded (/etc/systemd/system/cri-docker.socket; enabled; vendor preset: enabled)
+       Active: active (listening) since Tue 2023-05-02 17:54:36 EDT; 5s ago
+     Triggers: ● cri-docker.service
+       Listen: /run/cri-dockerd.sock (Stream)
+        Tasks: 0 (limit: 154529)
+       Memory: 0B
+          CPU: 1ms
+       CGroup: /system.slice/cri-docker.socket
+
+      May 02 17:54:36 %hostname% systemd[1]: Starting CRI Docker Socket for the API.
+      May 02 17:54:36 %hostname% systemd[1]: Listening on CRI Docker Socket for the API.
+
+
+# Configure nodes to use cri-dockerd
+sudo sed -i 's,containerd/containerd.sock,cri-dockerd.sock,' /var/lib/kubelet/kubeadm-flags.env
+
+sudo cat /var/lib/kubelet/kubeadm-flags.env
+KUBELET_KUBEADM_ARGS="--container-runtime-endpoint=unix:///var/run/cri-dockerd.sock --pod-infra-container-image=registry.k8s.io/pause:3.9"
+
+# update the Node object in the control plane
+kubectl edit node $(hostname)
+
+  Within the file, modify:
+  kubeadm.alpha.kubernetes.io/cri-socket:
+  from:
+    unix:///var/run/containerd/containerd.sock
+  to
+    unix:///var/run/cri-dockerd.sock
+
+# restart
+systemctl restart kubelet
+
+# verify
+kubectl get nodes -o wide
+  NAME            STATUS   ROLES           AGE    VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE                         KERNEL-VERSION    CONTAINER-RUNTIME
+  %hostname%      Ready    control-plane   4h3m   v1.27.1   128.224.48.4   <none>        Debian GNU/Linux 11 (bullseye)   5.10.0-21-amd64   docker://23.0.5
+
+-----------------
+# Test container:
+kubectl create ns webserver
+   namespace/webserver created
+
+kubectl apply -f sample-pod.yaml -n webserver
+  pod/webserver created
+
+kubectl get pods -n webserver
+  NAME        READY   STATUS              RESTARTS   AGE
+  webserver   0/1     ContainerCreating   0          2s
+
+kubectl get pods -n webserver
+  NAME        READY   STATUS    RESTARTS   AGE
+  webserver   1/1     Running   0          7s
+
+# Get pod IP
+kubectl get pod webserver -n webserver --template '{{.status.podIP}}'
+   172.16.61.14
+
+curl -v http://172.16.61.14
+  *   Trying 172.16.61.14:80...
+  * Connected to 172.16.61.14 (172.16.61.14) port 80 (#0)
+  > GET / HTTP/1.1
+  > Host: 172.16.61.14
+  > User-Agent: curl/7.74.0
+  > Accept: */*
+  >
+  * Mark bundle as not supporting multiuse
+  < HTTP/1.1 200 OK
+  < Server: nginx/1.23.4
+
+# check docker
+docker ps | grep nginx
+  9f4c68fc29d6   nginx                             "/docker-entrypoint.…"   7 minutes ago   Up 7 minutes             k8s_webserver_webserver_webserver_f74176f5-500e-40bb-a58e-5f287fa1c628_0
+
+------------
+# Jenkins credentials
+
+# create an ssh key pair for jenkins
+sudu su jenkins
+  ssh-keygen -t ed25519 
+
+# Optionaly create a new jenkins user account for api calls
+'Dashboard' -> 'Manage Jenkins' -> 'Manage Users'
+click '+ Create User' at upper right corner
+   Username: JenkinsApiUser
+   Password: <up-to-you>
+   Confirm Password: <up-to-you>
+   Full Name: Jenkins Api User
+   e-mail address: <up-to-you>
+   'Create User'
+
+
+
+# In Jenkins Navigate to ...
+'Dashboard' -> 'Manage Jenkins' -> 'Manage Credentials'
+   'Stores scoped to Jenkins' -> 'System'
+
+# Create the 'Local_Domain' domain
+click '+ Add Domain' at upper right corner
+   Domain Name: Local_Domain
+   Create
+
+# Navigate to ...
+'Dashboard' -> 'Manage Jenkins' -> 'Manage Credentials'
+   'Stores scoped to Jenkins' -> 'Local_Domain'
+
+# Create credentail
+click '+ Add Credentail' at upper right corner
+   Kind: Username with password
+   Scope: Global
+   Username: <jenkins_username>
+   Password: <jenkins_password> 
+   ID: jenkins-api
+   Create
+
+# Create credentail
+click '+ Add Credentail' at upper right corner
+   Kind: SSH username with private key
+   Scope: Global
+   ID: jenkins-api
+   Username: jenkins
+   Private Key: Enter Directly
+     Key: <cut-n-paste private key>
+   Passphrase: <NONE>
+   Create
+
+-----------------
+# jenkins build project setup
+# e.g.
+
+
+PROJECT_ID=debian-master
+
+kubectl create namespace jenkins-${PROJECT_ID}
+
+
+
+-----------------
+# deb mirror tool.
+
+apt-get install -y debmirror
+
+# As jenkins ...
+# Obtain and install debian keyrring.
+DEB_ROOT=/export/mirror/debian
+SOURCES_LIST_DIR=/export/config/debian/
+KEYRING_DIR=${SOURCES_LIST_DIR}/mirrorkeyring
+
+mkdir -p ${KEYRING_DIR}/mirrorkeyring/
+mkdir /tmp/deb_keys
+cd /tmp/deb_keys
+
+# wget http://ftp.ca.debian.org/debian/pool/main/d/debian-archive-keyring/debian-archive-keyring_2021.1.1_all.deb
+wget http://ftp.ca.debian.org/debian/pool/main/d/debian-archive-keyring/debian-archive-keyring_2021.1.1+deb11u1_all.deb
+wget http://ftp.ca.debian.org/debian/pool/main/d/debian-archive-keyring/debian-archive-keyring_2023.3_all.deb
+
+for f in $(ls debian-archive-keyring_*.deb); do
+   ar xv $f
+   tar xvf data.tar.xz
+   gpg --no-default-keyring --keyring ${KEYRING_DIR}/trustedkeys.gpg --import /tmp/deb_keys/usr/share/keyrings/debian-archive-keyring.gpg
+done
+
+
+
+curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor > /tmp/nginx-archive-keyring.gpg
+gpg --no-default-keyring --keyring ${KEYRING_DIR}/nginx-archive-keyring.gpg --import /tmp/nginx-archive-keyring.gpg
+
+chmod -R 571 ${DEB_ROOT}/mirrorkeyring
+chmod  700 ${DEB_ROOT}/mirrorkeyring
+
+# Still as jenkins ...
+git config --global user.name "Name LastName"
+git config --global user.email "Email Address"
+

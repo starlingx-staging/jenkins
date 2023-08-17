@@ -75,7 +75,11 @@ swap_percent () {
         esac
     done < /proc/meminfo
 
-    percent=$(( 100 * swapTarget / swapTotal ))
+    if [ $swapTotal == 0 ]; then
+        percent=100
+    else
+        percent=$(( 100 * swapTarget / swapTotal ))
+    fi
     # echo "SwapTotal: $swapTotal"
     # echo "$field: $swapTarget $percent"
     echo $percent

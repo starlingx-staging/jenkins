@@ -22,11 +22,11 @@ SOURCE_LIST=$(find $SOURCES_LIST_DIR -name "$SOURCES_LIST_TEMPLATE")
 
 usage () {
     echo "debian_repo_sync.sh [ --source-file=<path> ] [ --release-filter=<filter> ] [ --section-filter=<filter>]"
-    echo "                    [ --retry=N ] [ --dry-run ]"
+    echo "                    [ --arch-filter=<filter> ] [ --retry=N ] [ --dry-run ]"
     exit 0
 }
 
-TEMP=$(getopt -o h --long help,source-file:,release-filter:,section-filter:,retry:,dry-run -n "$(basename "$0")" -- "$@")
+TEMP=$(getopt -o h --long help,source-file:,release-filter:,section-filter:,arch-filter:,retry:,dry-run -n "$(basename "$0")" -- "$@")
 if [ $? -ne 0 ]; then
     echo "getopt error"
     usage
@@ -36,12 +36,14 @@ eval set -- "$TEMP"
 
 RELEASE_FILTER=""
 SECTION_FILTER=""
+ARCH_FILTER=""
 
 while true ; do
     case "$1" in
         --source-file)    SOURCE_LIST="$2" ; shift 2 ;;
         --release-filter) RELEASE_FILTER="$2" ; shift 2 ;;
         --section-filter) SECTION_FILTER="$2" ; shift 2 ;;
+        --arch-filter)    ARCH_FILTER="$2" ; shift 2 ;;
         --dry-run)        DRY_RUN_ARG="--dry-run" ; shift ;;
         --retry)          RETRY_COUNT="$2" ; shift 2 ;;
         -h|--help)        echo "help"; usage; exit 0 ;;
@@ -80,6 +82,23 @@ for source_file in $SOURCE_LIST; do
         arch=${arr[$ARCH]}
         release=${arr[$RELEASE]}
         section=${arr[$SECTION]}
+
+        if [ "$ARCH_FILTER" != "" ]; then
+            arch_list=()
+            arch_filter_expr="$(echo "$ARCH_FILTER" | sed 's#[*]#.*#g')"
+            for arch_word in ${arch/,/ } ; do
+                if [[ "$arch_word" =~ ^${arch_filter_expr} ]] ; then
+                    arch_list+=("$arch_word")
+                    break
+                fi
+            done
+            if [[ ${#arch_list[*]} -gt 0 ]] ; then
+                echo "arch '$arch' matches filter"
+                arch=$(IFS=, ; echo "${arch_list[@]}")
+            else
+                continue
+            fi
+        fi
 
         if [ "$RELEASE_FILTER" != "" ]; then
             RELEASE_FILTER="$(echo "$RELEASE_FILTER" | sed 's#[*]#.*#g')"
@@ -127,7 +146,7 @@ for source_file in $SOURCE_LIST; do
         outPath=${DEB_ROOT}/${server}/$inPath
 
         official=0
-        if [[ ${server} =~ [.]debian[.]org$ ]]; then
+        if [[ ${server} =~ [.]debian[.]org$ || ${server} = "mirror.csclub.uwaterloo.ca" ]]; then
             official=1
         fi
 

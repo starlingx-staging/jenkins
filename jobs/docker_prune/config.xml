@@ -22,7 +22,11 @@
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <triggers/>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>0 14 * * 0</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
@@ -43,13 +47,23 @@ while read line ; do
     a=( $(echo $tag | tr '-' ' ') )
     current=0
     os=""
+    sub_product=""
+    builder=""
     stability=""
     timestamp=""
-    if [ "${a[$current]}" = "rc" ]; then
-        branch="${a[$current]}-${a[$next]}"
+    if [ "${a[$current]}" = "jenkins" ]; then
+        builder="${a[$current]}"
+        current=$((current +1))
+    fi
+    if [ "${a[$current]}" = "rc" ] || [ "${a[$current]}" = "f" ]; then
+        branch="${a[$current]}-${a[$((current +1))]}"
         current=$(( current+2 ))
     else
         branch="${a[$current]}"
+        current=$((current +1))
+    fi
+    if [ "${a[$current]}" = "openstack" ]; then
+        sub_product="${a[$current]}"
         current=$((current +1))
     fi
     if [ "${a[$current]}" = "debian" ] || [ "${a[$current]}" = "centos" ]; then
@@ -65,7 +79,13 @@ while read line ; do
         continue
     fi
     
-    key="$image:$branch"
+    key="$image:"
+    if [ "$builder" != "" ]; then
+        key+="$builder-$branch"; 
+    else
+        key+="$branch"
+    fi
+    if [ "$sub_product" != "" ]; then key+="-$sub_product"; fi
     if [ "$os" != "" ]; then key+="-$os"; fi
     if [ "$stability" != "" ]; then key+="-$stability"; fi
     if [ "${newest["$key"]}" == "" ]; then
@@ -81,13 +101,19 @@ while read line ; do
         docker image rm "starlingx/$key-${newest["$key"]}"
         newest[$key]=$timestamp
     fi
-done &lt; &lt;(docker image ls | grep starlingx/stx-)</command>
+done &lt; &lt;(docker image ls | grep starlingx/stx-)
+
+docker volume prune -f
+
+docker buildx prune --filter=until=1000h
+
+docker system df</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
     <hudson.tasks.Mailer plugin="mailer@448.v5b_97805e3767">
-      <recipients>scott.little@windriver.com, don.penney@windriver.com</recipients>
+      <recipients>scott.little@windriver.com, davlet.panech@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>

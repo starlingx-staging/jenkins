@@ -1,7 +1,7 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <hudson>
   <disabledAdministrativeMonitors/>
-  <version>2.387.1</version>
+  <version>2.426.3</version>
   <numExecutors>20</numExecutors>
   <mode>NORMAL</mode>
   <useSecurity>true</useSecurity>
@@ -192,6 +192,7 @@
         <string>dpanech-stx-debian-master</string>
         <string>starlingx-jenkins-pipelines</string>
         <string>STX_build_dev_debian_master</string>
+        <string>test1</string>
       </jobNames>
       <jobFilters/>
       <columns>
@@ -273,6 +274,9 @@
         <string>STX_build_debian_master</string>
         <string>STX_build_dev_debian_master</string>
         <string>STX_delete_deb_build_containers</string>
+        <string>STX_openstack_build_debian</string>
+        <string>STX_openstack_build_debian_build_containers</string>
+        <string>STX_openstack_build_pipelines</string>
       </jobNames>
       <jobFilters/>
       <columns>
@@ -405,7 +409,7 @@
         <hudson.views.LastFailureColumn/>
         <hudson.views.LastDurationColumn/>
         <hudson.views.BuildButtonColumn/>
-        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.4.1"/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.208.v91d65b_7792a_c"/>
       </columns>
       <recurse>false</recurse>
     </listView>
@@ -421,6 +425,9 @@
         <string>STX_f_antelope_build_debian</string>
         <string>STX_f_antelope_build_debian_build_containers</string>
         <string>STX_f_antelope_build_pipelines</string>
+        <string>STX_f_antelope_openstack_build_debian</string>
+        <string>STX_f_antelope_openstack_build_debian_build_containers</string>
+        <string>STX_f_antelope_openstack_build_pipelines</string>
       </jobNames>
       <jobFilters/>
       <columns>
@@ -431,7 +438,63 @@
         <hudson.views.LastFailureColumn/>
         <hudson.views.LastDurationColumn/>
         <hudson.views.BuildButtonColumn/>
-        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.4.1"/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.208.v91d65b_7792a_c"/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>f-kernel-6.6</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+        <string>STX_f_kernel_6.6_build_debian</string>
+        <string>STX_f_kernel_6.6_build_debian_build_containers</string>
+        <string>STX_f_kernel_6.6_openstack_build_debian</string>
+        <string>STX_f_kernel_6.6_openstack_build_debian_build_containers</string>
+        <string>STX_f_kernel_6.6_openstack_build_pipelines</string>
+        <string>STX_f_kernel_6.6_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.208.v91d65b_7792a_c"/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>STX 9.0</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+        <string>STX_9.0_build_debian</string>
+        <string>STX_9.0_build_debian_build_containers</string>
+        <string>STX_9.0_openstack_build_debian</string>
+        <string>STX_9.0_openstack_build_debian_build_containers</string>
+        <string>STX_9.0_openstack_build_pipelines</string>
+        <string>STX_9.0_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.208.v91d65b_7792a_c"/>
       </columns>
       <recurse>false</recurse>
     </listView>

@@ -44,6 +44,64 @@ NOT_NUM="[^0-9]"
 YYYY_MM_PATTERN="${NUM}${NUM}${NUM}${NUM}[.]${NUM}${NUM}"
 MILESTONE_PATTERN="[.][bB]${NUM}"
 
+function dir_age {
+    local FN=$1
+    local UNIT=$2
+    local NOW
+    local OLD
+    local DELTA
+
+    if [ "$FN"  == "" ]; then
+        >&2 echo "dir_age: required arguement 'FN' missing"
+        return 1
+    fi
+
+    if [ "$UNIT"  == "" ]; then
+        >&2 echo "dir_age: required arguement 'UNIT' missing"
+        return 1
+    fi
+
+    if [ ! -f "$FN" ]; then
+        >&2 echo "dir_age: invalid file '$FN'"
+        return 1
+    fi
+
+    NOW=$(date "+%s")
+    OLD=$(stat -c %Y "$FN")
+    DELTA=$(($NOW - $OLD))
+
+    case "$UNIT" in
+        years)
+            DELTA=$(($DELTA / (60 * 60 * 24 * 365)))
+            ;;
+        months)
+            DELTA=$(($DELTA / (60 * 60 * 24 * 30)))
+            ;;
+        weeks)
+            DELTA=$(($DELTA / (60 * 60 * 24 * 7)))
+            ;;
+        days)
+            DELTA=$(($DELTA / (60 * 60 * 24)))
+            ;;
+        hours)
+            DELTA=$(($DELTA / (60 * 60)))
+            ;;
+        minutes)
+            DELTA=$(($DELTA / 60))
+            ;;
+        seconds)
+            ;;
+        *)
+            >&2 echo "dir_age: Invalid unit '$UNIT'"
+            return 1
+            ;;
+    esac
+
+    # echo "$DELTA $UNIT"
+    echo "$DELTA"
+    return 0
+}
+
 function file_age {
     local FN=$1
     local UNIT=$2
@@ -139,6 +197,17 @@ function published_build_age {
         fi
     done
 
+    for f in $DIR/logs ; do
+        if [ -d $f ]; then
+            AGE=$(dir_age $f days)
+            if [ $? -eq 0 ]; then
+                >&2 echo "   $f  AGE=$AGE"
+                echo "$AGE"
+                return 0
+            fi
+        fi
+    done
+
     AGE=1
     echo "$AGE"
     return 1
@@ -159,7 +228,7 @@ function workspace_age {
         return 1
     fi
 
-    for f in $DIR/BUILD $DIR/build-std.log $DIR/build.log $DIR/CHANGELOG* $DIR/PUBLISHED; do
+    for f in $DIR/BUILD $DIR/build-std.log $DIR/build.log $DIR/CHANGELOG* $DIR/PUBLISHED $DIR/localdisk/pkgbuilder/jenkins/*/chroot.log; do
         if [ -f $f ]; then
             AGE=$(file_age $f days)
             if [ $? -eq 0 ]; then
@@ -528,21 +597,20 @@ function workspace_cleanup_by_age {
               done
            fi
 
-           if [ -d $d/aptly ]; then
-              echo "deleting $d/aptly"
-              jenkins_rm root $d/aptly
-           fi
+	   for d2 in $(find $d/aptly -mindepth 1 -maxdepth 1 -type d); do
+              echo "deleting $PWD/$d2"
+              jenkins_rm root $PWD/$d2
+           done
 
            if [ -d $d/docker ]; then
-              echo "deleting $d/docker"
-              jenkins_rm root $d/docker
+              echo "deleting $PWD/$d/docker"
+              jenkins_rm root $PWD/$d/docker
            fi
 
-           if [ -d $d/localdisk ]; then
-              # Most of the build directories owned by root are inside localdisk
-              echo "deleting $d/localdisk"
-              jenkins_rm root $d/localdisk
-           fi
+	   for d2 in $(find $d/localdisk -mindepth 1 -maxdepth 1 -type d); do
+              echo "deleting $PWD/$d2"
+              jenkins_rm root $PWD/$d2
+           done
 
            if [ $NO_RM -ne 1 ]; then
               echo "rm -rf $d"

@@ -1,7 +1,6 @@
-<?xml version='1.1' encoding='UTF-8'?>
-<project>
+<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
   <actions/>
-  <description></description>
+  <description/>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -12,10 +11,11 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.34">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@330.v645b_7df10e2a_">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
+    
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
@@ -33,169 +33,202 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>DATE_FORMAT=&quot;+%Y-%B&quot;
+      <command># DATE_FORMAT="+%Y-%B"
+DATE_YM_FORMAT="+%Y-%m"
+DATE_FORMAT="+%Y-%m-%d"
 
 TMPDIR=$(mktemp -d /tmp/sanity_XXXXXX)
-if [ &quot;$TMPDIR&quot; == &quot;&quot; ]; then exit 1; fi
+if [ "$TMPDIR" == "" ]; then exit 1; fi
 
-ARCHIVE=&quot;$TMPDIR/archive.txt&quot;
-LOG=&quot;$TMPDIR/log.txt&quot;
-RECORD=&quot;$TMPDIR/record.txt&quot;
-HEADERS=&quot;$TMPDIR/headers.txt&quot;
+ARCHIVE="$TMPDIR/archive.txt"
+LOG="$TMPDIR/log.txt"
+RECORD="$TMPDIR/record.txt"
+HEADERS="$TMPDIR/headers.txt"
 
 echo ARCHIVE=$ARCHIVE
 
 update_sanity () {
-    local path=&quot;$1&quot;
-    local status=&quot;$2&quot;
+    local path="$1"
+    local status="$2"
 
-    local green_link_path=&quot;$(dirname &quot;$path&quot;)/latest_green_build&quot;
-    local yellow_link_path=&quot;$(dirname &quot;$path&quot;)/latest_yellow_build&quot;
-    local sanity_path=&quot;$path/outputs&quot;
+    local green_link_path="$(dirname "$path")/latest_green_build"
+    local yellow_link_path="$(dirname "$path")/latest_yellow_build"
+    local sanity_path="$path/outputs"
 
     if [ ! -d $path ]; then
-        echo &quot;Invalid directory: $path&quot;
+        echo "Invalid directory: $path"
         return 1
     fi
 
     if [ ! -d $sanity_path ]; then
-        echo &quot;Invalid directory: $sanity_path&quot;
+        echo "Invalid directory: $sanity_path"
         return 1
     fi
 
-    if [ &quot;$status&quot; != &quot;GREEN&quot; ] &amp;&amp; [ &quot;$status&quot; != &quot;YELLOW&quot; ] &amp;&amp; [ &quot;$status&quot; != &quot;RED&quot; ]; then
-        echo &quot;Invalid status: $status&quot;
+    if [ "$status" != "GREEN" ] &amp;&amp; [ "$status" != "YELLOW" ] &amp;&amp; [ "$status" != "RED" ]; then
+        echo "Invalid status: $status"
         return 1
     fi
 
-    if [ -f &quot;$sanity_path/$status&quot; ]; then
+    if [ -f "$sanity_path/$status" ]; then
         # already set
         return 0
     fi
 
-    if [ -f &quot;$sanity_path/GREEN&quot; ] || [ -f &quot;$sanity_path/GREEN&quot; ] || [ -f &quot;$sanity_path/GREEN&quot; ]; then
-        echo &quot;Status mismatch when setting $status at $path&quot;
+    if [ -f "$sanity_path/GREEN" ] || [ -f "$sanity_path/GREEN" ] || [ -f "$sanity_path/GREEN" ]; then
+        echo "Status mismatch when setting $status at $path"
         return 1
     fi
 
-    echo &quot;touch $sanity_path/$status&quot;
-    touch &quot;$sanity_path/$status&quot;
+    echo "touch $sanity_path/$status"
+    touch "$sanity_path/$status"
 
-    if [ $status == &quot;GREEN&quot; ]; then
-        if [ -L &quot;$green_link_path&quot; ]; then
-            rm &quot;$green_link_path&quot;
+    if [ $status == "GREEN" ]; then
+        if [ -L "$green_link_path" ]; then
+            rm "$green_link_path"
         fi
-        echo &quot;ln -s $(basename $path) $green_link_path&quot;
-        ln -s &quot;$(basename $path)&quot; &quot;$green_link_path&quot;
+        echo "ln -s $(basename $path) $green_link_path"
+        ln -s "$(basename $path)" "$green_link_path"
     fi
 
-    if [ $status == &quot;YELLOW&quot; ] || [ $status == &quot;GREEN&quot; ]; then
-        if [ -L &quot;$yellow_link_path&quot; ]; then
-            rm &quot;$yellow_link_path&quot;
+    if [ $status == "YELLOW" ] || [ $status == "GREEN" ]; then
+        if [ -L "$yellow_link_path" ]; then
+            rm "$yellow_link_path"
         fi
-        echo &quot;ln -s $(basename $path) $yellow_link_path&quot;
-        ln -s &quot;$(basename $path)&quot; &quot;$yellow_link_path&quot;
+        echo "ln -s $(basename $path) $yellow_link_path"
+        ln -s "$(basename $path)" "$yellow_link_path"
     fi
 }
 
 process_sanity_headers () {
     local branch=$1
 
-    local pattern=&quot;&quot;
-    local url=&quot;&quot;
-    local status=&quot;&quot;
-    local path=&quot;&quot;
+    local pattern=""
+    local url=""
+    local status=""
+    local path=""
     
     cat $HEADERS | sort --unique | \
     while read -r line; do
-        # restore the &apos;\&apos; prior to &apos;[&apos; and &apos;]&apos; for the upcomming sed search pattern
-        pattern=&quot;$(echo &quot;$line&quot; | sed &apos;s/\[/\\[/g&apos; | sed &apos;s/\]/\\]/g&apos;)&quot;
+        # restore the '\' prior to '[' and ']' for the upcomming sed search pattern
+        pattern="$(echo "$line" | sed 's/\[/\\[/g' | sed 's/\]/\\]/g')"
 
         # Extract the message body (more or less) and save to file
-        sed -n -e  &quot;/^$pattern$/,/^Subject:/{ /^$pattern$/d; /^Subject:/d; p}&quot; $ARCHIVE &gt; $RECORD
+        # sed -n -e  "/^$pattern$/,/^Subject:/{ /^$pattern$/d; /^Subject:/d; p}" $ARCHIVE &gt; $RECORD
+        sed -n -e  "/$pattern$/,/^Subject:/{ /^$pattern$/d; /^Subject:/d; p}" $ARCHIVE &gt; $RECORD
 
-        # expect to find two pieces of  info from the message, load url and test status
-                url=$(grep &apos;http://mirror.starlingx.cengn.ca/mirror/starlingx&apos; $RECORD | grep -v latest_build | grep -v helm-charts | grep -v &apos;^[&gt;[]&apos; | sed -e &apos;s/^.*&lt;//&apos; -e &apos;s/^.*[\(]//&apos; -e &apos;s/[\)].*$//&apos; -e &apos;s/&gt;.*$//&apos; -e &apos;s#.*\(http.*\)#\1#&apos; | head -n 1 | sed -e &apos;s#[ ]*$##&apos; -e &apos;s#iso/$##&apos; -e &apos;s#outputs/$##&apos;)
+        # repair long lines that were broken into multiple lines with a '=' at end of line
+        # sed -i -e '/[^=]=$/{:1 N;/ :/b; s/=\n//g; b1}' $RECORD
+        sed -i -e '/^.\{77\}=$/{N;s/=\n//}' $RECORD
         
-        if [ &quot;$url&quot; == &quot;&quot; ]; then
-            # perhaps they used a &apos;latest_build&apos; path.  We can only use this if BUILD_ID is given
+        # expect to find two pieces of  info from the message, load url and test status
+        # url=$(grep 'https://mirror.starlingx.cengn.ca/mirror/starlingx' $RECORD | grep -v latest_build | grep -v helm-charts | grep -v '^[&gt;[]' | sed -e 's/^.*&lt;//' -e 's/^.*[\(]//' -e 's/[\)].*$//' -e 's/&gt;.*$//' -e 's#.*\(http.*\)#\1#' | head -n 1 | sed -e 's#[ ]*$##' -e 's#iso/$##' -e 's#outputs/$##')
+        url=$(grep -e 'http://mirror.starlingx.cengn.ca/mirror/starlingx' \
+                   -e 'https://mirror.starlingx.cengn.ca/mirror/starlingx' \
+                   -e 'https://mirror.starlingx.windriver.com/mirror/starlingx' \
+                   $RECORD | \
+              grep -v latest_build | grep -v helm-charts | grep -v '^[&gt;[]' | \
+              sed -e 's/^.*&lt;//' -e 's/^.*[\(]//' -e 's/[\)].*$//' -e 's/&gt;.*$//' -e 's#.*\(http.*\)#\1#' | \
+              head -n 1 | sed -e 's#[ ]*$##' -e 's#iso/$##' -e 's#outputs/$##')
+        if [ "$url" == "" ]; then
+            # perhaps they used a 'latest_build' path.  We can only use this if BUILD_ID is given
 
-            build_id=$(grep &apos;^BUILD_ID=&apos; $RECORD | sed -e &apos;s#^BUILD_ID=##&apos; -e &quot;s#^&apos;\([^&apos;]*\)&apos;\$#\1#&quot; -e &apos;s#^&quot;\([^&quot;]*\)&quot;$#\1#&apos;)
-            if [ &quot;$build_id&quot; != &quot;&quot; ]; then
-                        url=$(grep &apos;http://mirror.starlingx.cengn.ca/mirror/starlingx&apos; $RECORD | grep latest_build | grep -v helm-charts | grep -v &apos;^[&gt;[]&apos; | sed -e &apos;s/^.*&lt;//&apos; -e &apos;s/^.*[\(]//&apos; -e &apos;s/[\)].*$//&apos; -e &apos;s/&gt;.*$//&apos; -e &apos;s#.*\(http.*\)#\1#&apos; -e &quot;s#latest_build#${build_id}#&quot; | head -n 1 | sed -e &apos;s#[ ]*$##&apos; -e &apos;s#iso/$##&apos; -e &apos;s#outputs/$##&apos;)
+            build_id=$(grep '^BUILD_ID=' $RECORD | sed -e 's#^BUILD_ID=##' -e "s#^'\([^']*\)'\$#\1#" -e 's#^"\([^"]*\)"$#\1#')
+            if [ "$build_id" != "" ]; then
+                        url=$(grep -e 'http://mirror.starlingx.cengn.ca/mirror/starlingx' \
+                                   -e 'https://mirror.starlingx.cengn.ca/mirror/starlingx' \
+                                   -e 'https://mirror.starlingx.windriver.com/mirror/starlingx' \
+                                   $RECORD |\
+                              grep latest_build | grep -v helm-charts | grep -v '^[&gt;[]' | \
+                              sed -e 's/^.*&lt;//' -e 's/^.*[\(]//' -e 's/[\)].*$//' -e 's/&gt;.*$//' -e 's#.*\(http.*\)#\1#' -e "s#latest_build#${build_id}#" | \
+                              head -n 1 | \
+                              sed -e 's#[ ]*$##' -e 's#iso/$##' -e 's#outputs/$##')
             fi
             
         fi
         
         status=$( (
-                  grep &apos;^Status: [YRGyrg]&apos;  $RECORD | grep -v &apos;^[&gt;]&apos; | sed &apos;s/^Status: //&apos; | awk &apos;{ print $1 }&apos;
-                  grep &apos;^ Status: [YRGyrg]&apos;  $RECORD | grep -v &apos;^[&gt;]&apos; | sed &apos;s/^ Status: //&apos; | awk &apos;{ print $1 }&apos;
-                  grep &apos;^Overall Status: [YRGyrg]&apos;  $RECORD | grep -v &apos;^[&gt;]&apos; | sed &apos;s/^Overall Status: //&apos; | awk &apos;{ print $1 }&apos;
+                  grep '^Status: [YRGyrg]'  $RECORD | grep -v '^[&gt;]' | sed 's/^Status: //' | awk '{ print $1 }'
+                  grep '^ Status: [YRGyrg]'  $RECORD | grep -v '^[&gt;]' | sed 's/^ Status: //' | awk '{ print $1 }'
+                  grep '^Overall Status: [YRGyrg]'  $RECORD | grep -v '^[&gt;]' | sed 's/^Overall Status: //' | awk '{ print $1 }'
                   ) | head -n 1)
         
         # convert to uppercase
         status=${status^^}
 
-        if [ &quot;$status&quot; == &quot;&quot; ] || [ &quot;$url&quot; == &quot;&quot; ]; then
+        if [ "$status" == "" ] || [ "$url" == "" ]; then
            continue
         fi
 
         # Convert url to file system path
-        path=$(echo $url | sed &apos;s#http://mirror.starlingx.cengn.ca#/export#&apos; | sed &apos;s#/$##&apos; | sed &apos;s#^\(.*/[0-9]*T[0-9]*Z\)/.*$#\1#&apos;)
-        
+        path=$(echo $url | sed -e 's#http://mirror.starlingx.cengn.ca#/export#' \
+                               -e 's#https://mirror.starlingx.cengn.ca#/export#' \
+                               -e 's#https://mirror.starlingx.windriver.com#/export#' \
+                               -e 's#/$##' \
+                               -e 's#^\(.*/[0-9]*T[0-9]*Z\)/.*$#\1#')
         # process this entry
-        echo &quot;$status: $path&quot;
+        echo "$status: $path"
         if [ ! -d $path ]; then
-            echo &quot;Invalid directory: $path&quot;
+            echo "Invalid directory: $path"
             continue
         fi
 
-        if [[ &quot;$path&quot; != *&quot;/$branch/&quot;* ]]; then
-            echo &quot;Invalid directory: &apos;$path&apos; does not contain &apos;/$branch/&apos;&quot;
+        if [[ "$path" != *"/$branch/"* ]]; then
+            echo "Invalid directory: '$path' does not contain '/$branch/'"
             continue
         fi
 
-        update_sanity &quot;$path&quot; &quot;$status&quot; || continue
+        update_sanity "$path" "$status" || continue
     done
 }
 
-for ym in $((date $DATE_FORMAT; date -d &apos;yesterday&apos; $DATE_FORMAT) | sort --unique); do
+# for ym in $((date $DATE_FORMAT; date -d 'yesterday' $DATE_FORMAT) | sort --unique); do
     # Obtain archive of starlingx-discuss for the month
-    wget &quot;http://lists.starlingx.io/pipermail/starlingx-discuss/${ym}.txt&quot; -O $ARCHIVE -o $LOG
+#    wget "http://lists.starlingx.io/pipermail/starlingx-discuss/${ym}.txt" -O $ARCHIVE -o $LOG
+
+end_date=$(date $DATE_FORMAT)
+start_date=$(date -d 'last week' $DATE_FORMAT)
+ym_date=$(date $DATE_YM_FORMAT)
+
+    wget "https://lists.starlingx.io/archives/list/starlingx-discuss@lists.starlingx.io/export/starlingx-discuss@lists.starlingx.io-${ym_date}.mbox.gz?start=${start_date}&amp;end=${end_date}" -O $ARCHIVE.gz -o $LOG
     if [ $? -ne 0 ]; then
         continue
     fi
+    
+    gunzip $ARCHIVE.gz
 
     # Merge multi-line subjects into a single line
-    sed -i -e &apos;/^Subject.*[sS]anity/{:1 N;/[^t]:/b; s/\n//; b1}&apos; $ARCHIVE
+    # sed -i -e '/^Subject.*[sS]anity/{:1 N;/[^t]:/b; s/\n//; b1}' $ARCHIVE
+    sed -i -e '/^Subject:/{:1 N;/[^t]:/b; s/\n//; b1}' $ARCHIVE
     
     # Look for messages with a subject suggesting a sanity test result
-    grep &quot;^Subject: \[Starlingx-discuss\] FW: Sanity Test&quot; $ARCHIVE &gt; $HEADERS || true
-    grep &quot;^Subject: \[Starlingx-discuss\] Sanity Test&quot; $ARCHIVE &gt;&gt; $HEADERS || true
-    grep &quot;^Subject: \[Starlingx-discuss\]  Sanity Test&quot; $ARCHIVE &gt;&gt; $HEADERS || true
-    grep &quot;^Subject: \[Starlingx-discuss\][ ]*\[Containers\][ ]*Sanity Test&quot; $ARCHIVE &gt;&gt; $HEADERS || true
-    grep &quot;^Subject: \[Starlingx-discuss\] Sanity Master Test&quot; $ARCHIVE &gt;&gt; $HEADERS || true
-    grep &quot;^Subject: \[Starlingx-discuss\]  Sanity Master Test&quot; $ARCHIVE &gt;&gt; $HEADERS || true
-    grep &quot;^Subject: \[Starlingx-discuss\] StarlingX + STX-Openstack MASTER build sanity results&quot; $ARCHIVE &gt;&gt; $HEADERS || true
+    grep "^Subject: Sanity and Regression" $ARCHIVE &gt; $HEADERS || true
+    grep "^Subject: \[Starlingx-discuss\] FW: Sanity Test" $ARCHIVE &gt;&gt; $HEADERS || true
+    grep "^Subject: \[Starlingx-discuss\] Sanity Test" $ARCHIVE &gt;&gt; $HEADERS || true
+    grep "^Subject: \[Starlingx-discuss\]  Sanity Test" $ARCHIVE &gt;&gt; $HEADERS || true
+    grep "^Subject: \[Starlingx-discuss\][ ]*\[Containers\][ ]*Sanity Test" $ARCHIVE &gt;&gt; $HEADERS || true
+    grep "^Subject: \[Starlingx-discuss\] Sanity Master Test" $ARCHIVE &gt;&gt; $HEADERS || true
+    grep "^Subject: \[Starlingx-discuss\]  Sanity Master Test" $ARCHIVE &gt;&gt; $HEADERS || true
+    grep "^Subject: \[Starlingx-discuss\] StarlingX + STX-Openstack MASTER build sanity results" $ARCHIVE &gt;&gt; $HEADERS || true
 
     process_sanity_headers master
     
     for rc in 4.0 5.0 6.0 7.0 8.0 9.0; do
-        grep &quot;^Subject: \[Starlingx-discuss\] Sanity RC $rc Test&quot; $ARCHIVE &gt; $HEADERS || true
-        grep &quot;^Subject: \[Starlingx-discuss\]  Sanity RC $rc Test&quot; $ARCHIVE &gt;&gt; $HEADERS || true
+        grep "^Subject: \[Starlingx-discuss\] Sanity RC $rc Test" $ARCHIVE &gt; $HEADERS || true
+        grep "^Subject: \[Starlingx-discuss\]  Sanity RC $rc Test" $ARCHIVE &gt;&gt; $HEADERS || true
 
         process_sanity_headers rc/$rc
     done
 
     \rm -f $LOG
-done
+# done
 
 \rm -rf $TMPDIR</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@448.v5b_97805e3767">
+    <hudson.tasks.Mailer plugin="mailer@463.vedf8358e006b_">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>

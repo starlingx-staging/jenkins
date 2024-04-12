@@ -2,6 +2,7 @@
 .bash_logout
 .bash_profile
 .bashrc
+.docker-jenkins-official
 .docker-login-count
 .docker/
 .gitconfig
@@ -15,6 +16,8 @@
 .ssh/
 .vim/
 .viminfo
+archive-key*
+bin/archive-key*
 credentials.xml
 dl_other_from_centos_repo.sh
 docker_io_slittlewrs.cred
@@ -101,3 +104,13 @@ io.jenkins.plugins.*.xml
 jobConfigHistory.xml
 org.jenkins.plugins.*.xml
 xterm/
+jobs/test1/
+.wget-hsts
+.rpmdb/
+.parallel/
+.minikube/
+.local/
+.kube/cache
+.kube/config.bak
+.gnupg/
+.config/

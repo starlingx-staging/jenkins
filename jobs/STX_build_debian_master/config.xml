@@ -131,7 +131,8 @@
 # Comma-separated
 EMAIL_LIST="\
 	davlet.panech@windriver.com, \
-    scott.little@windriver.com     
+    scott.little@windriver.com, \
+	dostoievski.albinobatista@windriver.com     
 "
 
 cat &gt;"env.properties" &lt;&lt;_END
@@ -193,7 +194,7 @@ _END
   </builders>
   <publishers>
     <hudson.tasks.Mailer plugin="mailer@448.v5b_97805e3767">
-      <recipients>scott.little@windriver.com davlet.panech@windriver.com</recipients>
+      <recipients>scott.little@windriver.com davlet.panech@windriver.com dostoievski.albinobatista@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>

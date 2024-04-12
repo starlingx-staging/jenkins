@@ -1,0 +1,37 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<fingerprint>
+  <timestamp>2024-02-06 00:58:19.527 UTC</timestamp>
+  <md5sum>81274fd6a949e2ea249c69ca7ca40468</md5sum>
+  <fileName>Credential id=jenkins-api name=slittle/****** (Credential to make jenkins api calls)</fileName>
+  <usages>
+    <entry>
+      <string>STX_9.0_openstack_build_pipelines/parts/publish-logs</string>
+      <ranges>1-6</ranges>
+    </entry>
+    <entry>
+      <string>STX_f_kernel_6.6_pipelines/parts/publish-logs</string>
+      <ranges>15-35</ranges>
+    </entry>
+    <entry>
+      <string>STX_9.0_pipelines/parts/publish-logs</string>
+      <ranges>1-11</ranges>
+    </entry>
+    <entry>
+      <string>STX_8.0_build_pipelines/parts/publish-logs</string>
+      <ranges>22-27</ranges>
+    </entry>
+    <entry>
+      <string>STX_openstack_build_pipelines/parts/publish-logs</string>
+      <ranges>85-131</ranges>
+    </entry>
+    <entry>
+      <string>STX_f_kernel_6.6_openstack_build_pipelines/parts/publish-logs</string>
+      <ranges>10-31</ranges>
+    </entry>
+    <entry>
+      <string>starlingx-jenkins-pipelines/parts/publish-logs</string>
+      <ranges>223-265</ranges>
+    </entry>
+  </usages>
+  <facets/>
+</fingerprint>

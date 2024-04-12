@@ -1,0 +1,17 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<fingerprint>
+  <timestamp>2023-05-05 18:40:05.759 UTC</timestamp>
+  <md5sum>702ceb6314e350b4228e8e6e5c4b3cdd</md5sum>
+  <fileName>Credential id=jenkins-api name=slittle/****** (Credential to make jenkins api calls)</fileName>
+  <usages>
+    <entry>
+      <string>STX_f_antelope_build_pipelines/parts/publish-logs</string>
+      <ranges>20</ranges>
+    </entry>
+    <entry>
+      <string>STX_f_antelope_openstack_build_pipelines/parts/publish-logs</string>
+      <ranges>24</ranges>
+    </entry>
+  </usages>
+  <facets/>
+</fingerprint>

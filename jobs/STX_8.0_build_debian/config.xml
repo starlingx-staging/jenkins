@@ -11,7 +11,7 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.34">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@330.v645b_7df10e2a_">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -103,6 +103,23 @@
           <description>2022-11-01: this option does not work correctly (breaks docker image builds).</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>PATCH_LIST</name>
+          <description>&lt;pre&gt;&lt;code&gt;List of Gerrit URLs to apply before running the build, one per line "[PATH] URL REF", eg:
+
+  https://review.opendev.org/starlingx/config     refs/changes/71/859571/4
+  https://review.opendev.org/starlingx/stx-puppet refs/changes/75/859575/1
+  https://review.opendev.org/starlingx/tools      refs/changes/76/859576/2
+
+or with paths relative to repo root:
+
+  cgcs-root/stx/config     https://review.opendev.org/starlingx/config     refs/changes/71/859571/4
+  cgcs-root/stx/stx-puppet https://review.opendev.org/starlingx/stx-puppet refs/changes/75/859575/1
+  stx-tools                https://review.opendev.org/starlingx/tools      refs/changes/76/859576/2
+&lt;/code&gt;&lt;/pre&gt;</description>
+          <defaultValue>-</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     
@@ -143,7 +160,7 @@ _END
 </command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@2.45">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@787.v665fcf2a_830b_">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -186,12 +203,12 @@ _END
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@448.v5b_97805e3767">
+    <hudson.tasks.Mailer plugin="mailer@463.vedf8358e006b_">
       <recipients>scott.little@windriver.com davlet.panech@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.95">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.104">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -224,6 +241,6 @@ _END
     </hudson.plugins.emailext.ExtendedEmailPublisher>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.22"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.26"/>
   </buildWrappers>
 </project>

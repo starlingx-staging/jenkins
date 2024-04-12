@@ -88,9 +88,8 @@ fi
 # if [ ! -d .repo ]; then
     repo init -u ${BUILD_REPO_URL} -b ${BRANCH} -m ${MANIFEST}
 # fi
-repo sync --force-sync --optimized-fetch -j$(nproc)
-
-</command>
+( cd .repo/repo &amp;&amp; git pull --no-rebase --ff-only ; ) || true
+repo sync --force-sync --optimized-fetch -j$(nproc)</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>

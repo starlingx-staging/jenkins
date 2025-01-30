@@ -20,6 +20,9 @@ RETRY_COUNT=1
 
 SOURCE_LIST=$(find $SOURCES_LIST_DIR -name "$SOURCES_LIST_TEMPLATE")
 
+renice -n 10 -p $$
+ionice -c 3 -p $$
+
 usage () {
     echo "debian_repo_sync.sh [ --source-file=<path> ] [ --release-filter=<filter> ] [ --section-filter=<filter>]"
     echo "                    [ --arch-filter=<filter> ] [ --retry=N ] [ --dry-run ]"

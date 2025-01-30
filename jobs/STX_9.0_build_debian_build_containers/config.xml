@@ -263,7 +263,7 @@ export MASTER_JOB_NAME=$JOB_NAME
 export DISTRO=$OS
 
 export MUNGED_BRANCH=$(echo $BRANCH | tr '/' '-')
-if [ "$BRANCH" == "r/stx.9.0" ]; then
+if [ "$BRANCH" == "master" ]; then
     PUBLISH_BRANCH=$BRANCH
     PUBLISH_TIMESTAMP=$TIMESTAMP
 elif [[ $BRANCH == f/* ]]; then

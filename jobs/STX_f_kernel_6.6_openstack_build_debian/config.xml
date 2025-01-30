@@ -110,7 +110,7 @@
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>false</disabled>
+  <disabled>true</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
@@ -247,7 +247,7 @@ export TIMESTAMP=$BUILD_TIMESTAMP
 export PUBLISH_BRANCH=""
 export PUBLISH_TIMESTAMP=""
 
-if [ "$BRANCH" == "f/kernel-6.6" ]; then
+if [ "$BRANCH" == "master" ]; then
     PUBLISH_BRANCH=$BRANCH
     PUBLISH_TIMESTAMP=$TIMESTAMP
 elif [[ $BRANCH == f/* ]]; then

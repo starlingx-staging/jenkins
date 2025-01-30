@@ -1,6 +1,7 @@
-<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
   <actions/>
-  <description/>
+  <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -105,16 +106,15 @@
         </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>false</disabled>
+  <disabled>true</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <hudson.triggers.TimerTrigger>
-      <spec>0 2 * * 0
+      <spec>0 2 * * 6
 </spec>
     </hudson.triggers.TimerTrigger>
   </triggers>
@@ -126,16 +126,16 @@
       </info>
     </EnvInjectBuilder>
     <hudson.tasks.Shell>
-      <command>TIMESTAMP=$(date --utc '+%Y%m%dT%H%M%SZ')
+      <command>TIMESTAMP=$(date --utc &apos;+%Y%m%dT%H%M%SZ&apos;)
 
 # Comma-separated
-EMAIL_LIST="\
+EMAIL_LIST=&quot;\
 	davlet.panech@windriver.com, \
     scott.little@windriver.com, \
 	dostoievski.albinobatista@windriver.com     
-"
+&quot;
 
-cat &gt;"env.properties" &lt;&lt;_END
+cat &gt;&quot;env.properties&quot; &lt;&lt;_END
 BUILD_HOME=/localdisk/designer/jenkins/rc-stx-9-0-debian
 TIMESTAMP=$TIMESTAMP
 FORCE_BUILD_WHEELS=false
@@ -208,7 +208,7 @@ _END
             <recipientProviders>
               <hudson.plugins.emailext.plugins.recipients.ListRecipientProvider/>
             </recipientProviders>
-            <attachmentsPattern/>
+            <attachmentsPattern></attachmentsPattern>
             <attachBuildLog>false</attachBuildLog>
             <compressBuildLog>false</compressBuildLog>
             <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
@@ -219,13 +219,13 @@ _END
       <contentType>default</contentType>
       <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
       <defaultContent>$DEFAULT_CONTENT</defaultContent>
-      <attachmentsPattern/>
+      <attachmentsPattern></attachmentsPattern>
       <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
       <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
       <attachBuildLog>false</attachBuildLog>
       <compressBuildLog>false</compressBuildLog>
       <replyTo>$DEFAULT_REPLYTO</replyTo>
-      <from/>
+      <from></from>
       <saveOutput>false</saveOutput>
       <disabled>true</disabled>
     </hudson.plugins.emailext.ExtendedEmailPublisher>
@@ -240,59 +240,59 @@ export DISTRO=debian
 export PUBLISH_URL=http://mirror.starlingx.cengn.ca
 export TIMESTAMP=$BUILD_TIMESTAMP
 
-export PUBLISH_BRANCH=""
-export PUBLISH_TIMESTAMP=""
+export PUBLISH_BRANCH=&quot;&quot;
+export PUBLISH_TIMESTAMP=&quot;&quot;
 
-if [ "$BRANCH" == "r/stx.9.0" ]; then
+if [ &quot;$BRANCH&quot; == &quot;master&quot; ]; then
     PUBLISH_BRANCH=$BRANCH
     PUBLISH_TIMESTAMP=$TIMESTAMP
 elif [[ $BRANCH == f/* ]]; then
     # feature branch
-    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^f/#feature/#')
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^f/#feature/#&apos;)
     PUBLISH_TIMESTAMP=$TIMESTAMP
 elif [[ $BRANCH == m/[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
     # milestone tag   m/2018.10.b3
-    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#')
-    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#')
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
 elif [[ $BRANCH == m[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
     # milestone tag m2018.10.b3
-    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#')
-    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#')
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
 elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9][.][Bb][0-9]* ]]; then
     # milestone tag 2018.10.b3
-    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#')
-    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#')
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
 elif [[ $BRANCH == r/stx[.]@([0-9])[.]@([0-9]) ]]; then
     # release candidate branch r/stx.2.0
-    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^r/stx[.]\([0-9]*[.][0-9]*\).*$#rc/\1#')
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/stx[.]\([0-9]*[.][0-9]*\).*$#rc/\1#&apos;)
     PUBLISH_TIMESTAMP=$TIMESTAMP
 elif [[ $BRANCH == r/[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
     # release branch r/2018.10.5
-    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#')
-    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#')
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#&apos;)
 elif [[ $BRANCH == r[0-9][0-9][0-9][0-9][.]* ]]; then
     # release branch r2018.10.5
-    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#')
-    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#')
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#&apos;)
 elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9] ]] || [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9].[0-9]* ]] ; then
     # Release branch 2018.10.1 
-    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#')
+    PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#&apos;)
     PUBLISH_TIMESTAMP=$BRANCH
 fi
 
 # Assertions, did we get a BRANCH we understand how to parse
-[ -n "$PUBLISH_BRANCH" ]
-[ -n "$PUBLISH_TIMESTAMP" ]
+[ -n &quot;$PUBLISH_BRANCH&quot; ]
+[ -n &quot;$PUBLISH_TIMESTAMP&quot; ]
 
 export PUBLISH_DISTRO_BASE=/export/mirror/starlingx/$PUBLISH_BRANCH/$DISTRO/$LAYER
 export PUBLISH_BUILD_BASE=$PUBLISH_DISTRO_BASE/$PUBLISH_TIMESTAMP
 export PUBLISH_LOGS_BASE=$PUBLISH_BUILD_BASE/logs
-export PUBLISH_LOGS_URL=$PUBLISH_URL/$(echo $PUBLISH_LOGS_BASE | sed 's#^/export/##')
+export PUBLISH_LOGS_URL=$PUBLISH_URL/$(echo $PUBLISH_LOGS_BASE | sed &apos;s#^/export/##&apos;)
 
 echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt; env.properties
 echo BRANCH=$BRANCH &gt;&gt; env.properties</scriptContent>
         <secureGroovyScript plugin="script-security@1321.va_73c0795b_923">
-          <script/>
+          <script></script>
           <sandbox>false</sandbox>
         </secureGroovyScript>
         <loadFilesFromMaster>false</loadFilesFromMaster>

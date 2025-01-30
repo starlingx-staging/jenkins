@@ -1,6 +1,7 @@
-<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
   <actions/>
-  <description/>
+  <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -105,7 +106,7 @@
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>PATCH_LIST</name>
-          <description>&lt;pre&gt;&lt;code&gt;List of Gerrit URLs to apply before running the build, one per line "[PATH] URL REF", eg:
+          <description>&lt;pre&gt;&lt;code&gt;List of Gerrit URLs to apply before running the build, one per line &quot;[PATH] URL REF&quot;, eg:
 
   https://review.opendev.org/starlingx/config     refs/changes/71/859571/4
   https://review.opendev.org/starlingx/stx-puppet refs/changes/75/859575/1
@@ -122,11 +123,10 @@ or with paths relative to repo root:
         </hudson.model.TextParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>false</disabled>
+  <disabled>true</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
@@ -137,15 +137,15 @@ or with paths relative to repo root:
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>TIMESTAMP=$(date --utc '+%Y%m%dT%H%M%SZ')
+      <command>TIMESTAMP=$(date --utc &apos;+%Y%m%dT%H%M%SZ&apos;)
 
 # Comma-separated
-EMAIL_LIST="\
+EMAIL_LIST=&quot;\
 	davlet.panech@windriver.com, \
     scott.little@windriver.com     
-"
+&quot;
 
-cat &gt;"env.properties" &lt;&lt;_END
+cat &gt;&quot;env.properties&quot; &lt;&lt;_END
 BUILD_HOME=/localdisk/designer/jenkins/rc-stx-8-0-debian
 TIMESTAMP=$TIMESTAMP
 FORCE_BUILD_WHEELS=false
@@ -218,7 +218,7 @@ _END
             <recipientProviders>
               <hudson.plugins.emailext.plugins.recipients.ListRecipientProvider/>
             </recipientProviders>
-            <attachmentsPattern/>
+            <attachmentsPattern></attachmentsPattern>
             <attachBuildLog>false</attachBuildLog>
             <compressBuildLog>false</compressBuildLog>
             <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
@@ -229,13 +229,13 @@ _END
       <contentType>default</contentType>
       <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
       <defaultContent>$DEFAULT_CONTENT</defaultContent>
-      <attachmentsPattern/>
+      <attachmentsPattern></attachmentsPattern>
       <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
       <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
       <attachBuildLog>false</attachBuildLog>
       <compressBuildLog>false</compressBuildLog>
       <replyTo>$DEFAULT_REPLYTO</replyTo>
-      <from/>
+      <from></from>
       <saveOutput>false</saveOutput>
       <disabled>false</disabled>
     </hudson.plugins.emailext.ExtendedEmailPublisher>

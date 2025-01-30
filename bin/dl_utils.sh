@@ -276,7 +276,7 @@ dl_repo_from_url () {
         DL_DIR="$DOWNLOAD_PATH_ROOT/$(repo_url_to_sub_path "$REPO_URL" | sed 's#[.]git$##')"
     fi
 
-    echo "dl_repo_from_url  REPO_URL='$REPO_URL'  BRANCH='$BRANCH'  DL_DIR='$DL_DIR'"
+    # echo "dl_repo_from_url  REPO_URL='$REPO_URL'  BRANCH='$BRANCH'  DL_DIR='$DL_DIR'"
 
     if [ ! -d "$DL_DIR" ]; then
         CMD="mkdir -p '$DL_DIR'"

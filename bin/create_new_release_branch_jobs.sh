@@ -27,7 +27,7 @@ jobs=( "$SRC_JOB_OS_CONTAINERS" "$SRC_JOB_OS_PIPE" "$SRC_JOB_OS_BUILD" "$SRC_JOB
 workdirs=( "$SRC_WORKDIR_OS_CONTAINERS" "$SRC_WORKDIR_OS_BUILD" "$SRC_WORKDIR_STX_CONTAINERS" "$SRC_WORKDIR_STX_BUILD" )
 
 
-BRANCH="r/stx.9.0"
+BRANCH="r/stx.10.0"
 
 function join_by {
   local d=${1-} f=${2-}

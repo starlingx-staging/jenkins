@@ -1,6 +1,8 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <hudson>
-  <disabledAdministrativeMonitors/>
+  <disabledAdministrativeMonitors>
+    <string>hudson.util.DoubleLaunchChecker</string>
+  </disabledAdministrativeMonitors>
   <version>2.426.3</version>
   <numExecutors>20</numExecutors>
   <mode>NORMAL</mode>
@@ -72,6 +74,7 @@
         <string>mirror_download_sync_debian</string>
         <string>mirror_repo_sync</string>
         <string>mirror_repo_sync_debian</string>
+        <string>Mirror_snapshot_sync_debian</string>
       </jobNames>
       <jobFilters/>
       <columns>
@@ -484,6 +487,132 @@
         <string>STX_9.0_openstack_build_debian_build_containers</string>
         <string>STX_9.0_openstack_build_pipelines</string>
         <string>STX_9.0_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.208.v91d65b_7792a_c"/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>f-bookworm</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+        <string>STX_f_bookworm_build_debian</string>
+        <string>STX_f_bookworm_build_debian_build_containers</string>
+        <string>STX_f_bookworm_openstack_build_debian</string>
+        <string>STX_f_bookworm_openstack_build_debian_build_containers</string>
+        <string>STX_f_bookworm_openstack_build_pipelines</string>
+        <string>STX_f_bookworm_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.208.v91d65b_7792a_c"/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <io.jenkins.plugins.view.calendar.CalendarView plugin="calendar-view@0.3.3">
+      <owner class="hudson" reference="../../.."/>
+      <name>Calendar</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+      </jobNames>
+      <jobFilters/>
+      <columns/>
+      <includeRegex>.*debian|.*schedule|.*debian_master</includeRegex>
+      <recurse>false</recurse>
+      <calendarViewEventsType>ALL</calendarViewEventsType>
+      <calendarViewType>WEEK</calendarViewType>
+      <useCustomFormats>false</useCustomFormats>
+      <useCustomWeekSettings>false</useCustomWeekSettings>
+      <useCustomSlotSettings>false</useCustomSlotSettings>
+      <weekSettingsShowWeekends>true</weekSettingsShowWeekends>
+      <weekSettingsShowWeekNumbers>true</weekSettingsShowWeekNumbers>
+      <weekSettingsFirstDay>1</weekSettingsFirstDay>
+      <monthTitleFormat></monthTitleFormat>
+      <monthColumnHeaderFormat></monthColumnHeaderFormat>
+      <monthTimeFormat></monthTimeFormat>
+      <monthPopupBuildTimeFormat></monthPopupBuildTimeFormat>
+      <weekTitleFormat></weekTitleFormat>
+      <weekColumnHeaderFormat></weekColumnHeaderFormat>
+      <weekTimeFormat></weekTimeFormat>
+      <weekSlotTimeFormat></weekSlotTimeFormat>
+      <weekPopupBuildTimeFormat></weekPopupBuildTimeFormat>
+      <dayTitleFormat></dayTitleFormat>
+      <dayColumnHeaderFormat></dayColumnHeaderFormat>
+      <dayTimeFormat></dayTimeFormat>
+      <daySlotTimeFormat></daySlotTimeFormat>
+      <dayPopupBuildTimeFormat></dayPopupBuildTimeFormat>
+      <weekSlotDuration>00:30:00</weekSlotDuration>
+      <weekMinTime>00:00:00</weekMinTime>
+      <weekMaxTime>24:00:00</weekMaxTime>
+      <daySlotDuration>00:30:00</daySlotDuration>
+      <dayMinTime>00:00:00</dayMinTime>
+      <dayMaxTime>24:00:00</dayMaxTime>
+    </io.jenkins.plugins.view.calendar.CalendarView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>f-caracal</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+        <string>STX_f_caracal_build_debian</string>
+        <string>STX_f_caracal_build_debian_build_containers</string>
+        <string>STX_f_caracal_openstack_build_debian</string>
+        <string>STX_f_caracal_openstack_build_debian_build_containers</string>
+        <string>STX_f_caracal_openstack_build_pipelines</string>
+        <string>STX_f_caracal_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.208.v91d65b_7792a_c"/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>STX 10.0</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+        <string>STX_10.0_build_debian</string>
+        <string>STX_10.0_build_debian_build_containers</string>
+        <string>STX_10.0_openstack_build_debian</string>
+        <string>STX_10.0_openstack_build_debian_build_containers</string>
+        <string>STX_10.0_openstack_build_pipelines</string>
+        <string>STX_10.0_pipelines</string>
       </jobNames>
       <jobFilters/>
       <columns>

@@ -5,32 +5,56 @@
   <fileName>Credential id=jenkins-api name=slittle/****** (Credential to make jenkins api calls)</fileName>
   <usages>
     <entry>
-      <string>STX_9.0_openstack_build_pipelines/parts/publish-logs</string>
-      <ranges>1-6</ranges>
-    </entry>
-    <entry>
-      <string>STX_f_kernel_6.6_pipelines/parts/publish-logs</string>
-      <ranges>15-35</ranges>
-    </entry>
-    <entry>
-      <string>STX_9.0_pipelines/parts/publish-logs</string>
-      <ranges>1-11</ranges>
+      <string>starlingx-jenkins-pipelines/parts/publish-logs</string>
+      <ranges>447-482</ranges>
     </entry>
     <entry>
       <string>STX_8.0_build_pipelines/parts/publish-logs</string>
-      <ranges>22-27</ranges>
+      <ranges>33</ranges>
     </entry>
     <entry>
       <string>STX_openstack_build_pipelines/parts/publish-logs</string>
-      <ranges>85-131</ranges>
+      <ranges>308-325</ranges>
+    </entry>
+    <entry>
+      <string>STX_f_kernel_6.6_pipelines/parts/publish-logs</string>
+      <ranges>45</ranges>
+    </entry>
+    <entry>
+      <string>STX_9.0_pipelines/parts/publish-logs</string>
+      <ranges>19</ranges>
+    </entry>
+    <entry>
+      <string>STX_f_caracal_openstack_build_pipelines/parts/publish-logs</string>
+      <ranges>8-30</ranges>
+    </entry>
+    <entry>
+      <string>STX_9.0_openstack_build_pipelines/parts/publish-logs</string>
+      <ranges>12</ranges>
+    </entry>
+    <entry>
+      <string>STX_f_caracal_pipelines/parts/publish-logs</string>
+      <ranges>4-10</ranges>
+    </entry>
+    <entry>
+      <string>STX_10.0_pipelines/parts/publish-logs</string>
+      <ranges>1-12</ranges>
+    </entry>
+    <entry>
+      <string>STX_f_bookworm_openstack_build_pipelines/parts/publish-logs</string>
+      <ranges>97-104</ranges>
+    </entry>
+    <entry>
+      <string>STX_f_bookworm_pipelines/parts/publish-logs</string>
+      <ranges>33-40</ranges>
+    </entry>
+    <entry>
+      <string>STX_10.0_openstack_build_pipelines/parts/publish-logs</string>
+      <ranges>1-4</ranges>
     </entry>
     <entry>
       <string>STX_f_kernel_6.6_openstack_build_pipelines/parts/publish-logs</string>
-      <ranges>10-31</ranges>
-    </entry>
-    <entry>
-      <string>starlingx-jenkins-pipelines/parts/publish-logs</string>
-      <ranges>223-265</ranges>
+      <ranges>43</ranges>
     </entry>
   </usages>
   <facets/>

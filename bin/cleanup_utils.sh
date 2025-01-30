@@ -239,7 +239,7 @@ function workspace_age {
         fi
     done
 
-    for f in $(ls -1 -t $DIR/$USR-*.cfg $DIR/*/$USR-*.cfg $DIR/*/configs/$USR-*/$USR-*.cfg 2>> /dev/null); do
+    for f in $(ls -1 -t $DIR/$USR-*.cfg $DIR/*/$USR-*.cfg $DIR/*/configs/$USR-*/$USR-*.cfg $DIR/localdisk/deploy/ostree_repo/config $DIR/localdisk/CERTS/TiBoot.crt $DIR/localdisk/log/log.appsdk* $DIR/localdisk/sub_workdir/log/log.appsdk* $DIR/aptly/nginx_access.log $DIR/containers/mock/b0/root/.initialized $DIR/installer/mock/b0/root/.initialized $DIR/rt/mock/b0/root/.initialized $DIR/std/mock/b0/root/.initialized 2>> /dev/null); do
         if [ -f $f ]; then
             AGE=$(file_age $f days)
             if [ $? -eq 0 ]; then
@@ -450,7 +450,7 @@ function published_build_cleanup_by_age {
               echo "delete_still_publised_images '$BUILD_DIR' '$d'"
               delete_still_publised_images "$BUILD_DIR" "$d" "$TRIAL_RUN"
 
-              echo "rm -rf $d"
+              echo "nice -n 20 ionice -c Idle rm -rf $d"
               if [ $TRIAL_RUN -ne 1 ]; then
                   nice -n 20 ionice -c Idle rm -rf "$d"
               fi
@@ -597,14 +597,74 @@ function workspace_cleanup_by_age {
               done
            fi
 
-	   for d2 in $(find $d/aptly -mindepth 1 -maxdepth 1 -type d); do
-              echo "deleting $PWD/$d2"
-              jenkins_rm root $PWD/$d2
-           done
+           if [ -d $d/aptly ]; then
+              echo "deleting $PWD/$d/aptly"
+              jenkins_rm root $PWD/$d/aptly
+           fi
 
            if [ -d $d/docker ]; then
               echo "deleting $PWD/$d/docker"
               jenkins_rm root $PWD/$d/docker
+           fi
+
+           if [ -d $d/localdisk/deploy/ostree_repo ]; then
+              echo "deleting $PWD/$d/localdisk/deploy/ostree_repo"
+              jenkins_rm root $PWD/$d/localdisk/deploy/ostree_repo
+           fi
+
+           if [ -d $d/localdisk/sub_workdir ]; then
+              echo "deleting $PWD/$d/localdisk/sub_workdir"
+              jenkins_rm root $PWD/$d/localdisk/sub_workdir
+           fi
+
+           if [ -d $d/localdisk/log ]; then
+              echo "deleting $PWD/$d/localdisk/log"
+              jenkins_rm root $PWD/$d/localdisk/log
+           fi
+
+           if [ -d $d/std/mock ]; then
+              echo "deleting $PWD/$d/std/mock "
+              jenkins_rm root $PWD/$d/std/mock 
+           fi
+
+           if [ -d $d/std/cache ]; then
+              echo "deleting $PWD/$d/std/cache "
+              jenkins_rm root $PWD/$d/std/cache 
+           fi
+
+           if [ -d $d/rt/mock ]; then
+              echo "deleting $PWD/$d/rt/mock "
+              jenkins_rm root $PWD/$d/rt/mock 
+           fi
+
+           if [ -d $d/rt/cache ]; then
+              echo "deleting $PWD/$d/rt/cache "
+              jenkins_rm root $PWD/$d/rt/cache 
+           fi
+
+           if [ -d $d/installer/mock ]; then
+              echo "deleting $PWD/$d/installer/mock "
+              jenkins_rm root $PWD/$d/installer/mock 
+           fi
+
+           if [ -d $d/installer/cache ]; then
+              echo "deleting $PWD/$d/installer/cache "
+              jenkins_rm root $PWD/$d/installer/cache 
+           fi
+
+           if [ -d $d/containers/mock ]; then
+              echo "deleting $PWD/$d/containers/mock "
+              jenkins_rm root $PWD/$d/containers/mock 
+           fi
+
+           if [ -d $d/containers/cache ]; then
+              echo "deleting $PWD/$d/containers/cache "
+              jenkins_rm root $PWD/$d/containers/cache 
+           fi
+
+           if [ -d $d/localdisk/CERTS ]; then
+              echo "deleting $PWD/$d/localdisk/CERTS"
+              jenkins_rm root $PWD/$d/localdisk/CERTS
            fi
 
 	   for d2 in $(find $d/localdisk -mindepth 1 -maxdepth 1 -type d); do
@@ -613,7 +673,7 @@ function workspace_cleanup_by_age {
            done
 
            if [ $NO_RM -ne 1 ]; then
-              echo "rm -rf $d"
+              echo "nice -n 20 ionice -c Idle rm -rf $d"
               if [ $TRIAL_RUN -ne 1 ]; then
                   nice -n 20 ionice -c Idle \rm -rf "$d"
               fi
@@ -772,7 +832,7 @@ function delete_old_release_and_milestone_builds_and_publications {
     # Delete milestone build workspace
     for m_delete_date in $delete_dates; do
         for DIR in $(find $WORKSPACE_BASE/ -maxdepth 1 -type d -name "m-$m_delete_date*" ); do
-            echo "delete_dates: rm -rf $DIR"
+            echo "delete_dates: nice -n 20 ionice -c Idle rm -rf $DIR"
             if [ $TRIAL_RUN -ne 1 ]; then
                 nice -n 20 ionice -c Idle \rm -rf "$DIR"
             fi
@@ -786,7 +846,7 @@ function delete_old_release_and_milestone_builds_and_publications {
         echo "delete_still_publised_images '$PUBLISHED_MILESTONE_BASE' '$m_delete_dir'"
         delete_still_publised_images "$PUBLISHED_MILESTONE_BASE" "$m_delete_dir" $TRIAL_RUN
 
-        echo "m_delete_dirs: rm -rf $DIR"
+        echo "m_delete_dirs: nice -n 20 ionice -c Idle rm -rf $DIR"
         if [ $TRIAL_RUN -ne 1 ]; then
             nice -n 20 ionice -c Idle \rm -rf "$DIR"
         fi
@@ -795,7 +855,7 @@ function delete_old_release_and_milestone_builds_and_publications {
     # Delete release build workspace
     for delete_date in $delete_dates; do
         for DIR in $(find $WORKSPACE_BASE/ -maxdepth 1 -type d -name "r-$delete_date*" ); do
-            echo "delete_dates: rm -rf $DIR"
+            echo "delete_dates: nice -n 20 ionice -c Idle rm -rf $DIR"
             if [ $TRIAL_RUN -ne 1 ]; then
                 nice -n 20 ionice -c Idle \rm -rf "$DIR"
             fi
@@ -809,7 +869,7 @@ function delete_old_release_and_milestone_builds_and_publications {
         echo "delete_still_publised_images '$PUBLISHED_RELEASE_BASE' '$delete_dir'"
         delete_still_publised_images "$PUBLISHED_RELEASE_BASE" "$delete_dir" $TRIAL_RUN
 
-        echo "delete_dirs: rm -rf $DIR"
+        echo "delete_dirs: nice -n 20 ionice -c Idle rm -rf $DIR"
         if [ $TRIAL_RUN -ne 1 ]; then
             nice -n 20 ionice -c Idle \rm -rf "$DIR"
         fi

@@ -11,7 +11,7 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.34">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@330.v645b_7df10e2a_">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -32,8 +32,30 @@
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 echo $SHELL
+set -x
 docker container prune -f
 sleep 60
+
+# remove duplicate tags to common id
+for image in $(docker image ls | awk '{ print $1 }' | sort --unique); do
+   for id in $(docker image ls | grep $image | grep -v 'seconds ago' | grep -v 'minutes ago' | grep -v 'hours ago' | awk '{ print $3 }'); do
+      for x in $(docker image ls | grep $image | grep -v '[&lt;]none[&gt;]' | grep $id | sort --reverse | tail -n+2 | awk '{print $1 ":" $2}'); do
+          docker image rm $x
+      done
+   done 
+done
+
+# remove all but most recent timestamp
+for image in $(docker image ls | awk '{ print $1 }' | sort --unique); do
+   echo "image=$image"
+   for tag_prefix in $(docker image ls | grep $image | grep '20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]' | awk '{print $2}' | sed 's#20[0-9][0-9]-[0-9][0-9]-[0-9][0-9].*$##' | sort --unique); do
+      echo "tag_prefix=$tag_prefix"
+      for x in $(docker image ls | grep $image | grep -v '[&lt;]none[&gt;]' | grep " ${tag_prefix}20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]" | grep -v 'seconds ago' | grep -v 'minutes ago' | grep -v 'hours ago' | sort --reverse | tail -n+2 | awk '{print $1 ":" $2}'); do
+         docker image rm $x
+      done
+   done 
+done
+
 docker image prune -f
 sleep 60
 # docker volume prune -f
@@ -103,16 +125,19 @@ while read line ; do
     fi
 done &lt; &lt;(docker image ls | grep starlingx/stx-)
 
+# delete 'evicted' pods
+kubectl get pods --all-namespaces -o json | jq '.items[] | select(.status.reason!=null) | select(.status.reason | contains("Evicted")) | "kubectl delete pods \(.metadata.name) -n \(.metadata.namespace)"' | xargs -r -n 1 bash -c
+
 docker volume prune -f
 
-docker buildx prune --filter=until=1000h
+docker buildx prune --filter=until=350h -f
 
 docker system df</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@448.v5b_97805e3767">
+    <hudson.tasks.Mailer plugin="mailer@463.vedf8358e006b_">
       <recipients>scott.little@windriver.com, davlet.panech@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>

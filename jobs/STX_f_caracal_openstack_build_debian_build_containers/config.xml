@@ -1,0 +1,368 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+  <actions/>
+  <description>Build debian build containers</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@330.v645b_7df10e2a_">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.BooleanParameterDefinition>
+          <name>FORCE_BUILD</name>
+          <description>Build even if there are no changes</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>FULL_BUILD</name>
+          <description>Don't use docker cache</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>30 10 * * *</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <EnvInjectBuilder plugin="envinject@2.908.v66a_774b_31d93">
+      <info>
+        <propertiesFilePath>env.properties</propertiesFilePath>
+      </info>
+    </EnvInjectBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@787.v665fcf2a_830b_">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_repo_sync_layered</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@787.v665fcf2a_830b_">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_change_log</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@787.v665fcf2a_830b_">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_build_deb_build_containers</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@787.v665fcf2a_830b_">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
+              <propertiesFile>env.properties</propertiesFile>
+              <failTriggerOnMissing>false</failTriggerOnMissing>
+              <textParamValueOnNewLine>false</textParamValueOnNewLine>
+              <useMatrixChild>false</useMatrixChild>
+              <onlyExactRuns>false</onlyExactRuns>
+            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+          </configs>
+          <projects>STX_last_commits</projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+          <block>
+            <buildStepFailureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </buildStepFailureThreshold>
+            <unstableThreshold>
+              <name>UNSTABLE</name>
+              <ordinal>1</ordinal>
+              <color>YELLOW</color>
+              <completeBuild>true</completeBuild>
+            </unstableThreshold>
+            <failureThreshold>
+              <name>FAILURE</name>
+              <ordinal>2</ordinal>
+              <color>RED</color>
+              <completeBuild>true</completeBuild>
+            </failureThreshold>
+          </block>
+          <buildAllNodesWithLabel>false</buildAllNodesWithLabel>
+        </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.TriggerBuilder>
+  </builders>
+  <publishers>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.104">
+      <recipientList>$DEFAULT_RECIPIENTS</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <recipientProviders>
+              <hudson.plugins.emailext.plugins.recipients.ListRecipientProvider/>
+            </recipientProviders>
+            <attachmentsPattern/>
+            <attachBuildLog>false</attachBuildLog>
+            <compressBuildLog>false</compressBuildLog>
+            <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
+            <contentType>project</contentType>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+      </configuredTriggers>
+      <contentType>default</contentType>
+      <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern/>
+      <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
+      <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
+      <attachBuildLog>false</attachBuildLog>
+      <compressBuildLog>false</compressBuildLog>
+      <replyTo>$DEFAULT_REPLYTO</replyTo>
+      <from/>
+      <saveOutput>false</saveOutput>
+      <disabled>false</disabled>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.26"/>
+    <EnvInjectBuildWrapper plugin="envinject@2.908.v66a_774b_31d93">
+      <info>
+        <scriptContent>export BRANCH=f/caracal
+export LAYER=build-containers
+export REGISTRY=docker.io
+export REGISTRY_USERID=slittlewrs
+export PRODUCT=openstack
+
+# Need a build-container manifest
+export MANIFEST=stx-openstack.xml
+export OS=debian
+export OS_VERSION=bullseye
+export PUBLISH_URL=http://mirror.starlingx.cengn.ca
+
+export TIMESTAMP=$BUILD_TIMESTAMP
+export MASTER_BUILD_NUMBER=$BUILD_NUMBER
+export MASTER_JOB_NAME=$JOB_NAME
+export DISTRO=$OS
+
+export MUNGED_BRANCH=$(echo $BRANCH | tr '/' '-')
+if [ "$BRANCH" == "master" ]; then
+    PUBLISH_BRANCH=$BRANCH
+    PUBLISH_TIMESTAMP=$TIMESTAMP
+elif [[ $BRANCH == f/* ]]; then
+    # feature branch
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^f/#feature/#')
+    PUBLISH_TIMESTAMP=$TIMESTAMP
+elif [[ $BRANCH == m/[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
+    # milestone tag   m/2018.10.b3
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#')
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^m/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#')
+elif [[ $BRANCH == m[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
+    # milestone tag m2018.10.b3
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#')
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#')
+    MUNGED_BRANCH=$(echo $BRANCH | sed 's#^m\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#m-\1\2#')
+elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9][.][Bb][0-9]* ]]; then
+    # milestone tag 2018.10.b3
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#')
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#')
+    MUNGED_BRANCH="m-$BRANCH"
+elif [[ $BRANCH == r/stx[.]@([0-9])[.]@([0-9]) ]]; then
+    # release candidate branch r/stx.2.0
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^r/stx[.]\([0-9]*[.][0-9]*\).*$#rc/\1#')
+    PUBLISH_TIMESTAMP=$TIMESTAMP
+    MUNGED_BRANCH=$(echo $BRANCH | sed 's#^r/stx[.]#rc-#')
+elif [[ $BRANCH == r/[0-9][0-9][0-9][0-9][.][0-9][0-9]* ]]; then
+    # release branch r/2018.10.5
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#')
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^r/\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#')
+elif [[ $BRANCH == r[0-9][0-9][0-9][0-9][.]* ]]; then
+    # release branch r2018.10.5
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#')
+    PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#\1\2#')
+    MUNGED_BRANCH=$(echo $BRANCH | sed 's#^r\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][0-9]*\)\{0,1\}$#r-\1\2#')
+elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9] ]] || [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9].[0-9]* ]] ; then
+    # Release branch 2018.10.1 
+    PUBLISH_BRANCH=$(echo $BRANCH | sed 's#\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#release/\1#')
+    PUBLISH_TIMESTAMP=$BRANCH
+    MUNGED_BRANCH="r-$BRANCH"
+fi
+
+if [ "${PRODUCT}" != "" ]; then
+    MUNGED_BRANCH=${MUNGED_BRANCH}-${PRODUCT}
+fi
+
+export PROJECT=$OS-$MUNGED_BRANCH-$LAYER
+
+export MY_REPO_ROOT=/localdisk/designer/$USER/$PROJECT
+export MY_REPO=$MY_REPO_ROOT/cgcs-root
+export MY_WORKSPACE=/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP
+
+export DOCKER_BUILD_TAG=$MUNGED_BRANCH-$OS-$TIMESTAMP
+
+export PUBLISH_DISTRO_BASE=/export/mirror/starlingx/$PUBLISH_BRANCH/$DISTRO/$LAYER
+export PUBLISH_BUILD_BASE=$PUBLISH_DISTRO_BASE/$PUBLISH_TIMESTAMP
+export PUBLISH_INPUTS_BASE=$PUBLISH_BUILD_BASE/inputs
+export PUBLISH_OUTPUTS_BASE=$PUBLISH_BUILD_BASE/outputs
+export PUBLISH_LOGS_BASE=$PUBLISH_BUILD_BASE/logs
+export PUBLISH_LOGS_URL=$PUBLISH_URL/$(echo $PUBLISH_LOGS_BASE | sed 's#^/export/##')
+
+echo TIMESTAMP=$TIMESTAMP &gt; env.properties
+echo FORCE_BUILD=$FORCE_BUILD &gt;&gt; env.properties
+echo FULL_BUILD=$FULL_BUILD &gt;&gt; env.properties
+echo PUBLISH_TIMESTAMP=$PUBLISH_TIMESTAMP &gt;&gt; env.properties
+echo BRANCH=$BRANCH &gt;&gt; env.properties
+echo PROJECT=$PROJECT &gt;&gt; env.properties
+echo MUNGED_BRANCH=$MUNGED_BRANCH &gt;&gt; env.properties
+# echo OPENSTACK_RELEASE=$OPENSTACK_RELEASE &gt;&gt; env.properties
+echo LAYER=$LAYER &gt;&gt; env.properties
+echo MANIFEST=$MANIFEST &gt;&gt; env.properties
+echo DISTRO=$DISTRO &gt;&gt; env.properties
+echo OS=$OS &gt;&gt; env.properties
+echo OS_VERSION=$OS_VERSION &gt;&gt; env.properties
+# echo BUILD_ISO=$BUILD_ISO &gt;&gt; env.properties
+echo MASTER_BUILD_NUMBER=$MASTER_BUILD_NUMBER &gt;&gt; env.properties
+echo MASTER_JOB_NAME=$MASTER_JOB_NAME &gt;&gt; env.properties
+echo MY_REPO_ROOT=$MY_REPO_ROOT &gt;&gt; env.properties
+echo MY_REPO=$MY_REPO &gt;&gt; env.properties
+echo MY_WORKSPACE=$MY_WORKSPACE &gt;&gt; env.properties
+echo REGISTRY=$REGISTRY &gt;&gt; env.properties
+echo REGISTRY_USERID=$REGISTRY_USERID  &gt;&gt; env.properties
+echo DOCKER_BUILD_ID=$DOCKER_BUILD_ID &gt;&gt; env.properties
+echo DOCKER_BUILD_TAG=$DOCKER_BUILD_TAG &gt;&gt; env.properties
+echo PUBLISH_DISTRO_BASE=$PUBLISH_DISTRO_BASE &gt;&gt; env.properties
+echo PUBLISH_BUILD_BASE=$PUBLISH_BUILD_BASE &gt;&gt; env.properties
+echo PUBLISH_INPUTS_BASE=$PUBLISH_INPUTS_BASE &gt;&gt; env.properties
+echo PUBLISH_OUTPUTS_BASE=$PUBLISH_OUTPUTS_BASE &gt;&gt; env.properties
+echo PUBLISH_LOGS_BASE=$PUBLISH_LOGS_BASE &gt;&gt; env.properties
+echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt;&gt; env.properties
+echo BUILD_NM=$JOB_NAME &gt;&gt; env.properties
+echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties
+# echo REPO_FILE=$REPO_FILE &gt;&gt; env.properties</scriptContent>
+        <secureGroovyScript plugin="script-security@1321.va_73c0795b_923">
+          <script/>
+          <sandbox>false</sandbox>
+        </secureGroovyScript>
+        <loadFilesFromMaster>false</loadFilesFromMaster>
+      </info>
+    </EnvInjectBuildWrapper>
+  </buildWrappers>
+</project>

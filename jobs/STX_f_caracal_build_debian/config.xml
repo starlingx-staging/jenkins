@@ -10,9 +10,10 @@
         <numToKeep>-1</numToKeep>
         <artifactDaysToKeep>-1</artifactDaysToKeep>
         <artifactNumToKeep>-1</artifactNumToKeep>
+        <removeLastBuild>false</removeLastBuild>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@330.v645b_7df10e2a_">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@332.va_1ee476d8f6d">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -109,7 +110,7 @@
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>true</disabled>
+  <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
@@ -120,7 +121,7 @@
   </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
-    <EnvInjectBuilder plugin="envinject@2.908.v66a_774b_31d93">
+    <EnvInjectBuilder plugin="envinject@2.922.v2274200dd258">
       <info>
         <propertiesFilePath>env.properties</propertiesFilePath>
       </info>
@@ -150,7 +151,7 @@ _END
 </command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@787.v665fcf2a_830b_">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@840.v3c7d4a_a_5e6c7">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -193,12 +194,12 @@ _END
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@463.vedf8358e006b_">
+    <hudson.tasks.Mailer plugin="mailer@489.vd4b_25144138f">
       <recipients>scott.little@windriver.com davlet.panech@windriver.com dostoievski.albinobatista@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.104">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@1876.v28d8d38315b_d">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -228,11 +229,12 @@ _END
       <from></from>
       <saveOutput>false</saveOutput>
       <disabled>true</disabled>
+      <throttlingEnabled>false</throttlingEnabled>
     </hudson.plugins.emailext.ExtendedEmailPublisher>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.26"/>
-    <EnvInjectBuildWrapper plugin="envinject@2.908.v66a_774b_31d93">
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.28"/>
+    <EnvInjectBuildWrapper plugin="envinject@2.922.v2274200dd258">
       <info>
         <scriptContent>export BRANCH=f/caracal
 export LAYER=monolithic
@@ -291,7 +293,7 @@ export PUBLISH_LOGS_URL=$PUBLISH_URL/$(echo $PUBLISH_LOGS_BASE | sed &apos;s#^/e
 
 echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt; env.properties
 echo BRANCH=$BRANCH &gt;&gt; env.properties</scriptContent>
-        <secureGroovyScript plugin="script-security@1321.va_73c0795b_923">
+        <secureGroovyScript plugin="script-security@1369.v9b_98a_4e95b_2d">
           <script></script>
           <sandbox>false</sandbox>
         </secureGroovyScript>

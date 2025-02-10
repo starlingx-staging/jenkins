@@ -50,6 +50,7 @@ org.jenkinsci.plugins*xml
 github-plugin-configuration.xml
 hudson*xml
 jenkins*xml
+name-utf8.txt
 nodeMonitors.xml
 queue.xml
 scriptApproval.xml

@@ -3,7 +3,7 @@
   <disabledAdministrativeMonitors>
     <string>hudson.util.DoubleLaunchChecker</string>
   </disabledAdministrativeMonitors>
-  <version>2.426.3</version>
+  <version>2.479.3</version>
   <numExecutors>20</numExecutors>
   <mode>NORMAL</mode>
   <useSecurity>true</useSecurity>
@@ -412,7 +412,7 @@
         <hudson.views.LastFailureColumn/>
         <hudson.views.LastDurationColumn/>
         <hudson.views.BuildButtonColumn/>
-        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.208.v91d65b_7792a_c"/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
       </columns>
       <recurse>false</recurse>
     </listView>
@@ -441,7 +441,7 @@
         <hudson.views.LastFailureColumn/>
         <hudson.views.LastDurationColumn/>
         <hudson.views.BuildButtonColumn/>
-        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.208.v91d65b_7792a_c"/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
       </columns>
       <recurse>false</recurse>
     </listView>
@@ -469,7 +469,7 @@
         <hudson.views.LastFailureColumn/>
         <hudson.views.LastDurationColumn/>
         <hudson.views.BuildButtonColumn/>
-        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.208.v91d65b_7792a_c"/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
       </columns>
       <recurse>false</recurse>
     </listView>
@@ -497,7 +497,7 @@
         <hudson.views.LastFailureColumn/>
         <hudson.views.LastDurationColumn/>
         <hudson.views.BuildButtonColumn/>
-        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.208.v91d65b_7792a_c"/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
       </columns>
       <recurse>false</recurse>
     </listView>
@@ -525,11 +525,11 @@
         <hudson.views.LastFailureColumn/>
         <hudson.views.LastDurationColumn/>
         <hudson.views.BuildButtonColumn/>
-        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.208.v91d65b_7792a_c"/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
       </columns>
       <recurse>false</recurse>
     </listView>
-    <io.jenkins.plugins.view.calendar.CalendarView plugin="calendar-view@0.3.3">
+    <io.jenkins.plugins.view.calendar.CalendarView plugin="calendar-view@0.3.5">
       <owner class="hudson" reference="../../.."/>
       <name>Calendar</name>
       <filterExecutors>false</filterExecutors>
@@ -595,7 +595,7 @@
         <hudson.views.LastFailureColumn/>
         <hudson.views.LastDurationColumn/>
         <hudson.views.BuildButtonColumn/>
-        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.208.v91d65b_7792a_c"/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
       </columns>
       <recurse>false</recurse>
     </listView>
@@ -623,7 +623,7 @@
         <hudson.views.LastFailureColumn/>
         <hudson.views.LastDurationColumn/>
         <hudson.views.BuildButtonColumn/>
-        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.208.v91d65b_7792a_c"/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
       </columns>
       <recurse>false</recurse>
     </listView>
@@ -635,24 +635,6 @@
     <excludeClientIPFromCrumb>false</excludeClientIPFromCrumb>
   </crumbIssuer>
   <nodeProperties/>
-  <globalNodeProperties>
-    <hudson.slaves.EnvironmentVariablesNodeProperty>
-      <envVars serialization="custom">
-        <unserializable-parents/>
-        <tree-map>
-          <default>
-            <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../../../../views/listView[15]/jobNames/comparator"/>
-          </default>
-          <int>3</int>
-          <string>EMAIL_LIST_GLOBAL</string>
-          <string>davlet.panech@windriver.com, scott.little@windriver.com, luis.sampaio@windriver.com, yue.tao@windriver.com, xiao.zhang@windriver.com, haiqing.bai@windriver.com, jason.norton@windriver.com</string>
-          <string>ISO_LOCATION</string>
-          <string>//</string>
-          <string>MINIKUBE_HOME</string>
-          <string>/localdisk/designer/jenkins</string>
-        </tree-map>
-      </envVars>
-    </hudson.slaves.EnvironmentVariablesNodeProperty>
-  </globalNodeProperties>
+  <globalNodeProperties/>
   <nodeRenameMigrationNeeded>false</nodeRenameMigrationNeeded>
 </hudson>

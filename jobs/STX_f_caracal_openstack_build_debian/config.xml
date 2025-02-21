@@ -117,7 +117,8 @@ stx-fm-rest-api,stx-libvirt,stx-mariadb,stx-ovs,stx-pci-irq-affinity-agent,stx-h
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <hudson.triggers.TimerTrigger>
-      <spec>0 8 * * 2,4,6
+      <spec>#0 8 * * 2,4,6
+
 </spec>
     </hudson.triggers.TimerTrigger>
   </triggers>

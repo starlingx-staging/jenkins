@@ -17,82 +17,181 @@ Required software:
    git
    docker
    jenkins
+   nginx
+   Minikube
+   Containerd
+   Kubernetes
+   Helm
+   Calico
+   Docker CRI
+   debmirror
    anything else listed at https://docs.starlingx.io/developer_guide/index.html
 
 
 Jenkins Plugins:
 
-   Ant Plugin
-   Authentication Tokens API Plugin
-   bouncycastle API Plugin
-   Branch API Plugin
-   Build Timeout
-   Build Timestamp Plugin
-   Code Coverage API Plugin
-   Command Agent Launcher Plugin
-   Conditional BuildStep
-   Coverage/Complexity Scatter Plot PlugIn
-   Credentials Binding Plugin
-   Credentials Plugin
-   Display URL API
-   Docker Commons Plugin
-   Docker Pipeline
-   Durable Task Plugin
-   Email Extension Plugin
-   EnvInject API Plugin
-   Environment Injector Plugin
-   External Monitor Job Type Plugin
-   Folders Plugin
-   GitHub API Plugin
-   GitHub Branch Source Plugin
-   GitHub Organization Folder Plugin
-   GitHub plugin
-   Git Parameter Plug-In
-   Gradle Plugin
-   Groovy
-   Jackson 2 API Plugin
-   Javadoc Plugin
-   JavaScript GUI Lib
-   JDK Tool Plugin
-   Jenkins Apache HttpComponents Client 4.x API Plugin
-   Jenkins Cobertura Plugin
-   Jenkins Git client plugin
-   Jenkins Git plugin
-   Jenkins GIT server Plugin
-   Jenkins JSch dependency plugin
-   Jenkins Mailer Plugin
-   Jenkins Parameterized Trigger plugin
-   Jenkins SSH Slaves plugin
-   Jenkins Subversion Plug-in
-   Jenkins TextFinder plugin
-   Jenkins Workspace Cleanup Plugin
-   jQuery plugin
-   JUnit Plugin
-   LDAP Plugin
-   Lockable Resources plugin
-   MapDB API Plugin
-   Mask Passwords Plugin
-   Matrix Authorization Strategy Plugin
-   Matrix Project Plugin
-   Maven Integration plugin
+   ace-editor
+   ansicolor
+   antisamy-markup-formatter
+   ant
+   apache-httpcomponents-client-4-api
+   asm-api
+   authentication-tokens
+   blueocean-autofavorite
+   blueocean-bitbucket-pipeline
+   blueocean-commons
+   blueocean-config
+   blueocean-core-js
+   blueocean-dashboard
+   blueocean-display-url
+   blueocean-events
+   blueocean-github-pipeline
+   blueocean-git-pipeline
+   blueocean-i18n
+   blueocean
+   blueocean-jwt
+   blueocean-personalization
+   blueocean-pipeline-api-impl
+   blueocean-pipeline-editor
+   blueocean-pipeline-scm-api
+   blueocean-rest-impl
+   blueocean-rest
+   blueocean-web
+   bootstrap5-api
+   bouncycastle-api
+   branch-api
+   build-environment
+   build-name-setter
+   build-timeout
+   build-timestamp
+   build-with-parameters
+   caffeine-api
+   calendar-view
+   checks-api
+   cloudbees-bitbucket-branch-source
+   cloudbees-folder
+   command-launcher
+   commons-httpclient3-api
+   commons-lang3-api
+   commons-text-api
+   conditional-buildstep
+   credentials-binding
+   credentials
+   dark-theme
+   data-tables-api
+   description-setter
+   display-url-api
+   downstream-build-cache
+   downstream-buildview
+   durable-task
+   echarts-api
+   eddsa-api
+   email-ext
+   emailext-template
+   envfile
+   envinject-api
+   envinject
+   environment-script
+   external-monitor-job
+   favorite
+   font-awesome-api
+   git-client
+   github-api
+   github-branch-source
+   github
+   git
+   git-server
+   gradle
+   gson-api
+   handlebars
+   handy-uri-templates-2-api
+   htmlpublisher
+   instance-identity
+   ionicons-api
+   jackson2-api
+   jakarta-activation-api
+   jakarta-mail-api
+   javadoc
+   javax-activation-api
+   javax-mail-api
+   jaxb
+   jdk-tool
+   jenkins-design-language
+   jjwt-api
+   jobConfigHistory
+   joda-time-api
+   jquery3-api
+   jquery
+   jsch
+   json-api
+   json-path-api
+   junit
+   kubernetes-client-api
+   kubernetes-credentials
+   kubernetes
+   ldap
+   lockable-resources
+   mailer
+   matrix-auth
+   matrix-project
+   maven-plugin
+   metrics
+   mina-sshd-api-common
+   mina-sshd-api-core
+   momentjs
+   monitoring
    next-executions
-   OWASP Markup Formatter Plugin
-   PAM Authentication plugin
-   Parameterized Remote Trigger Plugin
-   Pipeline
-   Pipeline
-   Pipeline Graph Analysis Plugin
-   Plain Credentials Plugin
-   Pre SCM BuildStep Plugin
-   Rebuilder
-   Resource Disposer Plugin
-   Run Condition Plugin
-   SCM API Plugin
-   Script Security Plugin
-   SSH Agent Plugin
-   SSH Credentials Plugin
-   Structs Plugin
-   Timestamper
-   Token Macro Plugin
-   Windows Slaves Plugin
-   xUnit plugin
+   Office-365-Connector
+   okhttp-api
+   pam-auth
+   parameterized-trigger
+   pipeline-build-step
+   pipeline-github-lib
+   pipeline-graph-analysis
+   pipeline-graph-view
+   pipeline-groovy-lib
+   pipeline-input-step
+   pipeline-milestone-step
+   pipeline-model-api
+   pipeline-model-definition
+   pipeline-model-extensions
+   pipeline-rest-api
+   pipeline-stage-step
+   pipeline-stage-tags-metadata
+   pipeline-stage-view
+   plain-credentials
+   plugin-util-api
+   popper2-api
+   popper-api
+   postbuild-task
+   pubsub-light
+   pyenv-pipeline
+   rebuild
+   resource-disposer
+   run-condition
+   scm-api
+   script-security
+   snakeyaml-api
+   sse-gateway
+   ssh-credentials
+   sshd
+   ssh-slaves
+   structs
+   theme-manager
+   timestamper
+   token-macro
+   trilead-api
+   variant
+   workflow-aggregator
+   workflow-api
+   workflow-basic-steps
+   workflow-cps-global-lib
+   workflow-cps
+   workflow-durable-task-step
+   workflow-job
+   workflow-multibranch
+   workflow-scm-step
+   workflow-step-api
+   workflow-support
+   ws-cleanup
+

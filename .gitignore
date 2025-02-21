@@ -7,6 +7,7 @@
 .docker/
 .gitconfig
 .java/
+.kube/
 .lastStarted
 .lesshst
 .owner

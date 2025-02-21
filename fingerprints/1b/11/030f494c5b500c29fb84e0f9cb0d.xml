@@ -1,0 +1,21 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<fingerprint>
+  <timestamp>2025-02-12 16:18:08.256 UTC</timestamp>
+  <md5sum>1b11030f494c5b500c29fb84e0f9cb0d</md5sum>
+  <fileName>Credential id=jenkins-api name=slittle1/****** (Credential to make jenkins api calls)</fileName>
+  <usages>
+    <entry>
+      <string>STX_openstack_build_pipelines/parts/publish-logs</string>
+      <ranges>332-336</ranges>
+    </entry>
+    <entry>
+      <string>starlingx-jenkins-pipelines/parts/publish-logs</string>
+      <ranges>502-510</ranges>
+    </entry>
+    <entry>
+      <string>STX_f_caracal_openstack_build_pipelines/parts/publish-logs</string>
+      <ranges>37-40</ranges>
+    </entry>
+  </usages>
+  <facets/>
+</fingerprint>

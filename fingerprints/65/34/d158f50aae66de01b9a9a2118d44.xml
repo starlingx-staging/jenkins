@@ -1,0 +1,13 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<fingerprint>
+  <timestamp>2025-02-12 15:53:19.296 UTC</timestamp>
+  <md5sum>6534d158f50aae66de01b9a9a2118d44</md5sum>
+  <fileName>Credential id=jenkins-api name=slittle1/****** (Credential to make jenkins api calls)</fileName>
+  <usages>
+    <entry>
+      <string>starlingx-jenkins-pipelines/parts/publish-logs</string>
+      <ranges>500</ranges>
+    </entry>
+  </usages>
+  <facets/>
+</fingerprint>

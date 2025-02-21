@@ -1,7 +1,9 @@
 #!/bin/bash
 
-DEB_ROOT=/export/mirror/debian
-SOURCES_LIST_DIR=/export/config/debian/
+set -x
+
+DEB_ROOT=/starlingx/mirror/debian
+SOURCES_LIST_DIR=/starlingx/config/debian/
 KEYRING_DIR=${SOURCES_LIST_DIR}/mirrorkeyring
 export GNUPGHOME=${KEYRING_DIR}
 SOURCES_LIST_TEMPLATE='*-sources.list'

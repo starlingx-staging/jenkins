@@ -11,7 +11,7 @@
 # rpms and src.rpms downloaded from a yum repository.
 #
 # Configuration files for repositories to be downloaded are currently
-# stored at mirror.starlingx.cengn.ca:/export/config/yum.repos.d.
+# stored at mirror.starlingx.cengn.ca:/starlingx/config/yum.repos.d.
 # Those repos were derived from stx-tools/centos-mirror-tools/yum.repos.d
 # with some modifications that will need to be automated in a
 # future update.
@@ -22,11 +22,11 @@ set -x
 REPO_SYNC_LAYERED_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
 export PATH=$PATH:$REPO_SYNC_LAYERED_DIR
 
-LOGFILE="/export/log/daily_repo_sync.log"
-YUM_CONF_DIR="/export/config"
+LOGFILE="/starlingx/log/daily_repo_sync.log"
+YUM_CONF_DIR="/starlingx/config"
 YUM_CONF="${YUM_CONF_DIR}/yum.conf"
 YUM_REPOS_DIR="${YUM_CONF_DIR}/yum.repos.d"
-DOWNLOAD_PATH_ROOT="/export/mirror/centos"
+DOWNLOAD_PATH_ROOT="/starlingx/mirror/centos"
 URL_UTILS="url_utils.sh"
 INI_UTILS="ini_utils.sh"
 ERR_COUNT=0

@@ -24,7 +24,7 @@ else
 fi
 
 
-DOWNLOAD_PATH_ROOT=${DOWNLOAD_PATH_ROOT:-/export/mirror/centos}
+DOWNLOAD_PATH_ROOT=${DOWNLOAD_PATH_ROOT:-/starlingx/mirror/centos}
 
 
 dl_git_from_url () {

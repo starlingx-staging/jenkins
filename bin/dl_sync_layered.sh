@@ -14,8 +14,8 @@
 
 DAILY_DL_SYNC_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
 
-LOGFILE=/export/log/daily_dl_sync.log
-DOWNLOAD_PATH_ROOT=/export/mirror/centos
+LOGFILE=/starlingx/log/daily_dl_sync.log
+DOWNLOAD_PATH_ROOT=/starlingx/mirror/centos
 
 STX_BRANCH="master"
 STX_BRANCH_ROOT_DIR="$HOME/stx-repo"

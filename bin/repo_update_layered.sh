@@ -15,14 +15,14 @@
 
 set -x
 
-LOGFILE="/export/log/repo_update.log"
-BAD_REPOS_FILE="/export/log/bad_repos.log"
-YUM_CONF_DIR="/export/config"
+LOGFILE="/starlingx/log/repo_update.log"
+BAD_REPOS_FILE="/starlingx/log/bad_repos.log"
+YUM_CONF_DIR="/starlingx/config"
 # YUM_CONF_DIR="/tmp/config"
 YUM_CONF="$YUM_CONF_DIR/yum.conf"
 YUM_REPOS_DIR="$YUM_CONF_DIR/yum.repos.d"
 GPG_KEYS_DIR="$YUM_CONF_DIR/rpm-gpg-keys"
-DOWNLOAD_PATH_ROOT=/export/mirror/centos
+DOWNLOAD_PATH_ROOT=/starlingx/mirror/centos
 STX_BRANCH="master"
 STX_REPO_ROOT="$HOME/stx-repo"
 STX_TOOLS_ROOT_DIR="$STX_REPO_ROOT/stx-tools"

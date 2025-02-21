@@ -34,7 +34,7 @@ SANITY_FILE_YELLOW="YELLOW"
 SANITY_FILE_RED="RED"
 
 WORKSPACE_BASE=/localdisk/loadbuild/jenkins
-PUBLISHED_BASE=/export/mirror/starlingx
+PUBLISHED_BASE=/starlingx/mirror/starlingx
 PUBLISHED_RELEASE_BASE=$PUBLISHED_BASE/release
 PUBLISHED_MILESTONE_BASE=$PUBLISHED_BASE/milestone
 KEEP_RELEASES=2
@@ -363,7 +363,7 @@ function test_deletable {
         fi
     fi
 
-    for hcd in $(find /export/mirror/starlingx/ -maxdepth 6 -type d -name helm-charts | grep -v $DIR); do
+    for hcd in $(find /starlingx/mirror/starlingx/ -maxdepth 6 -type d -name helm-charts | grep -v $DIR); do
         for tgz in $(find $hcd -type f -name '*tgz'); do
             tar xzvf $tgz --wildcards "*.yaml" --to-stdout 2> /dev/null | grep 'docker.io[/]starlingx' | grep $DIR
             # tar xzvf $tgz --wildcards "*.yaml" --to-stdout 2> /dev/null | grep 'docker.io[/]starlingx'
@@ -385,7 +385,7 @@ function published_build_cleanup_by_age {
     local TRIAL_RUN=$2
 
     local DIR_TYPE="published_build"
-    local PUBLISHED_LOADS="/export/mirror/starlingx"
+    local PUBLISHED_LOADS="/starlingx/mirror/starlingx"
     local WILD='[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]T[0-9][0-9][0-9][0-9][0-9][0-9]Z'
     local SD="$BUILD_DIR/$SAVE_DATA_FILE"
     local dirs=""
@@ -404,8 +404,8 @@ function published_build_cleanup_by_age {
         return 1
     fi
 
-    if [[ "$BUILD_DIR" != /export/mirror/starlingx/* ]]; then
-        >&2 echo "invalid directory, '$BUILD_DIR' does not start with '/export/mirror/starlingx/'"
+    if [[ "$BUILD_DIR" != /starlingx/mirror/starlingx/* ]]; then
+        >&2 echo "invalid directory, '$BUILD_DIR' does not start with '/starlingx/mirror/starlingx/'"
         return 1
     fi
 

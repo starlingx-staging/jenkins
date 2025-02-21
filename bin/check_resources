@@ -8,7 +8,7 @@ disk_threshholds['/var/lib/jenkins']=90
 disk_threshholds['/var/lib/docker']=80
 disk_threshholds['/localdisk/designer']=90
 disk_threshholds['/localdisk/loadbuild']=90
-disk_threshholds['/export/mirror/']=90
+disk_threshholds['/starlingx/']=90
 
 declare -A mem_threshholds_low
 mem_threshholds_low['MemAvailable']=25

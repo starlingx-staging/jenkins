@@ -30,7 +30,7 @@
 RELOCATE_REPO_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
 source "${RELOCATE_REPO_DIR}/url_utils.sh"
 
-DOWNLOAD_PATH_ROOT=/export/mirror/centos
+DOWNLOAD_PATH_ROOT=/starlingx/mirror/centos
 
 OLD_URL="$1"
 NEW_URL="$2"

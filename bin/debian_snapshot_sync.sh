@@ -2,8 +2,8 @@
 
 DEBIAN_SNAPSHOT_SYNC_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
 
-DEB_ROOT=/export/mirror/debian
-SOURCES_LIST_DIR=/export/config/debian/
+DEB_ROOT=/starlingx/mirror/debian
+SOURCES_LIST_DIR=/starlingx/config/debian/
 KEYRING_DIR=${SOURCES_LIST_DIR}/mirrorkeyring
 export GNUPGHOME=${KEYRING_DIR}
 SOURCES_LIST_TEMPLATE='*-sources.list'

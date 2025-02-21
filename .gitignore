@@ -31,6 +31,7 @@ layer-distro/
 layer-flock/
 layer-kernel/
 logs/
+monitoring/
 net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition.xml
 plugins/
 queue.xml.bak

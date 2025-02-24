@@ -23,7 +23,7 @@ from yum import Errors
 from optparse import OptionParser
 import ConfigParser
 import rpmUtils.arch
-from yum2.misc import unique
+from yum.misc import unique
 
 # Subclass ConfigParser so that the options don't get lowercased.  This is
 # important given that they are path names.

@@ -1,6 +1,7 @@
-<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
   <actions/>
-  <description/>
+  <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -15,11 +16,10 @@
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
-    
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>false</disabled>
+  <disabled>true</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
@@ -58,9 +58,9 @@ git pull
 cd $GIT_ROOT/$GIT_NAME/debian-cengn
 
 if docker image ls | grep -q ${IMAGE_NAME}; then
-    echo "found pre-existing docker image '${IMAGE_NAME}'"
+    echo &quot;found pre-existing docker image &apos;${IMAGE_NAME}&apos;&quot;
 else
-    echo "build docker image '${IMAGE_NAME}'"
+    echo &quot;build docker image &apos;${IMAGE_NAME}&apos;&quot;
    pushd docker/
    docker build --build-arg MYUID=$(id -u) --build-arg MYUNAME=${USER} -t ${IMAGE_NAME} -f Dockerfile .
    popd

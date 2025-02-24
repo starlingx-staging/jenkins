@@ -1,4 +1,5 @@
-<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
   <actions/>
   <description>mirror upstream debian snapshot</description>
   <keepDependencies>false</keepDependencies>
@@ -29,11 +30,10 @@
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>false</disabled>
+  <disabled>true</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
@@ -44,23 +44,23 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>EXTRA_ARGS=""
-if [ "$SOURCE_FILE" != "" ]; then
-    EXTRA_ARGS+=" --source-file $SOURCE_FILE"
+      <command>EXTRA_ARGS=&quot;&quot;
+if [ &quot;$SOURCE_FILE&quot; != &quot;&quot; ]; then
+    EXTRA_ARGS+=&quot; --source-file $SOURCE_FILE&quot;
 fi
-if [ "$RELEASE" != "" ]; then
-    EXTRA_ARGS+=" --release-filter $RELEASE"
+if [ &quot;$RELEASE&quot; != &quot;&quot; ]; then
+    EXTRA_ARGS+=&quot; --release-filter $RELEASE&quot;
 fi
-if [ "$SECTION" != ""  ]; then
-    EXTRA_ARGS+=" --section-filter $SECTION"
+if [ &quot;$SECTION&quot; != &quot;&quot;  ]; then
+    EXTRA_ARGS+=&quot; --section-filter $SECTION&quot;
 fi
-if [ "$ARCH" != ""  ]; then
-    EXTRA_ARGS+=" --arch-filter $ARCH"
+if [ &quot;$ARCH&quot; != &quot;&quot;  ]; then
+    EXTRA_ARGS+=&quot; --arch-filter $ARCH&quot;
 fi
-for BRANCH in $(echo $BRANCHES | tr ',' ' '); do
-    echo "Processing branch '$BRANCH'"
+for BRANCH in $(echo $BRANCHES | tr &apos;,&apos; &apos; &apos;); do
+    echo &quot;Processing branch &apos;$BRANCH&apos;&quot;
     ~/bin/debian_snapshot_sync.sh --retry=3 --url=$TOOLS_URL --branch=$BRANCH $EXTRA_ARGS || true
-    echo "RC=${PIPESTATUS[0]}"
+    echo &quot;RC=${PIPESTATUS[0]}&quot;
 done</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>

@@ -1,4 +1,5 @@
-<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
   <actions/>
   <description>mirror upstream debian repos</description>
   <keepDependencies>false</keepDependencies>
@@ -44,11 +45,10 @@ e.g. contrib</description>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>false</disabled>
+  <disabled>true</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
@@ -63,18 +63,18 @@ e.g. contrib</description>
       <command># ~/bin/repo_update.sh
 # ~/bin/repo_update_layered.sh
 
-EXTRA_ARGS=""
-if [ "$SOURCE_FILE" != "" ]; then
-    EXTRA_ARGS+=" --source-file $SOURCE_FILE"
+EXTRA_ARGS=&quot;&quot;
+if [ &quot;$SOURCE_FILE&quot; != &quot;&quot; ]; then
+    EXTRA_ARGS+=&quot; --source-file $SOURCE_FILE&quot;
 fi
-if [ "$RELEASE" != "" ]; then
-    EXTRA_ARGS+=" --release-filter $RELEASE"
+if [ &quot;$RELEASE&quot; != &quot;&quot; ]; then
+    EXTRA_ARGS+=&quot; --release-filter $RELEASE&quot;
 fi
-if [ "$SECTION" != ""  ]; then
-    EXTRA_ARGS+=" --section-filter $SECTION"
+if [ &quot;$SECTION&quot; != &quot;&quot;  ]; then
+    EXTRA_ARGS+=&quot; --section-filter $SECTION&quot;
 fi
-if [ "$ARCH" != ""  ]; then
-    EXTRA_ARGS+=" --arch-filter $ARCH"
+if [ &quot;$ARCH&quot; != &quot;&quot;  ]; then
+    EXTRA_ARGS+=&quot; --arch-filter $ARCH&quot;
 fi
 ~/bin/debian_repo_sync.sh --retry=3 $EXTRA_ARGS
 ~/bin/debian_repo_release_sync.sh $EXTRA_ARGS
@@ -98,7 +98,7 @@ fi
             <recipientProviders>
               <hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider/>
             </recipientProviders>
-            <attachmentsPattern/>
+            <attachmentsPattern></attachmentsPattern>
             <attachBuildLog>false</attachBuildLog>
             <compressBuildLog>false</compressBuildLog>
             <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
@@ -109,13 +109,13 @@ fi
       <contentType>default</contentType>
       <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
       <defaultContent>$DEFAULT_CONTENT</defaultContent>
-      <attachmentsPattern/>
+      <attachmentsPattern></attachmentsPattern>
       <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
       <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
       <attachBuildLog>false</attachBuildLog>
       <compressBuildLog>false</compressBuildLog>
       <replyTo>$DEFAULT_REPLYTO</replyTo>
-      <from/>
+      <from></from>
       <saveOutput>false</saveOutput>
       <disabled>false</disabled>
     </hudson.plugins.emailext.ExtendedEmailPublisher>

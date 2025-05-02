@@ -23,7 +23,7 @@ SRC_WORKDIR_OS_CONTAINERS="debian-master-openstack-build-containers"
 
 SRC_BRANCH="master"
 
-BRANCH="f/caracal"
+BRANCH="f/portable-dc"
 
 JOB_BRANCH="$(echo $BRANCH | sed 's#[/\-]#_#g')"
 WORKDIR_BRANCH="$(echo $BRANCH | sed 's#[/._]#-#g')"
@@ -73,6 +73,7 @@ done
 transforms["starlingx/$SRC_BRANCH/debian"]="starlingx/$PUBLISHDIR_BRANCH/debian"
 transforms["TAG=$SRC_BRANCH"]="TAG=$WORKDIR_BRANCH"
 transforms["BRANCH=$SRC_BRANCH"]="BRANCH=$BRANCH"
+quoted_transforms["$SRC_BRANCH"]="$BRANCH"
 transforms["<defaultValue>$SRC_BRANCH"]="<defaultValue>$BRANCH"
 # transforms["$SRC_BRANCH"]="$BRANCH"
 

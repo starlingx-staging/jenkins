@@ -6,7 +6,7 @@
   <usages>
     <entry>
       <string>starlingx-jenkins-pipelines/parts/publish-logs</string>
-      <ranges>447-482</ranges>
+      <ranges>486</ranges>
     </entry>
     <entry>
       <string>STX_8.0_build_pipelines/parts/publish-logs</string>
@@ -14,7 +14,7 @@
     </entry>
     <entry>
       <string>STX_openstack_build_pipelines/parts/publish-logs</string>
-      <ranges>308-325</ranges>
+      <ranges>326</ranges>
     </entry>
     <entry>
       <string>STX_f_kernel_6.6_pipelines/parts/publish-logs</string>
@@ -22,35 +22,35 @@
     </entry>
     <entry>
       <string>STX_9.0_pipelines/parts/publish-logs</string>
-      <ranges>19</ranges>
+      <ranges>20</ranges>
     </entry>
     <entry>
       <string>STX_f_caracal_openstack_build_pipelines/parts/publish-logs</string>
-      <ranges>8-30</ranges>
+      <ranges>35</ranges>
     </entry>
     <entry>
       <string>STX_9.0_openstack_build_pipelines/parts/publish-logs</string>
-      <ranges>12</ranges>
+      <ranges>16</ranges>
     </entry>
     <entry>
       <string>STX_f_caracal_pipelines/parts/publish-logs</string>
-      <ranges>4-10</ranges>
+      <ranges>10</ranges>
     </entry>
     <entry>
       <string>STX_10.0_pipelines/parts/publish-logs</string>
-      <ranges>1-12</ranges>
+      <ranges>16-17</ranges>
     </entry>
     <entry>
       <string>STX_f_bookworm_openstack_build_pipelines/parts/publish-logs</string>
-      <ranges>97-104</ranges>
+      <ranges>104</ranges>
     </entry>
     <entry>
       <string>STX_f_bookworm_pipelines/parts/publish-logs</string>
-      <ranges>33-40</ranges>
+      <ranges>40</ranges>
     </entry>
     <entry>
       <string>STX_10.0_openstack_build_pipelines/parts/publish-logs</string>
-      <ranges>1-4</ranges>
+      <ranges>9</ranges>
     </entry>
     <entry>
       <string>STX_f_kernel_6.6_openstack_build_pipelines/parts/publish-logs</string>

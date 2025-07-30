@@ -1,0 +1,76 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>keep unbound&apos;s cache fresh</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>1</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+        <removeLastBuild>false</removeLastBuild>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@332.va_1ee476d8f6d">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>0,10,20,30,40,50 * * * *</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>BLACK_LIST=~jenkins/dns_blacklist.txt
+DIR=&quot;/localdisk/designer/jenkins/debian-master/repo&quot;
+
+REPEATS=5
+ERR=0
+for TARGET in $( grep -rIhE &quot;(https?|ftp)://[^/ )\&quot;&apos;&gt;]+&quot; $DIR \
+                    --exclude-dir={.git,node_modules,venv,__pycache__,build,man,qa,centos,dist,.cache,docs,doc,test,tests,changelog} \
+                    --exclude={*.rst,*.md,*.txt,*.texi,copyright,README,LICENSE,COPYING,MAINTAINERS,[Cc]hange[Ll]og*,*release-notes} | \
+                 grep -vE &apos;^\s*(#|//|/\*|&lt;!--)&apos; | \
+                 grep -v &apos;Bug-Debian:&apos; | \
+                 grep -v &apos;bugs.debian.org&apos; | \
+                 grep -v &apos;debian-master&apos; | \
+                 grep -v &apos;^[*][ ]&apos; | \
+                 grep -v &apos;^[ ][*][ ]&apos; | \
+                 grep -oE &quot;(https?|ftp)://[^/ )\&quot;&apos;&gt;]+&quot; | \
+                 grep -vE &apos;[@$]&apos; | \
+                 sed -E &apos;s#(https?|ftp)://([^/:]+).*#\2#&apos; | \
+                 grep -v -f $BLACK_LIST | \
+                 grep -vE &apos;^[0-9]{1,3}(\.[0-9]{1,3}){3}$&apos; | \
+                 sort -u); do
+     if REPLY=$(nslookup $TARGET) ; then
+         echo &quot;$REPLY&quot;
+         if echo $REPLY | grep &apos;No answer&apos;; then
+             sleep 2
+         else
+             for i in $(seq 1 $REPEATS); do
+                 if ! nslookup $TARGET ; then
+                     ERR=1
+                 fi
+             done
+         fi
+     else
+         echo &quot;$REPLY&quot;
+         sleep 2
+     fi
+done
+exit $ERR</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

@@ -61,8 +61,8 @@ function dir_age {
         return 1
     fi
 
-    if [ ! -f "$FN" ]; then
-        >&2 echo "dir_age: invalid file '$FN'"
+    if [ ! -d "$FN" ]; then
+        >&2 echo "dir_age: invalid dir '$FN'"
         return 1
     fi
 
@@ -266,6 +266,7 @@ function test_deletable {
     local KF="$DIR/$KEEP_FILE"
     local KEEP=0
     local SANITY_COLORS="$SANITY_FILE_GREEN $SANITY_FILE_YELLOW $SANITY_FILE_RED"
+    local FIND_ROOT
     KEEP_DAYS=""
     KEEP_AGE=999999
     AGE=""
@@ -363,7 +364,16 @@ function test_deletable {
         fi
     fi
 
-    for hcd in $(find /starlingx/mirror/starlingx/ -maxdepth 6 -type d -name helm-charts | grep -v $DIR); do
+    #
+    # Try to find versioned helm charts from other builds that refer to images from this build.
+    # If found keep this build.
+    #
+    # This seems to have broken down in more recent releases because versioned charts seem
+    # to refer to 'latest' images rather then versioned images.
+    # helm-charts/stx/stx-openstack-25.09-0-debian-stable-versioned.tgz
+    # 
+    FIND_ROOT=$(echo  $DIR | cut -d '/' -f -6)
+    for hcd in $(find $FIND_ROOT -maxdepth 6 -type d -name helm-charts | grep -v $DIR); do
         for tgz in $(find $hcd -type f -name '*tgz'); do
             tar xzvf $tgz --wildcards "*.yaml" --to-stdout 2> /dev/null | grep 'docker.io[/]starlingx' | grep $DIR
             # tar xzvf $tgz --wildcards "*.yaml" --to-stdout 2> /dev/null | grep 'docker.io[/]starlingx'
@@ -700,7 +710,7 @@ function delete_old_master_builds_and_publications {
     for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d \( -name 'master*' -o -name 'debian-master*' \) ) -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
         workspace_cleanup_by_age $DIR $TRIAL_RUN
     done
-    for DIR in $(find $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name 'master' ) -maxdepth 4 -name SAVE_DATA -exec dirname {} \; ); do
+    for DIR in $(find $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name 'master' ) -maxdepth 6 -name SAVE_DATA -exec dirname {} \; ); do
         published_build_cleanup_by_age $DIR $TRIAL_RUN
     done
 
@@ -724,7 +734,7 @@ function delete_old_ussuri_builds_and_publications {
         done
     done
     for BASE_DIR in $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name 'ussuri' ); do
-        for DIR in $(find ${BASE_DIR} -maxdepth 4 -name SAVE_DATA -exec dirname {} \; ); do
+        for DIR in $(find ${BASE_DIR} -maxdepth 6 -name SAVE_DATA -exec dirname {} \; ); do
             published_build_cleanup_by_age $DIR $TRIAL_RUN
         done
     done
@@ -745,7 +755,7 @@ function delete_old_feature_builds_and_publications {
     for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d -name 'f-*') -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
         workspace_cleanup_by_age $DIR $TRIAL_RUN
     done
-    for DIR in $(find $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name 'feature') -maxdepth 4 -name SAVE_DATA -exec dirname {} \; ); do
+    for DIR in $(find $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name 'feature') -maxdepth 6 -name SAVE_DATA -exec dirname {} \; ); do
         published_build_cleanup_by_age $DIR $TRIAL_RUN
     done
 
@@ -765,7 +775,7 @@ function delete_old_release_candidates_builds_and_publications {
     for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d \( -name 'rc-*' -o -name 'debian-rc-*' \) ) -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
         workspace_cleanup_by_age $DIR $TRIAL_RUN
     done
-    for DIR in $(find $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name rc ) -maxdepth 4 -name SAVE_DATA -exec dirname {} \; ); do
+    for DIR in $(find $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name rc ) -maxdepth 6 -name SAVE_DATA -exec dirname {} \; ); do
         published_build_cleanup_by_age $DIR $TRIAL_RUN
     done
 

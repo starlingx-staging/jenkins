@@ -193,7 +193,7 @@
   <myViewsTabBar class="hudson.views.DefaultMyViewsTabBar"/>
   <clouds/>
   <quietPeriod>5</quietPeriod>
-  <scmCheckoutRetryCount>0</scmCheckoutRetryCount>
+  <scmCheckoutRetryCount>5</scmCheckoutRetryCount>
   <views>
     <hudson.model.AllView>
       <owner class="hudson" reference="../../.."/>
@@ -267,6 +267,7 @@
       <jobNames>
         <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
         <string>delete_old_loads_master_feature</string>
+        <string>dns_cache_refresh</string>
         <string>docker_prune</string>
         <string>resource_check</string>
         <string>STX_sanity_result_from_discuss_mailing_list</string>

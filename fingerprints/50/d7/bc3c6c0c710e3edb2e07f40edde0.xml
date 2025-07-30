@@ -8,18 +8,6 @@
       <string>STX_f_caracal_pipelines/parts/publish-logs</string>
       <ranges>11-12</ranges>
     </entry>
-    <entry>
-      <string>STX_openstack_build_pipelines/parts/publish-logs</string>
-      <ranges>327-331</ranges>
-    </entry>
-    <entry>
-      <string>starlingx-jenkins-pipelines/parts/publish-logs</string>
-      <ranges>490-499</ranges>
-    </entry>
-    <entry>
-      <string>STX_f_caracal_openstack_build_pipelines/parts/publish-logs</string>
-      <ranges>33-36</ranges>
-    </entry>
   </usages>
   <facets/>
 </fingerprint>

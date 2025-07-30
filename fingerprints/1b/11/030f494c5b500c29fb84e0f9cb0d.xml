@@ -5,16 +5,40 @@
   <fileName>Credential id=jenkins-api name=slittle1/****** (Credential to make jenkins api calls)</fileName>
   <usages>
     <entry>
-      <string>STX_openstack_build_pipelines/parts/publish-logs</string>
-      <ranges>332-336</ranges>
+      <string>starlingx-jenkins-pipelines/parts/publish-logs</string>
+      <ranges>580-614,616-637</ranges>
     </entry>
     <entry>
-      <string>starlingx-jenkins-pipelines/parts/publish-logs</string>
-      <ranges>502-510</ranges>
+      <string>STX_openstack_build_pipelines/parts/publish-logs</string>
+      <ranges>405-456</ranges>
+    </entry>
+    <entry>
+      <string>STX_f_portable_dc_openstack_build_pipelines/parts/publish-logs</string>
+      <ranges>3</ranges>
+    </entry>
+    <entry>
+      <string>STX_f_trixie_pipelines/parts/publish-logs</string>
+      <ranges>33-41</ranges>
+    </entry>
+    <entry>
+      <string>STX_f_portable_dc_pipelines/parts/publish-logs</string>
+      <ranges>6-14</ranges>
+    </entry>
+    <entry>
+      <string>STX_f_trixie_openstack_build_pipelines/parts/publish-logs</string>
+      <ranges>5-7</ranges>
     </entry>
     <entry>
       <string>STX_f_caracal_openstack_build_pipelines/parts/publish-logs</string>
-      <ranges>37-40</ranges>
+      <ranges>40</ranges>
+    </entry>
+    <entry>
+      <string>STX_10.0_pipelines/parts/publish-logs</string>
+      <ranges>13</ranges>
+    </entry>
+    <entry>
+      <string>STX_10.0_openstack_build_pipelines/parts/publish-logs</string>
+      <ranges>5</ranges>
     </entry>
   </usages>
   <facets/>

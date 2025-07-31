@@ -1,0 +1,147 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+  <actions/>
+  <description>prune unused docker containers and images</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@330.v645b_7df10e2a_">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>true</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>0 14 * * 0</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+echo $SHELL
+set -x
+docker container prune -f
+sleep 60
+
+# remove duplicate tags to common id
+for image in $(docker image ls | awk '{ print $1 }' | sort --unique); do
+   for id in $(docker image ls | grep $image | grep -v 'seconds ago' | grep -v 'minutes ago' | grep -v 'hours ago' | awk '{ print $3 }'); do
+      for x in $(docker image ls | grep $image | grep -v '[&lt;]none[&gt;]' | grep $id | sort --reverse | tail -n+2 | awk '{print $1 ":" $2}'); do
+          docker image rm $x
+      done
+   done 
+done
+
+# remove all but most recent timestamp
+for image in $(docker image ls | awk '{ print $1 }' | sort --unique); do
+   echo "image=$image"
+   for tag_prefix in $(docker image ls | grep $image | grep '20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]' | awk '{print $2}' | sed 's#20[0-9][0-9]-[0-9][0-9]-[0-9][0-9].*$##' | sort --unique); do
+      echo "tag_prefix=$tag_prefix"
+      for x in $(docker image ls | grep $image | grep -v '[&lt;]none[&gt;]' | grep " ${tag_prefix}20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]" | grep -v 'seconds ago' | grep -v 'minutes ago' | grep -v 'hours ago' | sort --reverse | tail -n+2 | awk '{print $1 ":" $2}'); do
+         docker image rm $x
+      done
+   done 
+done
+
+docker image prune -f
+sleep 60
+# docker volume prune -f
+sleep 600
+
+unset newest
+declare -A newest
+while read line ; do
+    image=$(echo "$line" | awk '{ print $1 }' | sed 's#^starlingx/##')
+    tag=$(echo "$line" | awk '{ print $2 }' )
+    a=( $(echo $tag | tr '-' ' ') )
+    current=0
+    os=""
+    sub_product=""
+    builder=""
+    stability=""
+    timestamp=""
+    if [ "${a[$current]}" = "jenkins" ]; then
+        builder="${a[$current]}"
+        current=$((current +1))
+    fi
+    if [ "${a[$current]}" = "rc" ] || [ "${a[$current]}" = "f" ]; then
+        branch="${a[$current]}-${a[$((current +1))]}"
+        current=$(( current+2 ))
+    else
+        branch="${a[$current]}"
+        current=$((current +1))
+    fi
+    if [ "${a[$current]}" = "openstack" ]; then
+        sub_product="${a[$current]}"
+        current=$((current +1))
+    fi
+    if [ "${a[$current]}" = "debian" ] || [ "${a[$current]}" = "centos" ]; then
+        os="${a[$current]}"
+        current=$((current +1))
+    fi
+    if [ "${a[$current]}" = "dev" ] || [ "${a[$current]}" = "stable" ]; then
+        stability="${a[$current]}"
+        current=$((current +1))
+    fi
+    timestamp="${a[$current]}"
+    if [ "$timestamp" == "latest" ]; then
+        continue
+    fi
+    
+    key="$image:"
+    if [ "$builder" != "" ]; then
+        key+="$builder-$branch"; 
+    else
+        key+="$branch"
+    fi
+    if [ "$sub_product" != "" ]; then key+="-$sub_product"; fi
+    if [ "$os" != "" ]; then key+="-$os"; fi
+    if [ "$stability" != "" ]; then key+="-$stability"; fi
+    if [ "${newest["$key"]}" == "" ]; then
+        echo "key '$key' is new"
+        newest["$key"]=$timestamp
+    elif [ "${newest["$key"]}" &gt; "$timestamp" ]; then
+        echo "timestamp $timestamp is older than ${newest["$key"]}"
+        echo "docker image rm 'starlingx/$key-$timestamp'"
+        docker image rm "starlingx/$key-$timestamp"
+    else 
+        echo "timestamp $timestamp is newer than ${newest["$key"]}"
+        echo "docker image rm 'starlingx/$key-${newest["$key"]}'"
+        docker image rm "starlingx/$key-${newest["$key"]}"
+        newest[$key]=$timestamp
+    fi
+done &lt; &lt;(docker image ls | grep starlingx/stx-)
+
+# delete 'evicted' pods
+kubectl get pods --all-namespaces -o json | jq '.items[] | select(.status.reason!=null) | select(.status.reason | contains("Evicted")) | "kubectl delete pods \(.metadata.name) -n \(.metadata.namespace)"' | xargs -r -n 1 bash -c
+
+docker volume prune -f
+
+docker buildx prune --filter=until=350h -f
+
+docker system df</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@463.vedf8358e006b_">
+      <recipients>scott.little@windriver.com, davlet.panech@windriver.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
+  <buildWrappers/>
+</project>

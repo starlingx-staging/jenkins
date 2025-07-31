@@ -1,0 +1,92 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+  <actions/>
+  <description/>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>60</daysToKeep>
+        <numToKeep>-1</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@330.v645b_7df10e2a_">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>true</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>6 18 * * *</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>export PATH=/usr/local/bin:$PATH
+MY_REPO_DIR=/localdisk/designer/${USER}/${JOB_NAME}/v2/repoes
+MIRROR_DIR=/export/mirror/
+IMAGE_NAME=debian-downloads-downloader-v3-${USER}
+CONTAINER_NAME=debian-downloads-downloader-v3b-${USER}
+GIT_ROOT=$HOME/cengn-debian-dl/debian-cengn
+GIT_NAME=debian-dl
+GIT_URL=https://github.com/starlingx-staging/$GIT_NAME
+
+mkdir -p ${MY_REPO_DIR}
+
+if [ ! -d $GIT_ROOT ]; then
+    mkdir -p $GIT_ROOT
+fi
+
+cd $GIT_ROOT
+
+if [ ! -d $GIT_ROOT/$GIT_NAME ]; then
+    git clone $GIT_URL
+fi
+
+cd $GIT_ROOT/$GIT_NAME
+
+git pull
+
+cd $GIT_ROOT/$GIT_NAME/debian-cengn
+
+if docker image ls | grep -q ${IMAGE_NAME}; then
+    echo "found pre-existing docker image '${IMAGE_NAME}'"
+else
+    echo "build docker image '${IMAGE_NAME}'"
+   pushd docker/
+   docker build --build-arg MYUID=$(id -u) --build-arg MYUNAME=${USER} -t ${IMAGE_NAME} -f Dockerfile .
+   popd
+fi
+
+docker run -t --rm --name ${CONTAINER_NAME} \
+   -v $PWD/opt:/opt \
+   -v $PWD/inputs:/inputs \
+   -v ${MY_REPO_DIR}:/repoes \
+   -v $MIRROR_DIR:/outputs \
+   ${IMAGE_NAME}
+   
+
+
+</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@463.vedf8358e006b_">
+      <recipients>scott.little@windriver.com davlet.panech@windriver.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.26"/>
+  </buildWrappers>
+</project>

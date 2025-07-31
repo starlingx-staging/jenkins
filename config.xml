@@ -7,22 +7,178 @@
   <numExecutors>20</numExecutors>
   <mode>NORMAL</mode>
   <useSecurity>true</useSecurity>
-  <authorizationStrategy class="hudson.security.ProjectMatrixAuthorizationStrategy">
+  <authorizationStrategy class="hudson.security.GlobalMatrixAuthorizationStrategy">
+    <permission>GROUP:com.cloudbees.plugins.credentials.CredentialsProvider.Create:wrcloud_devops</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.Create:dpanech</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.Create:slittle</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.Create:slittle1</permission>
+    <permission>GROUP:com.cloudbees.plugins.credentials.CredentialsProvider.Delete:wrcloud_devops</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.Delete:dpanech</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.Delete:slittle</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.Delete:slittle1</permission>
+    <permission>GROUP:com.cloudbees.plugins.credentials.CredentialsProvider.ManageDomains:wrcloud_devops</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.ManageDomains:dpanech</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.ManageDomains:slittle</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.ManageDomains:slittle1</permission>
+    <permission>GROUP:com.cloudbees.plugins.credentials.CredentialsProvider.Update:wrcloud_devops</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.Update:dpanech</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.Update:slittle</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.Update:slittle1</permission>
     <permission>GROUP:com.cloudbees.plugins.credentials.CredentialsProvider.View:authenticated</permission>
+    <permission>GROUP:com.cloudbees.plugins.credentials.CredentialsProvider.View:wrcloud_devops</permission>
     <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.View:anonymous</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.View:dpanech</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.View:slittle</permission>
+    <permission>USER:com.cloudbees.plugins.credentials.CredentialsProvider.View:slittle1</permission>
+    <permission>GROUP:hudson.model.Computer.Build:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Computer.Build:dpanech</permission>
+    <permission>USER:hudson.model.Computer.Build:slittle</permission>
+    <permission>USER:hudson.model.Computer.Build:slittle1</permission>
+    <permission>GROUP:hudson.model.Computer.Configure:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Computer.Configure:dpanech</permission>
+    <permission>USER:hudson.model.Computer.Configure:slittle</permission>
+    <permission>USER:hudson.model.Computer.Configure:slittle1</permission>
+    <permission>GROUP:hudson.model.Computer.Connect:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Computer.Connect:dpanech</permission>
+    <permission>USER:hudson.model.Computer.Connect:slittle</permission>
+    <permission>USER:hudson.model.Computer.Connect:slittle1</permission>
+    <permission>GROUP:hudson.model.Computer.Create:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Computer.Create:dpanech</permission>
+    <permission>USER:hudson.model.Computer.Create:slittle</permission>
+    <permission>USER:hudson.model.Computer.Create:slittle1</permission>
+    <permission>GROUP:hudson.model.Computer.Delete:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Computer.Delete:dpanech</permission>
+    <permission>USER:hudson.model.Computer.Delete:slittle</permission>
+    <permission>USER:hudson.model.Computer.Delete:slittle1</permission>
+    <permission>GROUP:hudson.model.Computer.Disconnect:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Computer.Disconnect:dpanech</permission>
+    <permission>USER:hudson.model.Computer.Disconnect:slittle</permission>
+    <permission>USER:hudson.model.Computer.Disconnect:slittle1</permission>
+    <permission>GROUP:hudson.model.Computer.Provision:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Computer.Provision:dpanech</permission>
+    <permission>USER:hudson.model.Computer.Provision:slittle</permission>
+    <permission>USER:hudson.model.Computer.Provision:slittle1</permission>
     <permission>GROUP:hudson.model.Hudson.Administer:wrcloud_devops</permission>
     <permission>USER:hudson.model.Hudson.Administer:dpanech</permission>
+    <permission>USER:hudson.model.Hudson.Administer:slittle</permission>
     <permission>USER:hudson.model.Hudson.Administer:slittle1</permission>
     <permission>GROUP:hudson.model.Hudson.Read:authenticated</permission>
+    <permission>GROUP:hudson.model.Hudson.Read:wrcloud_devops</permission>
     <permission>USER:hudson.model.Hudson.Read:anonymous</permission>
+    <permission>USER:hudson.model.Hudson.Read:dpanech</permission>
+    <permission>USER:hudson.model.Hudson.Read:slittle</permission>
+    <permission>USER:hudson.model.Hudson.Read:slittle1</permission>
+    <permission>GROUP:hudson.model.Item.Build:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Item.Build:dpanech</permission>
+    <permission>USER:hudson.model.Item.Build:slittle</permission>
+    <permission>USER:hudson.model.Item.Build:slittle1</permission>
+    <permission>GROUP:hudson.model.Item.Cancel:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Item.Cancel:dpanech</permission>
+    <permission>USER:hudson.model.Item.Cancel:slittle</permission>
+    <permission>USER:hudson.model.Item.Cancel:slittle1</permission>
+    <permission>GROUP:hudson.model.Item.Configure:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Item.Configure:dpanech</permission>
+    <permission>USER:hudson.model.Item.Configure:slittle</permission>
+    <permission>USER:hudson.model.Item.Configure:slittle1</permission>
+    <permission>GROUP:hudson.model.Item.Create:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Item.Create:dpanech</permission>
+    <permission>USER:hudson.model.Item.Create:slittle</permission>
+    <permission>USER:hudson.model.Item.Create:slittle1</permission>
+    <permission>GROUP:hudson.model.Item.Delete:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Item.Delete:dpanech</permission>
+    <permission>USER:hudson.model.Item.Delete:slittle</permission>
+    <permission>USER:hudson.model.Item.Delete:slittle1</permission>
+    <permission>GROUP:hudson.model.Item.Discover:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Item.Discover:dpanech</permission>
+    <permission>USER:hudson.model.Item.Discover:slittle</permission>
+    <permission>USER:hudson.model.Item.Discover:slittle1</permission>
+    <permission>GROUP:hudson.model.Item.Move:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Item.Move:dpanech</permission>
+    <permission>USER:hudson.model.Item.Move:slittle</permission>
+    <permission>USER:hudson.model.Item.Move:slittle1</permission>
     <permission>GROUP:hudson.model.Item.Read:authenticated</permission>
+    <permission>GROUP:hudson.model.Item.Read:wrcloud_devops</permission>
     <permission>USER:hudson.model.Item.Read:anonymous</permission>
+    <permission>USER:hudson.model.Item.Read:dpanech</permission>
+    <permission>USER:hudson.model.Item.Read:slittle</permission>
+    <permission>USER:hudson.model.Item.Read:slittle1</permission>
+    <permission>GROUP:hudson.model.Item.Workspace:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Item.Workspace:dpanech</permission>
+    <permission>USER:hudson.model.Item.Workspace:slittle</permission>
+    <permission>USER:hudson.model.Item.Workspace:slittle1</permission>
+    <permission>GROUP:hudson.model.Run.Delete:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Run.Delete:dpanech</permission>
+    <permission>USER:hudson.model.Run.Delete:slittle</permission>
+    <permission>USER:hudson.model.Run.Delete:slittle1</permission>
+    <permission>GROUP:hudson.model.Run.Replay:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Run.Replay:dpanech</permission>
+    <permission>USER:hudson.model.Run.Replay:slittle</permission>
+    <permission>USER:hudson.model.Run.Replay:slittle1</permission>
+    <permission>GROUP:hudson.model.Run.Update:wrcloud_devops</permission>
+    <permission>USER:hudson.model.Run.Update:dpanech</permission>
+    <permission>USER:hudson.model.Run.Update:slittle</permission>
+    <permission>USER:hudson.model.Run.Update:slittle1</permission>
+    <permission>GROUP:hudson.model.View.Configure:wrcloud_devops</permission>
+    <permission>USER:hudson.model.View.Configure:dpanech</permission>
+    <permission>USER:hudson.model.View.Configure:slittle</permission>
+    <permission>USER:hudson.model.View.Configure:slittle1</permission>
+    <permission>GROUP:hudson.model.View.Create:wrcloud_devops</permission>
+    <permission>USER:hudson.model.View.Create:dpanech</permission>
+    <permission>USER:hudson.model.View.Create:slittle</permission>
+    <permission>USER:hudson.model.View.Create:slittle1</permission>
+    <permission>GROUP:hudson.model.View.Delete:wrcloud_devops</permission>
+    <permission>USER:hudson.model.View.Delete:dpanech</permission>
+    <permission>USER:hudson.model.View.Delete:slittle</permission>
+    <permission>USER:hudson.model.View.Delete:slittle1</permission>
     <permission>GROUP:hudson.model.View.Read:authenticated</permission>
+    <permission>GROUP:hudson.model.View.Read:wrcloud_devops</permission>
     <permission>USER:hudson.model.View.Read:anonymous</permission>
+    <permission>USER:hudson.model.View.Read:dpanech</permission>
+    <permission>USER:hudson.model.View.Read:slittle</permission>
+    <permission>USER:hudson.model.View.Read:slittle1</permission>
+    <permission>GROUP:hudson.plugins.jobConfigHistory.JobConfigHistory.DeleteEntry:wrcloud_devops</permission>
+    <permission>USER:hudson.plugins.jobConfigHistory.JobConfigHistory.DeleteEntry:dpanech</permission>
+    <permission>USER:hudson.plugins.jobConfigHistory.JobConfigHistory.DeleteEntry:slittle</permission>
+    <permission>USER:hudson.plugins.jobConfigHistory.JobConfigHistory.DeleteEntry:slittle1</permission>
+    <permission>GROUP:hudson.scm.SCM.Tag:wrcloud_devops</permission>
+    <permission>USER:hudson.scm.SCM.Tag:dpanech</permission>
+    <permission>USER:hudson.scm.SCM.Tag:slittle</permission>
+    <permission>USER:hudson.scm.SCM.Tag:slittle1</permission>
+    <permission>GROUP:jenkins.metrics.api.Metrics.HealthCheck:wrcloud_devops</permission>
+    <permission>USER:jenkins.metrics.api.Metrics.HealthCheck:dpanech</permission>
+    <permission>USER:jenkins.metrics.api.Metrics.HealthCheck:slittle</permission>
+    <permission>USER:jenkins.metrics.api.Metrics.HealthCheck:slittle1</permission>
+    <permission>GROUP:jenkins.metrics.api.Metrics.ThreadDump:wrcloud_devops</permission>
+    <permission>USER:jenkins.metrics.api.Metrics.ThreadDump:dpanech</permission>
+    <permission>USER:jenkins.metrics.api.Metrics.ThreadDump:slittle</permission>
+    <permission>USER:jenkins.metrics.api.Metrics.ThreadDump:slittle1</permission>
     <permission>GROUP:jenkins.metrics.api.Metrics.View:authenticated</permission>
+    <permission>GROUP:jenkins.metrics.api.Metrics.View:wrcloud_devops</permission>
     <permission>USER:jenkins.metrics.api.Metrics.View:anonymous</permission>
+    <permission>USER:jenkins.metrics.api.Metrics.View:dpanech</permission>
+    <permission>USER:jenkins.metrics.api.Metrics.View:slittle</permission>
+    <permission>USER:jenkins.metrics.api.Metrics.View:slittle1</permission>
+    <permission>GROUP:org.jenkins.plugins.lockableresources.LockableResourcesManager.Queue:wrcloud_devops</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.Queue:dpanech</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.Queue:slittle</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.Queue:slittle1</permission>
+    <permission>GROUP:org.jenkins.plugins.lockableresources.LockableResourcesManager.Reserve:wrcloud_devops</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.Reserve:dpanech</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.Reserve:slittle</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.Reserve:slittle1</permission>
+    <permission>GROUP:org.jenkins.plugins.lockableresources.LockableResourcesManager.Steal:wrcloud_devops</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.Steal:dpanech</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.Steal:slittle</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.Steal:slittle1</permission>
+    <permission>GROUP:org.jenkins.plugins.lockableresources.LockableResourcesManager.Unlock:wrcloud_devops</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.Unlock:dpanech</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.Unlock:slittle</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.Unlock:slittle1</permission>
     <permission>GROUP:org.jenkins.plugins.lockableresources.LockableResourcesManager.View:authenticated</permission>
-    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.View:anonymous</permission>
+    <permission>GROUP:org.jenkins.plugins.lockableresources.LockableResourcesManager.View:wrcloud_devops</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.View:dpanech</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.View:slittle</permission>
+    <permission>USER:org.jenkins.plugins.lockableresources.LockableResourcesManager.View:slittle1</permission>
   </authorizationStrategy>
   <securityRealm class="hudson.security.PAMSecurityRealm" plugin="pam-auth@1.12">
     <serviceName>sshd</serviceName>
@@ -37,7 +193,7 @@
   <myViewsTabBar class="hudson.views.DefaultMyViewsTabBar"/>
   <clouds/>
   <quietPeriod>5</quietPeriod>
-  <scmCheckoutRetryCount>0</scmCheckoutRetryCount>
+  <scmCheckoutRetryCount>5</scmCheckoutRetryCount>
   <views>
     <hudson.model.AllView>
       <owner class="hudson" reference="../../.."/>
@@ -46,6 +202,658 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
     </hudson.model.AllView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>Master build jobs</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+        <string>STX_build_centos76_pike</string>
+        <string>STX_build_layer_all_master_master</string>
+        <string>STX_build_layer_compiler_master_master</string>
+        <string>STX_build_layer_containers_master_master</string>
+        <string>STX_build_layer_distro_master_master</string>
+        <string>STX_build_layer_flock_master_master</string>
+        <string>STX_build_master_master</string>
+        <string>STX_build_master_pike</string>
+        <string>STX_build_stein_master</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>Mirror Update</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
+        <string>mirror_download_sync</string>
+        <string>mirror_download_sync_debian</string>
+        <string>mirror_repo_sync</string>
+        <string>mirror_repo_sync_debian</string>
+        <string>Mirror_snapshot_sync_debian</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>Maintenance_Jobs</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
+        <string>delete_old_loads_master_feature</string>
+        <string>dns_cache_refresh</string>
+        <string>docker_prune</string>
+        <string>resource_check</string>
+        <string>STX_sanity_result_from_discuss_mailing_list</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>STX 4.0</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
+        <string>STX_4.0_build_layer_all</string>
+        <string>STX_4.0_build_layer_compiler</string>
+        <string>STX_4.0_build_layer_containers</string>
+        <string>STX_4.0_build_layer_distro</string>
+        <string>STX_4.0_build_layer_flock</string>
+        <string>STX_BUILD_4.0</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>STX 3.0</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
+        <string>STX_BUILD_3.0</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>STX 2.0</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
+        <string>STX_BUILD_2.0</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>~dpanech</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
+        <string>dpanech-stx-debian-master</string>
+        <string>starlingx-jenkins-pipelines</string>
+        <string>STX_build_dev_debian_master</string>
+        <string>test1</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>f-centos8</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
+        <string>STX_build_centos8_master</string>
+        <string>STX_build_layer_all_centos8_master</string>
+        <string>STX_build_layer_compiler_centos8_master</string>
+        <string>STX_build_layer_containers_centos8_master</string>
+        <string>STX_build_layer_distro_centos8_master</string>
+        <string>STX_build_layer_flock_centos8_master</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>STX 5.0</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
+        <string>STX_5.0_build_layer_all</string>
+        <string>STX_5.0_build_layer_compiler</string>
+        <string>STX_5.0_build_layer_containers</string>
+        <string>STX_5.0_build_layer_distro</string>
+        <string>STX_5.0_build_layer_flock</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>Debian_Master</name>
+      <description>Outputs: http://mirror.starlingx.cengn.ca/mirror/starlingx/master/debian/monolithic/</description>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
+        <string>starlingx-jenkins-pipelines</string>
+        <string>STX_build_deb_build_containers</string>
+        <string>STX_build_debian_build_containers_master</string>
+        <string>STX_build_debian_master</string>
+        <string>STX_build_dev_debian_master</string>
+        <string>STX_delete_deb_build_containers</string>
+        <string>STX_openstack_build_debian</string>
+        <string>STX_openstack_build_debian_build_containers</string>
+        <string>STX_openstack_build_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>STX 6.0</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
+        <string>STX_6.0_build_layer_all</string>
+        <string>STX_6.0_build_layer_compiler</string>
+        <string>STX_6.0_build_layer_containers</string>
+        <string>STX_6.0_build_layer_distro</string>
+        <string>STX_6.0_build_layer_flock</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>STX 7.0</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
+        <string>STX_7.0_build_debian</string>
+        <string>STX_7.0_build_debian_build_containers</string>
+        <string>STX_7.0_build_layer_all</string>
+        <string>STX_7.0_build_layer_compiler</string>
+        <string>STX_7.0_build_layer_containers</string>
+        <string>STX_7.0_build_layer_distro</string>
+        <string>STX_7.0_build_layer_flock</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>~jnorton</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
+        <string>CVE_scan</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>STX 8.0</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../listView/jobNames/comparator"/>
+        <string>STX_8.0_build_debian</string>
+        <string>STX_8.0_build_debian_build_containers</string>
+        <string>STX_8.0_build_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>Transition</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator"/>
+        <string>cengn_mirror</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>f-antelope</name>
+      <description>OpenStack Antelope</description>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+        <string>STX_f_antelope_build_debian</string>
+        <string>STX_f_antelope_build_debian_build_containers</string>
+        <string>STX_f_antelope_build_pipelines</string>
+        <string>STX_f_antelope_openstack_build_debian</string>
+        <string>STX_f_antelope_openstack_build_debian_build_containers</string>
+        <string>STX_f_antelope_openstack_build_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>f-kernel-6.6</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+        <string>STX_f_kernel_6.6_build_debian</string>
+        <string>STX_f_kernel_6.6_build_debian_build_containers</string>
+        <string>STX_f_kernel_6.6_openstack_build_debian</string>
+        <string>STX_f_kernel_6.6_openstack_build_debian_build_containers</string>
+        <string>STX_f_kernel_6.6_openstack_build_pipelines</string>
+        <string>STX_f_kernel_6.6_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>STX 9.0</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+        <string>STX_9.0_build_debian</string>
+        <string>STX_9.0_build_debian_build_containers</string>
+        <string>STX_9.0_openstack_build_debian</string>
+        <string>STX_9.0_openstack_build_debian_build_containers</string>
+        <string>STX_9.0_openstack_build_pipelines</string>
+        <string>STX_9.0_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>f-bookworm</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+        <string>STX_f_bookworm_build_debian</string>
+        <string>STX_f_bookworm_build_debian_build_containers</string>
+        <string>STX_f_bookworm_openstack_build_debian</string>
+        <string>STX_f_bookworm_openstack_build_debian_build_containers</string>
+        <string>STX_f_bookworm_openstack_build_pipelines</string>
+        <string>STX_f_bookworm_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <io.jenkins.plugins.view.calendar.CalendarView plugin="calendar-view@0.3.5">
+      <owner class="hudson" reference="../../.."/>
+      <name>Calendar</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+      </jobNames>
+      <jobFilters/>
+      <columns/>
+      <includeRegex>.*debian|.*schedule|.*debian_master</includeRegex>
+      <recurse>false</recurse>
+      <calendarViewEventsType>ALL</calendarViewEventsType>
+      <calendarViewType>WEEK</calendarViewType>
+      <useCustomFormats>false</useCustomFormats>
+      <useCustomWeekSettings>false</useCustomWeekSettings>
+      <useCustomSlotSettings>false</useCustomSlotSettings>
+      <weekSettingsShowWeekends>true</weekSettingsShowWeekends>
+      <weekSettingsShowWeekNumbers>true</weekSettingsShowWeekNumbers>
+      <weekSettingsFirstDay>1</weekSettingsFirstDay>
+      <monthTitleFormat></monthTitleFormat>
+      <monthColumnHeaderFormat></monthColumnHeaderFormat>
+      <monthTimeFormat></monthTimeFormat>
+      <monthPopupBuildTimeFormat></monthPopupBuildTimeFormat>
+      <weekTitleFormat></weekTitleFormat>
+      <weekColumnHeaderFormat></weekColumnHeaderFormat>
+      <weekTimeFormat></weekTimeFormat>
+      <weekSlotTimeFormat></weekSlotTimeFormat>
+      <weekPopupBuildTimeFormat></weekPopupBuildTimeFormat>
+      <dayTitleFormat></dayTitleFormat>
+      <dayColumnHeaderFormat></dayColumnHeaderFormat>
+      <dayTimeFormat></dayTimeFormat>
+      <daySlotTimeFormat></daySlotTimeFormat>
+      <dayPopupBuildTimeFormat></dayPopupBuildTimeFormat>
+      <weekSlotDuration>00:30:00</weekSlotDuration>
+      <weekMinTime>00:00:00</weekMinTime>
+      <weekMaxTime>24:00:00</weekMaxTime>
+      <daySlotDuration>00:30:00</daySlotDuration>
+      <dayMinTime>00:00:00</dayMinTime>
+      <dayMaxTime>24:00:00</dayMaxTime>
+    </io.jenkins.plugins.view.calendar.CalendarView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>f-caracal</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+        <string>STX_f_caracal_build_debian</string>
+        <string>STX_f_caracal_build_debian_build_containers</string>
+        <string>STX_f_caracal_openstack_build_debian</string>
+        <string>STX_f_caracal_openstack_build_debian_build_containers</string>
+        <string>STX_f_caracal_openstack_build_pipelines</string>
+        <string>STX_f_caracal_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>STX 10.0</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+        <string>STX_10.0_build_debian</string>
+        <string>STX_10.0_build_debian_build_containers</string>
+        <string>STX_10.0_openstack_build_debian</string>
+        <string>STX_10.0_openstack_build_debian_build_containers</string>
+        <string>STX_10.0_openstack_build_pipelines</string>
+        <string>STX_10.0_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>f-trixie</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+        <string>STX_f_trixie_build_debian</string>
+        <string>STX_f_trixie_build_debian_build_containers</string>
+        <string>STX_f_trixie_openstack_build_debian</string>
+        <string>STX_f_trixie_openstack_build_debian_build_containers</string>
+        <string>STX_f_trixie_openstack_build_pipelines</string>
+        <string>STX_f_trixie_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>f-portable-dc</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="java.lang.String$CaseInsensitiveComparator" reference="../../../listView[15]/jobNames/comparator"/>
+        <string>STX_f_portable_dc_build_debian</string>
+        <string>STX_f_portable_dc_build_debian_build_containers</string>
+        <string>STX_f_portable_dc_openstack_build_debian</string>
+        <string>STX_f_portable_dc_openstack_build_debian_build_containers</string>
+        <string>STX_f_portable_dc_openstack_build_pipelines</string>
+        <string>STX_f_portable_dc_pipelines</string>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+        <hudson.plugins.favorite.column.FavoriteColumn plugin="favorite@2.225.v68765b_b_a_1fa_3"/>
+      </columns>
+      <recurse>false</recurse>
+    </listView>
   </views>
   <primaryView>all</primaryView>
   <slaveAgentPort>-1</slaveAgentPort>

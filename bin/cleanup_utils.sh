@@ -524,8 +524,38 @@ function workspace_cleanup_by_age {
 
     for d in $dirs; do
        echo "Considering '$d'"
-       echo "   test_deletable '$d' '$num_keep' '$DIR_TYPE' 'publish_dir/$d/outputs/' 'publish_dir'"
-       test_deletable "$d" "$num_keep" "$DIR_TYPE" "publish_dir/$d/outputs/" "publish_dir"
+       local link_dir=
+       local sanity_dir=
+       # Look for publish location:
+       # try build.conf first
+       if [[ -f "$d/build.conf" ]] ; then
+           # build.conf defines these:
+           #   PUBLISH_ROOT
+           #   PUBLISH_SUBDIR (empty for StarlingX builds)
+           # and then publishes the artifacts for that build to
+           #   $PUBLISH_ROOT/$TIMESTAMP/$PUBLISH_SUBDIR
+           local publish_root
+           publish_root="$(unset PUBLISH_ROOT ; source "$d/build.conf" ; echo "$PUBLISH_ROOT")" 2>/dev/null
+           if [[ -n "$publish_root" && -d "$publish_root" ]] ; then
+               link_dir="$publish_root"
+               local publish_subdir
+               publish_subdir="$(unset PUBLISH_SUBDIR ; source "$d/build.conf" ; echo "$PUBLISH_SUBDIR")" 2>/dev/null
+               sanity_dir="${publish_root}/${d}${publish_subdir:+/${publish_subdir}}/outputs"
+           fi
+       fi
+       # else: a directory/symlink named "publish_dir" in workspace root
+       if [[ -z "$link_dir" && -d "publish_dir" ]] ; then
+           link_dir="publish_dir"
+           sanity_dir="publish_dir/$d/outputs"
+       fi
+       # else: consider latest_ links from workspace root, rather than publish location
+       if [[ -z "$link_dir" ]] ; then
+           link_dir="."
+           sanity_dir=""
+       fi
+
+       echo "   test_deletable '$d' '$num_keep' '$DIR_TYPE' '$sanity_dir' '$link_dir'"
+       test_deletable "$d" "$num_keep" "$DIR_TYPE" "$sanity_dir" "$link_dir"
        if [ $? -eq 0 ]; then
            echo "Delete: $d"
            NO_RM=0

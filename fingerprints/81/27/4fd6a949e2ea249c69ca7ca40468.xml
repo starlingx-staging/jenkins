@@ -21,24 +21,12 @@
       <ranges>45</ranges>
     </entry>
     <entry>
-      <string>STX_9.0_pipelines/parts/publish-logs</string>
-      <ranges>20</ranges>
-    </entry>
-    <entry>
       <string>STX_f_caracal_openstack_build_pipelines/parts/publish-logs</string>
       <ranges>35</ranges>
     </entry>
     <entry>
-      <string>STX_9.0_openstack_build_pipelines/parts/publish-logs</string>
-      <ranges>16</ranges>
-    </entry>
-    <entry>
       <string>STX_f_caracal_pipelines/parts/publish-logs</string>
       <ranges>10</ranges>
-    </entry>
-    <entry>
-      <string>STX_10.0_pipelines/parts/publish-logs</string>
-      <ranges>16-17</ranges>
     </entry>
     <entry>
       <string>STX_f_bookworm_openstack_build_pipelines/parts/publish-logs</string>
@@ -47,10 +35,6 @@
     <entry>
       <string>STX_f_bookworm_pipelines/parts/publish-logs</string>
       <ranges>40</ranges>
-    </entry>
-    <entry>
-      <string>STX_10.0_openstack_build_pipelines/parts/publish-logs</string>
-      <ranges>9</ranges>
     </entry>
     <entry>
       <string>STX_f_kernel_6.6_openstack_build_pipelines/parts/publish-logs</string>

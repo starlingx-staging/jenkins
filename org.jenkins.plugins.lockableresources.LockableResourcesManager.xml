@@ -1,5 +1,5 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<org.jenkins.plugins.lockableresources.LockableResourcesManager plugin="lockable-resources@1232.v512d6c434eb_d">
+<org.jenkins.plugins.lockableresources.LockableResourcesManager plugin="lockable-resources@1408.vb_7d1f371781d">
   <resources>
     <org.jenkins.plugins.lockableresources.LockableResource>
       <name>docker-image-lock</name>
@@ -16,6 +16,7 @@
       <queuedContexts/>
     </org.jenkins.plugins.lockableresources.LockableResource>
   </resources>
+  <allowEmptyOrNullValues>false</allowEmptyOrNullValues>
   <queuedContexts/>
   <enableSave>1</enableSave>
 </org.jenkins.plugins.lockableresources.LockableResourcesManager>

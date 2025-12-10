@@ -10,9 +10,10 @@
         <numToKeep>-1</numToKeep>
         <artifactDaysToKeep>-1</artifactDaysToKeep>
         <artifactNumToKeep>-1</artifactNumToKeep>
+        <removeLastBuild>false</removeLastBuild>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@330.v645b_7df10e2a_">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@338.va_0a_b_50e29397">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -43,12 +44,12 @@
   </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
-    <EnvInjectBuilder plugin="envinject@2.908.v66a_774b_31d93">
+    <EnvInjectBuilder plugin="envinject@2.926.v69c9b_3896a_96">
       <info>
         <propertiesFilePath>env.properties</propertiesFilePath>
       </info>
     </EnvInjectBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@787.v665fcf2a_830b_">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@859.vb_e3907a_07a_16">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -88,7 +89,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@787.v665fcf2a_830b_">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@859.vb_e3907a_07a_16">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -128,7 +129,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@787.v665fcf2a_830b_">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@859.vb_e3907a_07a_16">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -168,7 +169,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@787.v665fcf2a_830b_">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@859.vb_e3907a_07a_16">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -210,7 +211,7 @@
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
   </builders>
   <publishers>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.104">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@1916.vc954a_f86ff21">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -240,11 +241,12 @@
       <from></from>
       <saveOutput>false</saveOutput>
       <disabled>false</disabled>
+      <throttlingEnabled>false</throttlingEnabled>
     </hudson.plugins.emailext.ExtendedEmailPublisher>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.26"/>
-    <EnvInjectBuildWrapper plugin="envinject@2.908.v66a_774b_31d93">
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.30"/>
+    <EnvInjectBuildWrapper plugin="envinject@2.926.v69c9b_3896a_96">
       <info>
         <scriptContent>export BRANCH=r/stx.10.0
 export LAYER=build-containers
@@ -263,7 +265,7 @@ export MASTER_JOB_NAME=$JOB_NAME
 export DISTRO=$OS
 
 export MUNGED_BRANCH=$(echo $BRANCH | tr &apos;/&apos; &apos;-&apos;)
-if [ &quot;$BRANCH&quot; == &quot;r/stx.10.0&quot; ]; then
+if [ &quot;$BRANCH&quot; == &quot;master&quot; ]; then
     PUBLISH_BRANCH=$BRANCH
     PUBLISH_TIMESTAMP=$TIMESTAMP
 elif [[ $BRANCH == f/* ]]; then
@@ -284,7 +286,7 @@ elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9][.][Bb][0-9]* ]]; then
     PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
     PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
     MUNGED_BRANCH=&quot;m-$BRANCH&quot;
-elif [[ $BRANCH == r/stx[.]@([0-9])[.]@([0-9]) ]]; then
+elif [[ $BRANCH == r/stx[.]+([0-9])[.]@([0-9]) ]]; then
     # release candidate branch r/stx.2.0
     PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/stx[.]\([0-9]*[.][0-9]*\).*$#rc/\1#&apos;)
     PUBLISH_TIMESTAMP=$TIMESTAMP
@@ -352,7 +354,7 @@ echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt;&gt; env.properties
 echo BUILD_NM=$JOB_NAME &gt;&gt; env.properties
 echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties
 # echo REPO_FILE=$REPO_FILE &gt;&gt; env.properties</scriptContent>
-        <secureGroovyScript plugin="script-security@1321.va_73c0795b_923">
+        <secureGroovyScript plugin="script-security@1373.vb_b_4a_a_c26fa_00">
           <script></script>
           <sandbox>false</sandbox>
         </secureGroovyScript>

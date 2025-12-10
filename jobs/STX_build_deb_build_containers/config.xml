@@ -80,6 +80,25 @@
           <defaultValue>slittlewrs</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TIMESTAMP</name>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>MUNGED_BRANCH</name>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OS_VERSION</name>
+          <defaultValue>bullseye</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OS_ARCH</name>
+          <defaultValue>amd64</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -213,8 +232,9 @@ LATEST_LST_FILE=&quot;$MY_WORKSPACE/outputs/docker-images/builder-images-debian-
 mkdir -p &quot;$MY_WORKSPACE/outputs/docker-images&quot;
 
 cd $DOCKER_BUILD_WORKDIR
-DOCKERFILE_LIST=&quot;$(find stx/dockerfiles -name &apos;*.Dockerfile&apos;)&quot;
+DOCKERFILE_LIST=&quot;$(find stx/ -name &apos;*.Dockerfile&apos;)&quot;
 ALL_IMAGES=()
+LATEST_IMAGES=()
 
 if $FULL_BUILD ; then
     DOCKER_BUILD_ARGS+=&quot; --no-cache&quot;
@@ -223,12 +243,21 @@ fi
 # versioned images
 rm -f &quot;$VERSIONED_LST_FILE&quot;
 for DOCKERFILE in $DOCKERFILE_LIST ; do
-    DOCKERFILE_NAME=${DOCKERFILE#stx/dockerfiles/}
+    DOCKERFILE_NAME=${DOCKERFILE##*/}
     DOCKERFILE_NAME=${DOCKERFILE_NAME%.Dockerfile}
+    FIELDS=$(echo ${DOCKERFILE} | awk -F&apos;/&apos; &apos;{ print NF }&apos;)
+    OS_VER=&quot;${OS_VERSION}&quot;
+    if [ $FIELDS -ge 5 ]; then
+        OS_VER=$(echo ${DOCKERFILE} | cut -d &apos;/&apos; -f 3)
+        FULL_DOCKER_BUILD_TAG=$MUNGED_BRANCH-${OS}-${OS_VER}-${OS_ARCH}-$TIMESTAMP
+    else
+        FULL_DOCKER_BUILD_TAG=${DOCKER_BUILD_TAG}
+    fi
     DOCKER_BUILD_IMAGE=${DOCKER_BUILD_IMAGE_PREFIX}${DOCKERFILE_NAME}:${DOCKER_BUILD_TAG}
+    FULL_DOCKER_BUILD_IMAGE=${DOCKER_BUILD_IMAGE_PREFIX}${DOCKERFILE_NAME}:${FULL_DOCKER_BUILD_TAG}
 
-    echo &quot;building ${DOCKER_BUILD_IMAGE}&quot;
-    echo $DOCKER_BUILD_IMAGE &gt;&gt;&quot;$VERSIONED_LST_FILE&quot;
+    echo &quot;building ${FULL_DOCKER_BUILD_IMAGE}&quot;
+    echo $FULL_DOCKER_BUILD_IMAGE &gt;&gt;&quot;$VERSIONED_LST_FILE&quot;
     
 #    if [[ $DOCKERFILE_NAME == stx-lat-tool ]] ; then
 #      sed  &quot;s!\${LAT_BINARY_RESOURCE_PATH}!${LAT_BINARY_RESOURCE_PATH}!&quot; $DOCKERFILE &gt;$DOCKERFILE.new
@@ -238,31 +267,34 @@ for DOCKERFILE in $DOCKERFILE_LIST ; do
     with_retries $DOCKER_BUILD_RETRIES  docker build \
                   --ulimit core=0 \
                   --network host \
-                  --tag $DOCKER_BUILD_IMAGE \
+                  --tag $FULL_DOCKER_BUILD_IMAGE \
                   --file ${DOCKERFILE} \
                   $DOCKER_BUILD_ARGS \
                   .
                   
-    ALL_IMAGES+=($DOCKER_BUILD_IMAGE)
-                  
+    ALL_IMAGES+=($FULL_DOCKER_BUILD_IMAGE)
+       
+    if [ &quot;${FULL_DOCKER_BUILD_IMAGE}&quot; != &quot;${DOCKER_BUILD_IMAGE}&quot; ] &amp;&amp;
+       [ &quot;${OS_VER}&quot; == &quot;${OS_VERSION}&quot; ]; then
+        echo &quot;creating tag ${DOCKER_BUILD_IMAGE}&quot;
+        docker tag $FULL_DOCKER_BUILD_IMAGE $DOCKER_BUILD_IMAGE
+        ALL_IMAGES+=($DOCKER_BUILD_IMAGE)
+    fi
 done
 
 # latest tags
 rm -f  &quot;$LATEST_LST_FILE&quot;
-for DOCKERFILE in $DOCKERFILE_LIST ; do
-    DOCKERFILE_NAME=${DOCKERFILE#stx/dockerfiles/}
-    DOCKERFILE_NAME=${DOCKERFILE_NAME%.Dockerfile}
-    DOCKER_BUILD_IMAGE=${DOCKER_BUILD_IMAGE_PREFIX}${DOCKERFILE_NAME}:${DOCKER_BUILD_TAG}
+for DOCKER_BUILD_IMAGE in ${ALL_IMAGES[@]} ; do
     DOCKER_BUILD_IMAGE_LATEST=${DOCKER_BUILD_IMAGE%-*}-latest
     
     echo &quot;creating tag ${DOCKER_BUILD_IMAGE_LATEST}&quot;
     echo $DOCKER_BUILD_IMAGE_LATEST &gt;&gt;&quot;$LATEST_LST_FILE&quot;
     docker tag $DOCKER_BUILD_IMAGE $DOCKER_BUILD_IMAGE_LATEST
-    ALL_IMAGES+=($DOCKER_BUILD_IMAGE_LATEST)
+    LATEST_IMAGES+=($DOCKER_BUILD_IMAGE_LATEST)
 done
 
 # push them
-for img in ${ALL_IMAGES[@]} ; do
+for img in ${ALL_IMAGES[@]} ${LATEST_IMAGES[@]}; do
     docker push $img
 done
 </command>

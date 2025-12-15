@@ -10,9 +10,10 @@
         <numToKeep>-1</numToKeep>
         <artifactDaysToKeep>-1</artifactDaysToKeep>
         <artifactNumToKeep>-1</artifactNumToKeep>
+        <removeLastBuild>false</removeLastBuild>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@330.v645b_7df10e2a_">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@338.va_0a_b_50e29397">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -110,7 +111,7 @@
   <triggers/>
   <concurrentBuild>false</concurrentBuild>
   <builders>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@787.v665fcf2a_830b_">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@859.vb_e3907a_07a_16">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -230,6 +231,7 @@ VERSIONED_LST_FILE=&quot;$MY_WORKSPACE/outputs/docker-images/builder-images-debi
 LATEST_LST_FILE=&quot;$MY_WORKSPACE/outputs/docker-images/builder-images-debian-latest.lst&quot;
 
 mkdir -p &quot;$MY_WORKSPACE/outputs/docker-images&quot;
+mkdir -p &quot;$MY_WORKSPACE/outputs/docker-images/empty_dir&quot;
 
 cd $DOCKER_BUILD_WORKDIR
 DOCKERFILE_LIST=&quot;$(find stx/ -name &apos;*.Dockerfile&apos;)&quot;
@@ -256,6 +258,12 @@ for DOCKERFILE in $DOCKERFILE_LIST ; do
     DOCKER_BUILD_IMAGE=${DOCKER_BUILD_IMAGE_PREFIX}${DOCKERFILE_NAME}:${DOCKER_BUILD_TAG}
     FULL_DOCKER_BUILD_IMAGE=${DOCKER_BUILD_IMAGE_PREFIX}${DOCKERFILE_NAME}:${FULL_DOCKER_BUILD_TAG}
 
+    if [[ ${DOCKERFILE_NAME} == &quot;stx-lat-tool&quot; ]] ; then
+        extra_docker_build_args=&quot;--build-context lat-cache=$MY_WORKSPACE/outputs/docker-images/empty_dir&quot;
+    else
+        extra_docker_build_args=
+    fi
+
     echo &quot;building ${FULL_DOCKER_BUILD_IMAGE}&quot;
     echo $FULL_DOCKER_BUILD_IMAGE &gt;&gt;&quot;$VERSIONED_LST_FILE&quot;
     
@@ -269,6 +277,7 @@ for DOCKERFILE in $DOCKERFILE_LIST ; do
                   --network host \
                   --tag $FULL_DOCKER_BUILD_IMAGE \
                   --file ${DOCKERFILE} \
+                  $extra_docker_build_args \
                   $DOCKER_BUILD_ARGS \
                   .
                   
@@ -297,17 +306,18 @@ done
 for img in ${ALL_IMAGES[@]} ${LATEST_IMAGES[@]}; do
     docker push $img
 done
+
 </command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@463.vedf8358e006b_">
+    <hudson.tasks.Mailer plugin="mailer@509.vc54d23fc427e">
       <recipients>davlet.panech@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.104">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@1916.vc954a_f86ff21">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -337,8 +347,9 @@ done
       <from></from>
       <saveOutput>false</saveOutput>
       <disabled>false</disabled>
+      <throttlingEnabled>false</throttlingEnabled>
     </hudson.plugins.emailext.ExtendedEmailPublisher>
-    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@787.v665fcf2a_830b_">
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@859.vb_e3907a_07a_16">
       <configs>
         <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
           <configs>
@@ -369,6 +380,6 @@ MASTER_JOB_NAME=$MASTER_JOB_NAME</properties>
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.26"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.30"/>
   </buildWrappers>
 </project>

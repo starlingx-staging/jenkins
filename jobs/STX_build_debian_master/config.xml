@@ -13,7 +13,7 @@
         <removeLastBuild>false</removeLastBuild>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@332.va_1ee476d8f6d">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@338.va_0a_b_50e29397">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -78,15 +78,15 @@
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>BUILD_HELM_CHARTS</name>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>BUILD_DOCKER_BASE_IMAGE</name>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>BUILD_DOCKER_IMAGES</name>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>DOCKER_IMAGE_LIST</name>
@@ -94,7 +94,7 @@
         </hudson.model.StringParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>PUSH_DOCKER_IMAGES</name>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>USE_DOCKER_CACHE</name>
@@ -105,17 +105,40 @@
           <description>2022-11-01: this option does not work correctly (breaks docker image builds).</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>PATCH_TOPIC</name>
+          <description>List of Gerrit topics to cherry-pick, one per line.</description>
+          <defaultValue>concurrent_builds</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>PATCH_LIST</name>
+          <description>&lt;pre&gt;&lt;code&gt;
+    List of Gerrit URLs to apply before running the build, one per line &quot;[PATH] URL REF&quot;, eg:
+
+      https://review.opendev.org/starlingx/config     refs/changes/71/859571/4
+      https://review.opendev.org/starlingx/stx-puppet refs/changes/75/859575/1
+      https://review.opendev.org/starlingx/tools      refs/changes/76/859576/2
+
+    or with paths relative to repo root:
+
+      cgcs-root/stx/config     https://review.opendev.org/starlingx/config     refs/changes/71/859571/4
+      cgcs-root/stx/stx-puppet https://review.opendev.org/starlingx/stx-puppet refs/changes/75/859575/1
+      stx-tools                https://review.opendev.org/starlingx/tools      refs/changes/76/859576/2
+&lt;/code&gt;&lt;/pre&gt;</description>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>true</disabled>
+  <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <hudson.triggers.TimerTrigger>
-      <spec>10 0 * * 0,1,2,3,4,5
+      <spec># 10 16 * * 0,1,2,3,4,5
 
 
 </spec>
@@ -123,7 +146,7 @@
   </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
-    <EnvInjectBuilder plugin="envinject@2.922.v2274200dd258">
+    <EnvInjectBuilder plugin="envinject@2.926.v69c9b_3896a_96">
       <info>
         <propertiesFilePath>env.properties</propertiesFilePath>
       </info>
@@ -135,7 +158,8 @@
 EMAIL_LIST=&quot;\
 	davlet.panech@windriver.com, \
     scott.little@windriver.com, \
-	dostoievski.albinobatista@windriver.com     
+    Leonardo.FagundesLuzSerrano@windriver.com \
+    Caio.Volpato@windriver.com \
 &quot;
 
 cat &gt;&quot;env.properties&quot; &lt;&lt;_END
@@ -153,7 +177,7 @@ _END
 </command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@840.v3c7d4a_a_5e6c7">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@859.vb_e3907a_07a_16">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -196,12 +220,12 @@ _END
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@489.vd4b_25144138f">
+    <hudson.tasks.Mailer plugin="mailer@509.vc54d23fc427e">
       <recipients>scott.little@windriver.com davlet.panech@windriver.com dostoievski.albinobatista@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@1876.v28d8d38315b_d">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@1916.vc954a_f86ff21">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -235,8 +259,8 @@ _END
     </hudson.plugins.emailext.ExtendedEmailPublisher>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.28"/>
-    <EnvInjectBuildWrapper plugin="envinject@2.922.v2274200dd258">
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.30"/>
+    <EnvInjectBuildWrapper plugin="envinject@2.926.v69c9b_3896a_96">
       <info>
         <scriptContent>export BRANCH=master
 export LAYER=monolithic
@@ -266,7 +290,7 @@ elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9][.][Bb][0-9]* ]]; then
     # milestone tag 2018.10.b3
     PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
     PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
-elif [[ $BRANCH == r/stx[.]@([0-9])[.]@([0-9]) ]]; then
+elif [[ $BRANCH == r/stx[.]+([0-9])[.]@([0-9]) ]]; then
     # release candidate branch r/stx.2.0
     PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/stx[.]\([0-9]*[.][0-9]*\).*$#rc/\1#&apos;)
     PUBLISH_TIMESTAMP=$TIMESTAMP
@@ -295,7 +319,7 @@ export PUBLISH_LOGS_URL=$PUBLISH_URL/$(echo $PUBLISH_LOGS_BASE | sed &apos;s#^/e
 
 echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt; env.properties
 echo BRANCH=$BRANCH &gt;&gt; env.properties</scriptContent>
-        <secureGroovyScript plugin="script-security@1369.v9b_98a_4e95b_2d">
+        <secureGroovyScript plugin="script-security@1373.vb_b_4a_a_c26fa_00">
           <script></script>
           <sandbox>false</sandbox>
         </secureGroovyScript>

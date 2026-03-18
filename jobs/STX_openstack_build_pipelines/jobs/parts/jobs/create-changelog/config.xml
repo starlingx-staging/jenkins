@@ -103,5 +103,5 @@
     <lightweight>false</lightweight>
   </definition>
   <triggers/>
-  <disabled>true</disabled>
+  <disabled>false</disabled>
 </flow-definition>

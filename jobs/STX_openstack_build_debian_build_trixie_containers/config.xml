@@ -13,7 +13,7 @@
         <removeLastBuild>false</removeLastBuild>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@332.va_1ee476d8f6d">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@338.va_0a_b_50e29397">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -34,22 +34,22 @@
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>true</disabled>
+  <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <hudson.triggers.TimerTrigger>
-      <spec>30 22 * * *</spec>
+      <spec># 30 10 * * *</spec>
     </hudson.triggers.TimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
-    <EnvInjectBuilder plugin="envinject@2.922.v2274200dd258">
+    <EnvInjectBuilder plugin="envinject@2.926.v69c9b_3896a_96">
       <info>
         <propertiesFilePath>env.properties</propertiesFilePath>
       </info>
     </EnvInjectBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@840.v3c7d4a_a_5e6c7">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@859.vb_e3907a_07a_16">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -89,7 +89,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@840.v3c7d4a_a_5e6c7">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@859.vb_e3907a_07a_16">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -129,7 +129,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@840.v3c7d4a_a_5e6c7">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@859.vb_e3907a_07a_16">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -169,7 +169,7 @@
         </hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
       </configs>
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
-    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@840.v3c7d4a_a_5e6c7">
+    <hudson.plugins.parameterizedtrigger.TriggerBuilder plugin="parameterized-trigger@859.vb_e3907a_07a_16">
       <configs>
         <hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig>
           <configs>
@@ -211,7 +211,7 @@
     </hudson.plugins.parameterizedtrigger.TriggerBuilder>
   </builders>
   <publishers>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@1876.v28d8d38315b_d">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@1916.vc954a_f86ff21">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -245,24 +245,27 @@
     </hudson.plugins.emailext.ExtendedEmailPublisher>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.28"/>
-    <EnvInjectBuildWrapper plugin="envinject@2.922.v2274200dd258">
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.30"/>
+    <EnvInjectBuildWrapper plugin="envinject@2.926.v69c9b_3896a_96">
       <info>
-        <scriptContent>export BRANCH=f/trixie
+        <scriptContent>export BRANCH=master
 export LAYER=build-containers
 export REGISTRY=docker.io
 export REGISTRY_USERID=slittlewrs
+export PRODUCT=openstack
 
 # Need a build-container manifest
-export MANIFEST=compiler.xml
+export MANIFEST=stx-openstack.xml
 export OS=debian
 export OS_VERSION=bullseye
+export DISTRO=$OS
+export CODENAME=$OS_VERSION
+export ARCH=amd64
 export PUBLISH_URL=http://mirror.starlingx.cengn.ca
 
 export TIMESTAMP=$BUILD_TIMESTAMP
 export MASTER_BUILD_NUMBER=$BUILD_NUMBER
 export MASTER_JOB_NAME=$JOB_NAME
-export DISTRO=$OS
 
 export MUNGED_BRANCH=$(echo $BRANCH | tr &apos;/&apos; &apos;-&apos;)
 if [ &quot;$BRANCH&quot; == &quot;master&quot; ]; then
@@ -307,15 +310,19 @@ elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9] ]] || [[ $BRANCH == [0-9][0
     MUNGED_BRANCH=&quot;r-$BRANCH&quot;
 fi
 
-export PROJECT=$OS-$MUNGED_BRANCH-$LAYER
+if [ &quot;${PRODUCT}&quot; != &quot;&quot; ]; then
+    MUNGED_BRANCH=${MUNGED_BRANCH}-${PRODUCT}
+fi
+
+export PROJECT=$OS-$OS_VERSION-$MUNGED_BRANCH-$LAYER
 
 export MY_REPO_ROOT=/localdisk/designer/$USER/$PROJECT
 export MY_REPO=$MY_REPO_ROOT/cgcs-root
 export MY_WORKSPACE=/localdisk/loadbuild/$USER/$PROJECT/$TIMESTAMP
 
-export DOCKER_BUILD_TAG=$MUNGED_BRANCH-$OS-$TIMESTAMP
+export DOCKER_BUILD_TAG=$MUNGED_BRANCH-$OS-$OS_VERSION-$TIMESTAMP
 
-export PUBLISH_DISTRO_BASE=/export/mirror/starlingx/$PUBLISH_BRANCH/$DISTRO/$LAYER
+export PUBLISH_DISTRO_BASE=/starlingx/mirror/starlingx/$PUBLISH_BRANCH/$DISTRO/$CODENAME/$ARCH/$LAYER
 export PUBLISH_BUILD_BASE=$PUBLISH_DISTRO_BASE/$PUBLISH_TIMESTAMP
 export PUBLISH_INPUTS_BASE=$PUBLISH_BUILD_BASE/inputs
 export PUBLISH_OUTPUTS_BASE=$PUBLISH_BUILD_BASE/outputs
@@ -354,7 +361,7 @@ echo PUBLISH_LOGS_URL=$PUBLISH_LOGS_URL &gt;&gt; env.properties
 echo BUILD_NM=$JOB_NAME &gt;&gt; env.properties
 echo BUILD_NUM=$BUILD_NUMBER &gt;&gt; env.properties
 # echo REPO_FILE=$REPO_FILE &gt;&gt; env.properties</scriptContent>
-        <secureGroovyScript plugin="script-security@1369.v9b_98a_4e95b_2d">
+        <secureGroovyScript plugin="script-security@1373.vb_b_4a_a_c26fa_00">
           <script></script>
           <sandbox>false</sandbox>
         </secureGroovyScript>

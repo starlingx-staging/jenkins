@@ -1,4 +1,5 @@
-<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
   <actions/>
   <description>Create a last commits file</description>
   <keepDependencies>false</keepDependencies>
@@ -9,9 +10,10 @@
         <numToKeep>-1</numToKeep>
         <artifactDaysToKeep>-1</artifactDaysToKeep>
         <artifactNumToKeep>-1</artifactNumToKeep>
+        <removeLastBuild>false</removeLastBuild>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.34">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@338.va_0a_b_50e29397">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
@@ -33,35 +35,34 @@
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>true</disabled>
+  <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers/>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>echo "MY_REPO_ROOT=$MY_REPO_ROOT"
-echo "MY_REPO=$MY_REPO"
-echo "MY_WORKSPACE=$MY_WORKSPACE"
+      <command>echo &quot;MY_REPO_ROOT=$MY_REPO_ROOT&quot;
+echo &quot;MY_REPO=$MY_REPO&quot;
+echo &quot;MY_WORKSPACE=$MY_WORKSPACE&quot;
 
 
-[ -n "$MY_REPO_ROOT" ]
-[ -n "$MY_REPO" ]
-[ -n "$MY_WORKSPACE" ]
+[ -n &quot;$MY_REPO_ROOT&quot; ]
+[ -n &quot;$MY_REPO&quot; ]
+[ -n &quot;$MY_WORKSPACE&quot; ]
 
-[ -d "$MY_REPO_ROOT" ]
-[ -d "$MY_REPO" ]
-[ -n "$MY_WORKSPACE" ]
+[ -d &quot;$MY_REPO_ROOT&quot; ]
+[ -d &quot;$MY_REPO&quot; ]
+[ -n &quot;$MY_WORKSPACE&quot; ]
 
 
 cd $MY_REPO_ROOT
 
-if [ ! -f "${MY_WORKSPACE}/NEED_BUILD" ]; then
-    echo "No new content.  Build not required"
+if [ ! -f &quot;${MY_WORKSPACE}/NEED_BUILD&quot; ]; then
+    echo &quot;No new content.  Build not required&quot;
     exit 0
 fi
 
@@ -70,17 +71,17 @@ for e in $(find . -xtype d -name .git)
 do
  pushd $e/..
  f=$(/usr/bin/dirname $e)
- echo "$f"
- g=`printf "%-48s" $f`
- git log --pretty=tformat:"$g %H" -n 1 &gt;&gt; $MY_WORKSPACE/LAST_COMMITS
+ echo &quot;$f&quot;
+ g=`printf &quot;%-48s&quot; $f`
+ git log --pretty=tformat:&quot;$g %H&quot; -n 1 &gt;&gt; $MY_WORKSPACE/LAST_COMMITS
  popd
 done
 
 cd $MY_WORKSPACE
 
-export DEPLOY_DIR="$(dirname $MY_WORKSPACE)"
-export MY_CONTEXT_DIR="$DEPLOY_DIR/context"
-export BUILD_TIMESTAMP="$(basename $MY_WORKSPACE)"
+export DEPLOY_DIR=&quot;$(dirname $MY_WORKSPACE)&quot;
+export MY_CONTEXT_DIR=&quot;$DEPLOY_DIR/context&quot;
+export BUILD_TIMESTAMP=&quot;$(basename $MY_WORKSPACE)&quot;
 
 \cp LAST_COMMITS $DEPLOY_DIR/LAST_COMMITS
 
@@ -100,12 +101,12 @@ fi
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@448.v5b_97805e3767">
+    <hudson.tasks.Mailer plugin="mailer@509.vc54d23fc427e">
       <recipients>scott.little@windriver.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.95">
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@1916.vc954a_f86ff21">
       <recipientList>$DEFAULT_RECIPIENTS</recipientList>
       <configuredTriggers>
         <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
@@ -115,7 +116,7 @@ fi
             <recipientProviders>
               <hudson.plugins.emailext.plugins.recipients.ListRecipientProvider/>
             </recipientProviders>
-            <attachmentsPattern/>
+            <attachmentsPattern></attachmentsPattern>
             <attachBuildLog>false</attachBuildLog>
             <compressBuildLog>false</compressBuildLog>
             <replyTo>$PROJECT_DEFAULT_REPLYTO</replyTo>
@@ -126,18 +127,19 @@ fi
       <contentType>default</contentType>
       <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
       <defaultContent>$DEFAULT_CONTENT</defaultContent>
-      <attachmentsPattern/>
+      <attachmentsPattern></attachmentsPattern>
       <presendScript>$DEFAULT_PRESEND_SCRIPT</presendScript>
       <postsendScript>$DEFAULT_POSTSEND_SCRIPT</postsendScript>
       <attachBuildLog>false</attachBuildLog>
       <compressBuildLog>false</compressBuildLog>
       <replyTo>$DEFAULT_REPLYTO</replyTo>
-      <from/>
+      <from></from>
       <saveOutput>false</saveOutput>
       <disabled>true</disabled>
+      <throttlingEnabled>false</throttlingEnabled>
     </hudson.plugins.emailext.ExtendedEmailPublisher>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.22"/>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.30"/>
   </buildWrappers>
 </project>

@@ -115,7 +115,7 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <hudson.triggers.TimerTrigger>
-      <spec>10 0 * * 6
+      <spec>10 17 * * 1,2,3,4,5
 
 
 </spec>
@@ -266,7 +266,7 @@ elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9][.][Bb][0-9]* ]]; then
     # milestone tag 2018.10.b3
     PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#&apos;)
     PUBLISH_TIMESTAMP=$(echo $BRANCH | sed &apos;s#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#&apos;)
-elif [[ $BRANCH == r/stx[.]@([0-9])[.]@([0-9]) ]]; then
+elif [[ $BRANCH == r/stx[.]+([0-9])[.]@([0-9]) ]]; then
     # release candidate branch r/stx.2.0
     PUBLISH_BRANCH=$(echo $BRANCH | sed &apos;s#^r/stx[.]\([0-9]*[.][0-9]*\).*$#rc/\1#&apos;)
     PUBLISH_TIMESTAMP=$TIMESTAMP

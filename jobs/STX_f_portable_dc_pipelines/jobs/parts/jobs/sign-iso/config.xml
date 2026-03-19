@@ -9,14 +9,12 @@
         <string>DRY_RUN</string>
         <string>PUBLISH_TIMESTAMP</string>
         <string>MASTER_BUILD_NUMBER</string>
-        <string>PATCH_LIST</string>
         <string>TIMESTAMP</string>
         <string>JENKINS_SCRIPTS_BRANCH</string>
-        <string>PATCH_TOPIC</string>
         <string>MASTER_JOB_NAME</string>
-        <string>REFRESH_SOURCE</string>
         <string>BUILD_HOME</string>
         <string>SHELL_XTRACE</string>
+        <string>BUILD_ISO</string>
       </parameters>
       <options/>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
@@ -71,20 +69,14 @@
           <name>SHELL_XTRACE</name>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>REFRESH_SOURCE</name>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.TextParameterDefinition>
-          <name>PATCH_LIST</name>
-          <defaultValue>-</defaultValue>
-          <trim>false</trim>
-        </hudson.model.TextParameterDefinition>
-        <hudson.model.TextParameterDefinition>
-          <name>PATCH_TOPIC</name>
-          <defaultValue>-</defaultValue>
-          <trim>false</trim>
-        </hudson.model.TextParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>BUILD_ISO</name>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>SIGN_ISO</name>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -104,10 +96,10 @@
         </hudson.plugins.git.BranchSpec>
       </branches>
       <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-      <submoduleCfg class="list"/>
+      <submoduleCfg class="empty-list"/>
       <extensions/>
     </scm>
-    <scriptPath>pipelines/parts/clone-source.Jenkinsfile</scriptPath>
+    <scriptPath>pipelines/parts/sign-iso.Jenkinsfile</scriptPath>
     <lightweight>false</lightweight>
   </definition>
   <triggers/>

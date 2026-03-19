@@ -264,7 +264,7 @@ elif [[ $BRANCH == [0-9][0-9][0-9][0-9][.][0-9][0-9][.][Bb][0-9]* ]]; then
     # milestone tag 2018.10.b3
     PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\).*#milestone/\1#')
     PUBLISH_TIMESTAMP=$(echo $BRANCH | sed 's#^\([0-9][0-9][0-9][0-9][.][0-9][0-9]\)\([.][Bb][0-9]*\)$#\1\2#')
-elif [[ $BRANCH == r/stx[.]@([0-9])[.]@([0-9]) ]]; then
+elif [[ $BRANCH == r/stx[.]+([0-9])[.]@([0-9]) ]]; then
     # release candidate branch r/stx.2.0
     PUBLISH_BRANCH=$(echo $BRANCH | sed 's#^r/stx[.]\([0-9]*[.][0-9]*\).*$#rc/\1#')
     PUBLISH_TIMESTAMP=$TIMESTAMP

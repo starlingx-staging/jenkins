@@ -2,6 +2,8 @@
 
 set -x
 
+SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
+
 DEB_ROOT=/starlingx/mirror/debian
 SOURCES_LIST_DIR=/starlingx/config/debian/
 KEYRING_DIR=${SOURCES_LIST_DIR}/mirrorkeyring
@@ -18,7 +20,7 @@ OUT_PATH=7
 KEY=8
 EXTRA_ARGS=9
 DRY_RUN_ARG=
-RETRY_COUNT=1
+RETRY_COUNT=3
 
 SOURCE_LIST=$(find $SOURCES_LIST_DIR -name "$SOURCES_LIST_TEMPLATE")
 
@@ -184,7 +186,32 @@ for source_file in $SOURCE_LIST; do
         fi
 
         RC=0
-        for (( i=0; i < RETRY_COUNT; ++i )) ; do
+        for (( i=0; i < $RETRY_COUNT; ++i )) ; do
+
+            LOCK_FILE=$(find "$outPath" -maxdepth 1 -name 'Archive-Update-in-Progress-*')
+
+            if [ -n "$LOCK_FILE" ]; then
+                echo "Stale lock file found: $LOCK_FILE"
+
+                # check if debmirror is still running
+                if ! pgrep -f debmirror > /dev/null; then
+                    echo "No debmirror process found. Removing stale lock."
+                    rm -f "$LOCK_FILE"
+                else
+                    echo "debmirror appears to still be running. Delay, then retry."
+                    echo "process heirarchy of competing debmirror is..."
+                    pidlist=""
+                    for pid in $(pgrep -f debmirror); do
+                        while [ "$pid" -ne 1 ]; do
+                            pidlist+="$pid,"
+                            pid=$(ps -p $pid -o ppid=)
+                        done
+                    done
+                    ps -p ${pidlist%,} -o pid,ppid,user,lstart,cmd
+                    sleep 600
+                    continue
+                fi
+            fi
 
             cmd="debmirror \
                   $DRY_RUN_ARG \
@@ -208,16 +235,29 @@ for source_file in $SOURCE_LIST; do
             if [[ $RC -ne 0 ]] ; then
                 echo "Error: Attempt=$i: Command: $cmd"
                 echo "Error: RC: $RC"
+		sleep 300
                 continue
             fi
+        
+            cmd="$SCRIPT_DIR/debian_repo_validate.py $outPath --dist $release --sections $section --archs $arch"
+            echo "$cmd"
+            $cmd
+            RC=$?
+            if [[ $RC -ne 0 ]] ; then
+                echo "Error: Attempt=$i: Command: $cmd"
+                echo "Error: RC: $RC"
+		sleep 300
+                continue
+            fi
+            
             break
         done
-        if [ $RC -ne 0 ]; then
+        # RC 255 == section with no packages (yet)
+        if [ $RC -ne 0 ] && [ $RC -ne 255 ]; then
             exit $RC
         fi
     done
     RC=${PIPESTATUS[-1]}
-    # RC 255 == section with no packages (yet)
     if [ $RC -ne 0 ] && [ $RC -ne 255 ]; then
         exit 1
     fi

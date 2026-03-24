@@ -1,5 +1,7 @@
 #!/bin/bash
 
+-x
+
 DEBIAN_SNAPSHOT_SYNC_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
 
 DEB_ROOT=/starlingx/mirror/debian
@@ -182,9 +184,9 @@ for release in "${DISTRIBUTION}" "${DISTRIBUTION}-security"; do
         if [ "${SECUTITY_SNAPSHOT_TS}" == "" ]; then
             echo "Skipping '${release}' because debian_security_snapshot_timestamp not specified"
             continue
-	else
+        else
             inPath="archive/debian-security/${SECUTITY_SNAPSHOT_TS}"
-	fi
+        fi
     else
         inPath="archive/debian/${SNAPSHOT_TS}"
     fi
@@ -220,6 +222,31 @@ for release in "${DISTRIBUTION}" "${DISTRIBUTION}-security"; do
     RC=0
     for (( i=0; i < RETRY_COUNT; ++i )) ; do
 
+        LOCK_FILE=$(find "$outPath" -maxdepth 1 -name 'Archive-Update-in-Progress-*')
+
+        if [ -n "$LOCK_FILE" ]; then
+            echo "Stale lock file found: $LOCK_FILE"
+
+            # check if debmirror is still running
+            if ! pgrep -f debmirror > /dev/null; then
+                echo "No debmirror process found. Removing stale lock."
+                rm -f "$LOCK_FILE"
+            else
+                echo "debmirror appears to still be running. Delay, then retry."
+                echo "process heirarchy of competing debmirror is..."
+                pidlist=""
+                for pid in $(pgrep -f debmirror); do
+                    while [ "$pid" -ne 1 ]; do
+                        pidlist+="$pid,"
+                        pid=$(ps -p $pid -o ppid=)
+                    done
+                done
+                ps -p ${pidlist%,} -o pid,ppid,user,lstart,cmd
+                sleep 600
+                continue
+            fi
+        fi
+
         cmd="debmirror \
               $DRY_RUN_ARG \
               --host=$server \
@@ -242,8 +269,21 @@ for release in "${DISTRIBUTION}" "${DISTRIBUTION}-security"; do
         if [[ $RC -ne 0 ]] ; then
             echo "Error: Attempt=$i: Command: $cmd"
             echo "Error: RC: $RC"
+            sleep 300
             continue
         fi
+
+        cmd="$DEBIAN_SNAPSHOT_SYNC_DIR=/debian_repo_validate.py $outPath --dist $release --sections $section --archs $arch"
+        echo "$cmd"
+        $cmd
+        RC=$?
+        if [[ $RC -ne 0 ]] ; then
+            echo "Error: Attempt=$i: Command: $cmd"
+            echo "Error: RC: $RC"
+            sleep 300
+            continue
+        fi
+            
         break
     done
     if [ $RC -ne 0 ]; then

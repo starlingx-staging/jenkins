@@ -135,7 +135,8 @@
 EMAIL_LIST=&quot;\
 	davlet.panech@windriver.com, \
     scott.little@windriver.com, \
-	dostoievski.albinobatista@windriver.com     
+    Leonardo.FagundesLuzSerrano@windriver.com \
+    Caio.Volpato@windriver.com \
 &quot;
 
 cat &gt;&quot;env.properties&quot; &lt;&lt;_END

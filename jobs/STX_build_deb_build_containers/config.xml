@@ -90,6 +90,16 @@
           <defaultValue>master</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OS_VERSION</name>
+          <defaultValue>bullseye</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OS_ARCH</name>
+          <defaultValue>amd64</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -170,7 +180,6 @@ fi
 # export DOCKER_BUILD_IMAGE=$USER:$DOCKER_BUILD_TAG
 
 export DOCKER_BUILD_WORKDIR=$MY_REPO_ROOT/stx-tools
-export OS_ARCH=amd64
 
 MYUID=$(id -u)
 MYUNAME=$(id -un)
@@ -222,6 +231,7 @@ VERSIONED_LST_FILE=&quot;$MY_WORKSPACE/outputs/docker-images/builder-images-debi
 LATEST_LST_FILE=&quot;$MY_WORKSPACE/outputs/docker-images/builder-images-debian-latest.lst&quot;
 
 mkdir -p &quot;$MY_WORKSPACE/outputs/docker-images&quot;
+mkdir -p &quot;$MY_WORKSPACE/outputs/docker-images/empty_dir&quot;
 
 cd $DOCKER_BUILD_WORKDIR
 DOCKERFILE_LIST=&quot;$(find stx/ -name &apos;*.Dockerfile&apos;)&quot;
@@ -238,15 +248,21 @@ for DOCKERFILE in $DOCKERFILE_LIST ; do
     DOCKERFILE_NAME=${DOCKERFILE##*/}
     DOCKERFILE_NAME=${DOCKERFILE_NAME%.Dockerfile}
     FIELDS=$(echo ${DOCKERFILE} | awk -F&apos;/&apos; &apos;{ print NF }&apos;)
-    OS_VERSION=&quot;bullseye&quot;
+    OS_VER=&quot;${OS_VERSION}&quot;
     if [ $FIELDS -ge 5 ]; then
-        OS_VERSION=$(echo ${DOCKERFILE} | cut -d &apos;/&apos; -f 3)
-        FULL_DOCKER_BUILD_TAG=$MUNGED_BRANCH-${OS}-${OS_VERSION}-${OS_ARCH}-$TIMESTAMP
+        OS_VER=$(echo ${DOCKERFILE} | cut -d &apos;/&apos; -f 3)
+        FULL_DOCKER_BUILD_TAG=$MUNGED_BRANCH-${OS}-${OS_VER}-${OS_ARCH}-$TIMESTAMP
     else
         FULL_DOCKER_BUILD_TAG=${DOCKER_BUILD_TAG}
     fi
     DOCKER_BUILD_IMAGE=${DOCKER_BUILD_IMAGE_PREFIX}${DOCKERFILE_NAME}:${DOCKER_BUILD_TAG}
     FULL_DOCKER_BUILD_IMAGE=${DOCKER_BUILD_IMAGE_PREFIX}${DOCKERFILE_NAME}:${FULL_DOCKER_BUILD_TAG}
+
+    if [[ ${DOCKERFILE_NAME} == &quot;stx-lat-tool&quot; ]] ; then
+        extra_docker_build_args=&quot;--build-context lat-cache=$MY_WORKSPACE/outputs/docker-images/empty_dir&quot;
+    else
+        extra_docker_build_args=
+    fi
 
     echo &quot;building ${FULL_DOCKER_BUILD_IMAGE}&quot;
     echo $FULL_DOCKER_BUILD_IMAGE &gt;&gt;&quot;$VERSIONED_LST_FILE&quot;
@@ -261,12 +277,14 @@ for DOCKERFILE in $DOCKERFILE_LIST ; do
                   --network host \
                   --tag $FULL_DOCKER_BUILD_IMAGE \
                   --file ${DOCKERFILE} \
+                  $extra_docker_build_args \
                   $DOCKER_BUILD_ARGS \
                   .
                   
     ALL_IMAGES+=($FULL_DOCKER_BUILD_IMAGE)
        
-    if [ &quot;${FULL_DOCKER_BUILD_IMAGE}&quot; != &quot;${DOCKER_BUILD_IMAGE}&quot; ]; then
+    if [ &quot;${FULL_DOCKER_BUILD_IMAGE}&quot; != &quot;${DOCKER_BUILD_IMAGE}&quot; ] &amp;&amp;
+       [ &quot;${OS_VER}&quot; == &quot;${OS_VERSION}&quot; ]; then
         echo &quot;creating tag ${DOCKER_BUILD_IMAGE}&quot;
         docker tag $FULL_DOCKER_BUILD_IMAGE $DOCKER_BUILD_IMAGE
         ALL_IMAGES+=($DOCKER_BUILD_IMAGE)

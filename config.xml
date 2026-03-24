@@ -244,6 +244,7 @@
         <string>mirror_download_sync_debian</string>
         <string>mirror_repo_sync</string>
         <string>mirror_repo_sync_debian</string>
+        <string>mirror_repo_sync_debian_arm</string>
         <string>Mirror_snapshot_sync_debian</string>
       </jobNames>
       <jobFilters/>

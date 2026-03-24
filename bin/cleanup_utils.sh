@@ -737,7 +737,7 @@ function delete_old_master_builds_and_publications {
         TRIAL_RUN=1
     fi
 
-    for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d \( -name 'master*' -o -name 'debian-master*' \) ) -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
+    for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d \( -name 'master*' -o -name 'debian*-master*' \) ) -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
         workspace_cleanup_by_age $DIR $TRIAL_RUN
     done
     for DIR in $(find $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name 'master' ) -maxdepth 6 -name SAVE_DATA -exec dirname {} \; ); do
@@ -785,6 +785,9 @@ function delete_old_feature_builds_and_publications {
     for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d -name 'f-*') -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
         workspace_cleanup_by_age $DIR $TRIAL_RUN
     done
+    for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d -name '*-f-*-containers') -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
+        workspace_cleanup_by_age $DIR $TRIAL_RUN
+    done
     for DIR in $(find $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name 'feature') -maxdepth 6 -name SAVE_DATA -exec dirname {} \; ); do
         published_build_cleanup_by_age $DIR $TRIAL_RUN
     done
@@ -802,7 +805,10 @@ function delete_old_release_candidates_builds_and_publications {
         TRIAL_RUN=1
     fi
 
-    for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d \( -name 'rc-*' -o -name 'debian-rc-*' \) ) -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
+    for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d \( -name 'rc-*' -o -name 'debian-rc-*' -o  -name 'r-*' -o -name 'debian-r-*' \) ) -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
+        workspace_cleanup_by_age $DIR $TRIAL_RUN
+    done
+    for DIR in $(find $(find $WORKSPACE_BASE/ -maxdepth 1 -type d \( -name '*-r-*-containers' -o -name '*-rc-*-containers' \) ) -maxdepth 3 -name SAVE_DATA -exec dirname {} \; ); do
         workspace_cleanup_by_age $DIR $TRIAL_RUN
     done
     for DIR in $(find $(find $PUBLISHED_BASE/ -maxdepth 1 -type d -name rc ) -maxdepth 6 -name SAVE_DATA -exec dirname {} \; ); do
